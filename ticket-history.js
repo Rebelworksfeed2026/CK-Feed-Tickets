@@ -1,8 +1,8 @@
 (()=>{'use strict';
-const app=document.getElementById('app');if(!app||!window.supabase||!window.SUPABASE_URL)return;
+const app=document.getElementById('app');if(!app)return;
 const db=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
 const box=document.createElement('section');box.className='card';box.id='ticketHistory';box.innerHTML='<h3>Ticket history & search</h3><p>Find saved tickets from any week.</p><label>Ticket number<input id="historyNumber" placeholder="Full or partial ticket number"></label><label>Driver<select id="historyDriver"><option value="">All drivers</option></select></label><label>From date<input type="date" id="historyFrom"></label><label>Through date<input type="date" id="historyTo"></label><button type="button" id="historySearch">Search tickets</button><p id="historyMessage" role="status">Enter a ticket number or date range, then search.</p><div class="scroll"><table><thead><tr><th>Date</th><th>Driver</th><th>Ticket #</th><th>Tons</th><th>Destination</th><th>Photo</th></tr></thead><tbody id="historyResults"></tbody></table></div>';
-app.appendChild(box);
+const placeholder=document.getElementById('historyLoading');if(placeholder)placeholder.replaceWith(box);else app.appendChild(box);
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let drivers=[],busy=false;
 async function setup(){const {data:{user}}=await db.auth.getUser();if(!user)return;const r=await db.from('drivers').select('id,name,company').order('name');if(r.error){$('historyMessage').textContent='Unable to load drivers: '+r.error.message;return}drivers=r.data||[];$('historyDriver').innerHTML='<option value="">All drivers</option>'+drivers.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.name)+' — '+esc(d.company)+'</option>').join('')}
