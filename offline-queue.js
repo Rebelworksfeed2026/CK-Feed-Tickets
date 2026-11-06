@@ -15,9 +15,9 @@ if((await all()).some(x=>x.ticket_number===ticket_number)){$('offlineState').tex
 const {data:{session}}=await client.auth.getSession();if(!session?.user){$('offlineState').textContent='Sign in while online before saving offline tickets.';return}
 const f=$('ticketPhoto')?.files?.[0];if(f&&f.size>10485760){$('offlineState').textContent='Photo exceeds 10 MB. Choose a smaller photo.';return}
 await put({ticket_number,tons,destination,delivery_date,user_id:session.user.id,photo:f?await f.arrayBuffer():null,photo_type:f?.type||'image/jpeg',created:Date.now()});for(const id of ['ticket','tons','dest'])$(id).value='';if($('ticketPhoto'))$('ticketPhoto').value='';await state('Saved on this phone. Do not clear browser website data.');}
-let activeSync=null;async function sync(){if(activeSync)return activeSync;activeSync=performSync().finally(()=>{activeSync=null});return activeSync}
+let activeSync=null;async function sync(){if(activeSync)return activeSync;$('syncOffline').disabled=true;activeSync=performSync().finally(()=>{activeSync=null;$('syncOffline').disabled=false});return activeSync}
 async function performSync(){if(!navigator.onLine){await state('No connection.');return}const {data:{session}}=await client.auth.getSession();if(!session?.user){await state('Sign in to sync.');return}const d=await client.from('drivers').select('id').eq('user_id',session.user.id).maybeSingle();if(d.error||!d.data){await state('Driver account not found.');return}
-let done=0;for(const x of await all()){if(x.user_id!==session.user.id)continue;
+let done=0;const pending=await all();if(pending.length)$('offlineState').textContent='🔄 Checking '+pending.length+' saved ticket(s) for cloud sync…';for(const x of pending){if(x.user_id!==session.user.id)continue;
 const check=await client.from('feed_tickets').select('id,driver_id,photo_path').eq('ticket_number',x.ticket_number).maybeSingle();
 if(check.error){await state('Sync paused: '+check.error.message);return}
 if(check.data&&check.data.driver_id!==d.data.id){await state('Duplicate ticket number belongs to another driver: '+x.ticket_number);return}
