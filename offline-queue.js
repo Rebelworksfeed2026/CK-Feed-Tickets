@@ -30,4 +30,4 @@ $('syncOffline').onclick=()=>sync().catch(e=>state('Sync error: '+e.message));
 $('save').addEventListener('click',e=>{if(navigator.onLine||$('save').textContent.includes('correction'))return;e.stopImmediatePropagation();queue().catch(err=>state('Offline save failed: '+err.message))},true);
 window.addEventListener('online',()=>sync().catch(()=>{}));
 async function autoSync(){if(!navigator.onLine)return;if((await all()).length)await sync()}
-window.addEventListener('focus',()=>autoSync().catch(()=>{}));document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoSync().catch(()=>{})});setInterval(()=>autoSync().catch(()=>{}),60000);state();})();
+window.addEventListener('focus',()=>autoSync().catch(()=>{}));document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoSync().catch(()=>{})});setInterval(()=>autoSync().catch(()=>{}),60000);state();setTimeout(()=>autoSync().catch(()=>{}),3000);})();
