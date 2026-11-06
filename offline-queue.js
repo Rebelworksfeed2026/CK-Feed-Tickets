@@ -9,6 +9,7 @@ async function del(k){const db=await open();return new Promise((resolve,reject)=
 async function state(message){try{const a=await all();$('offlineState').textContent=(message?message+' ':'')+a.length+' ticket(s) waiting to sync.'}catch(e){$('offlineState').textContent='Offline storage unavailable: '+e.message}}
 const client=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
 async function queue(){const ticket_number=$('ticket').value.trim(),tons=Number($('tons').value),destination=$('dest').value.trim(),delivery_date=$('date').value;if(!ticket_number||!delivery_date||!destination||!Number.isFinite(tons)||tons<=0){$('offlineState').textContent='Complete the date, ticket number, tons, and destination first.';return}
+if(document.getElementById('entry').hidden){$('offlineState').textContent='Open your own driver tab before saving an offline ticket.';return}
 if((await all()).some(x=>x.ticket_number===ticket_number)){$('offlineState').textContent='That ticket is already waiting to sync.';return}
 const {data:{session}}=await client.auth.getSession();if(!session?.user){$('offlineState').textContent='Sign in while online before saving offline tickets.';return}
 const f=$('ticketPhoto')?.files?.[0];if(f&&f.size>10485760){$('offlineState').textContent='Photo exceeds 10 MB. Choose a smaller photo.';return}
@@ -25,4 +26,6 @@ await del(x.ticket_number);done++}
 await state(done?'Synced '+done+' ticket(s) to cloud.':'Nothing to sync.');if(done)document.getElementById('refresh')?.click()}
 $('syncOffline').onclick=()=>sync().catch(e=>state('Sync error: '+e.message));
 $('save').addEventListener('click',e=>{if(navigator.onLine||$('save').textContent.includes('correction'))return;e.stopImmediatePropagation();queue().catch(err=>state('Offline save failed: '+err.message))},true);
-window.addEventListener('online',()=>sync().catch(()=>{}));state();})();
+window.addEventListener('online',()=>sync().catch(()=>{}));
+let syncBusy=false;async function autoSync(){if(syncBusy||!navigator.onLine)return;syncBusy=true;try{if((await all()).length)await sync()}finally{syncBusy=false}}
+window.addEventListener('focus',()=>autoSync().catch(()=>{}));document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoSync().catch(()=>{})});setInterval(()=>autoSync().catch(()=>{}),60000);state();})();
