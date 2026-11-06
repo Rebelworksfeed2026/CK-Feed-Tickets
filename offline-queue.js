@@ -10,6 +10,7 @@ async function state(message){try{const a=await all();$('offlineState').textCont
 const client=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
 async function queue(){const ticket_number=$('ticket').value.trim(),tons=Number($('tons').value),destination=$('dest').value.trim(),delivery_date=$('date').value;if(!ticket_number||!delivery_date||!destination||!Number.isFinite(tons)||tons<=0){$('offlineState').textContent='Complete the date, ticket number, tons, and destination first.';return}
 if(document.getElementById('entry').hidden){$('offlineState').textContent='Open your own driver tab before saving an offline ticket.';return}
+if([...document.querySelectorAll('#rows tr td:nth-child(3)')].some(cell=>cell.textContent.trim()===ticket_number)){$('offlineState').textContent='That ticket is already on the current feed sheet. Nothing saved.';return}
 if((await all()).some(x=>x.ticket_number===ticket_number)){$('offlineState').textContent='That ticket is already waiting to sync.';return}
 const {data:{session}}=await client.auth.getSession();if(!session?.user){$('offlineState').textContent='Sign in while online before saving offline tickets.';return}
 const f=$('ticketPhoto')?.files?.[0];if(f&&f.size>10485760){$('offlineState').textContent='Photo exceeds 10 MB. Choose a smaller photo.';return}
