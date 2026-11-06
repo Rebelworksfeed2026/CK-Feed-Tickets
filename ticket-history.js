@@ -9,7 +9,7 @@ async function setup(){const {data:{user}}=await db.auth.getUser();if(!user)retu
 async function search(){if(busy)return;const number=$('historyNumber').value.trim();if(!me){$('historyMessage').textContent='Driver account not ready.';return}if(!number){$('historyMessage').textContent='Enter a ticket number to search.';return}
 busy=true;$('historySearch').disabled=true;$('historyMessage').textContent='Searching…';$('historyResults').innerHTML='';
 try{let q=db.from('feed_tickets').select('id,driver_id,ticket_number,delivery_date,tons,destination,photo_path').is('deleted_at',null).order('delivery_date',{ascending:false}).order('ticket_number',{ascending:false}).limit(25);
-q=q.ilike('ticket_number','%'+number.replace(/[%_,]/g,'')+'%');if(!me.is_admin)q=q.eq('driver_id',me.id);
+q=q.ilike('ticket_number','%'+number.replace(/[%_,]/g,'')+'%');
 const {data,error}=await q;if(error)throw error;const a=data||[];$('historyResults').innerHTML=a.map(x=>'<tr><td>'+esc(x.delivery_date)+'</td><td>'+esc(drivers.find(d=>d.id===x.driver_id)?.name||'Driver')+'</td><td>'+esc(x.ticket_number)+'</td><td>'+Number(x.tons).toFixed(2)+'</td><td>'+esc(x.destination)+'</td><td>'+(x.photo_path?'<button type="button" data-history-photo="'+esc(x.id)+'">📷 View</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="6">No matching tickets.</td></tr>';$('historyMessage').textContent=a.length+' ticket(s) found'+(a.length===25?' (first 25 matches; enter more digits)':'')+'.';box._found=a;
 }catch(e){$('historyMessage').textContent='Search failed: '+e.message}finally{busy=false;$('historySearch').disabled=false}}
 $('historySearch').addEventListener('click',search);
