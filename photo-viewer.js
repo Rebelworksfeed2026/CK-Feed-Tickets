@@ -24,6 +24,6 @@ img.src=r.data.signedUrl;
 }catch(e){msg.textContent='Unable to open photo: '+(e.message||String(e))}
 }
 rows.addEventListener('click',e=>{const b=e.target.closest('[data-view-photo]');if(b){e.preventDefault();view(b.dataset.viewPhoto)}});
-const observer=new MutationObserver(()=>{for(const tr of rows.querySelectorAll('tr')){const cells=tr.querySelectorAll('td');if(cells.length<8||tr.querySelector('[data-view-photo]'))continue;if(tr.dataset.hasPhoto==='no')continue;const ticket=cells[2].textContent.trim();if(!ticket)continue;const b=document.createElement('button');b.type='button';b.textContent='📷 Photo';b.dataset.viewPhoto=ticket;b.style.marginLeft='6px';cells[7].appendChild(b)}});
+const observer=new MutationObserver(()=>{for(const tr of rows.querySelectorAll('tr')){const cells=tr.querySelectorAll('td');if(cells.length<8||tr.querySelector('[data-view-photo]'))continue;if(tr.dataset.hasPhoto!=='yes')continue;const ticket=cells[2].textContent.trim();if(!ticket)continue;const b=document.createElement('button');b.type='button';b.textContent='📷 Photo';b.dataset.viewPhoto=ticket;b.style.marginLeft='6px';cells[7].appendChild(b)}});
 observer.observe(rows,{childList:true});
 })();
