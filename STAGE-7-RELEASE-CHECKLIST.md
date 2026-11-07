@@ -30,3 +30,10 @@
 8. Resolve or formally accept remaining security warnings before full production sign-off.
 
 Do not create sample production tickets or modify the original prototype.
+
+## 2026-11-07 Stage 8 additional preflight
+- Executed the standalone Node.js preflight: PASS (week boundaries, input validation, daily and weekly arithmetic, equal-load comparison, duplicate identity). These are isolated logic tests, not browser end-to-end tests.
+- Inspected the SECURITY DEFINER administrator function. It is a read-only EXISTS query checking the signed-in user's linked driver admin flag; anon cannot execute it, authenticated can. Because it is referenced in live RLS, permissions were not changed without a role-based integration test. Advisor warning remains.
+- Leaked-password protection requires Auth dashboard configuration; warning remains.
+- GitHub source and current versioned asset references were verified. An independent HTTP check of the GitHub Pages URL was inconclusive because external network resolution failed in the test environment; live availability is NOT independently confirmed.
+- No active ticket rows were created or modified. Final mobile Safari and live save/photo/offline tests remain for the user.
