@@ -8,6 +8,11 @@ async function put(x){const db=await open();return new Promise((resolve,reject)=
 async function del(k){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction('pending','readwrite');tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)};tx.onabort=()=>{db.close();reject(tx.error||new Error('Offline removal canceled'))};tx.objectStore('pending').delete(k)})}
 async function state(message){try{const a=await all(),pending=a.length;panel.style.borderLeft='5px solid '+(pending?'#d18b19':'#26874c');$('offlineState').textContent=(pending?'🟠 '+pending+' ticket(s) saved on this phone, waiting for cloud sync. Tickets: '+a.map(x=>x.ticket_number).join(', '):'🟢 No tickets waiting to sync.')+(message?' '+message:'');$('syncOffline').hidden=!pending}catch(e){panel.style.borderLeft='5px solid #b53d3d';$('offlineState').textContent='Offline storage unavailable: '+e.message}}
 const client=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
+function updateOfflineButton(){const entry=$('entry');$('saveOffline').hidden=entry.hidden||$('save').textContent.includes('correction')||$('app')?.hidden===true}
+new MutationObserver(updateOfflineButton).observe($('entry'),{attributes:true,attributeFilter:['hidden']});
+new MutationObserver(updateOfflineButton).observe($('save'),{childList:true,characterData:true,subtree:true});
+new MutationObserver(updateOfflineButton).observe($('app'),{attributes:true,attributeFilter:['hidden']});
+updateOfflineButton();
 let queueBusy=false;async function queue(){if(queueBusy)return;if($('save').textContent.includes('correction')){$('offlineState').textContent='Finish or cancel the correction before saving an offline ticket.';return}queueBusy=true;$('saveOffline').disabled=true;try{await performQueue()}finally{queueBusy=false;$('saveOffline').disabled=false}}
 async function performQueue(){const ticket_number=$('ticket').value.trim(),tons=Number($('tons').value),destination=$('dest').value.trim(),delivery_date=$('date').value;if(!ticket_number||!delivery_date||!destination||!Number.isFinite(tons)||tons<=0){$('offlineState').textContent='Complete the date, ticket number, tons, and destination first.';return}
 if(document.getElementById('entry').hidden){$('offlineState').textContent='Open your own driver tab before saving an offline ticket.';return}
