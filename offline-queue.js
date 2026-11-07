@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
-const panel=document.createElement('div');panel.className='card';panel.innerHTML='<h3>Offline tickets</h3><p id="offlineState">Checking saved tickets…</p><button id="syncOffline" type="button">Sync saved tickets</button>';
+const panel=document.createElement('div');panel.className='card';panel.innerHTML='<h3>Offline tickets</h3><p id="offlineState">Checking saved tickets…</p><button id="syncOffline" type="button">Sync saved tickets</button><button id="saveOffline" type="button" style="margin-left:8px">Save ticket on phone</button>';
 document.querySelector('#entry').after(panel);
 const open=()=>new Promise((resolve,reject)=>{const req=indexedDB.open('ck-feed-offline-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('pending',{keyPath:'ticket_number'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
 async function all(){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction('pending');const req=tx.objectStore('pending').getAll();tx.oncomplete=()=>{const rows=req.result;db.close();resolve(rows)};tx.onerror=()=>{db.close();reject(tx.error)};tx.onabort=()=>{db.close();reject(tx.error||new Error('Offline read canceled'))}})}
@@ -8,7 +8,8 @@ async function put(x){const db=await open();return new Promise((resolve,reject)=
 async function del(k){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction('pending','readwrite');tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)};tx.onabort=()=>{db.close();reject(tx.error||new Error('Offline removal canceled'))};tx.objectStore('pending').delete(k)})}
 async function state(message){try{const a=await all(),pending=a.length;panel.style.borderLeft='5px solid '+(pending?'#d18b19':'#26874c');$('offlineState').textContent=(pending?'🟠 '+pending+' ticket(s) saved on this phone, waiting for cloud sync. Tickets: '+a.map(x=>x.ticket_number).join(', '):'🟢 No tickets waiting to sync.')+(message?' '+message:'');$('syncOffline').hidden=!pending}catch(e){panel.style.borderLeft='5px solid #b53d3d';$('offlineState').textContent='Offline storage unavailable: '+e.message}}
 const client=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
-async function queue(){const ticket_number=$('ticket').value.trim(),tons=Number($('tons').value),destination=$('dest').value.trim(),delivery_date=$('date').value;if(!ticket_number||!delivery_date||!destination||!Number.isFinite(tons)||tons<=0){$('offlineState').textContent='Complete the date, ticket number, tons, and destination first.';return}
+let queueBusy=false;async function queue(){if(queueBusy)return;if($('save').textContent.includes('correction')){$('offlineState').textContent='Finish or cancel the correction before saving an offline ticket.';return}queueBusy=true;$('saveOffline').disabled=true;try{await performQueue()}finally{queueBusy=false;$('saveOffline').disabled=false}}
+async function performQueue(){const ticket_number=$('ticket').value.trim(),tons=Number($('tons').value),destination=$('dest').value.trim(),delivery_date=$('date').value;if(!ticket_number||!delivery_date||!destination||!Number.isFinite(tons)||tons<=0){$('offlineState').textContent='Complete the date, ticket number, tons, and destination first.';return}
 if(document.getElementById('entry').hidden){$('offlineState').textContent='Open your own driver tab before saving an offline ticket.';return}
 const week=$('week')?.value;if(week){const day=new Date(delivery_date+'T12:00:00');const saturday=new Date(day);saturday.setDate(day.getDate()-((day.getDay()+1)%7));const dateKey=[saturday.getFullYear(),String(saturday.getMonth()+1).padStart(2,'0'),String(saturday.getDate()).padStart(2,'0')].join('-');if(dateKey!==week){$('offlineState').textContent='Ticket date is outside the selected week. Choose the correct week before saving offline.';return}}
 if([...document.querySelectorAll('#rows tr td:nth-child(3)')].some(cell=>cell.textContent.trim()===ticket_number)){$('offlineState').textContent='That ticket is already on the current feed sheet. Nothing saved.';return}
@@ -29,6 +30,7 @@ if(x.photo&&!check.data?.photo_path){const photoType=x.photo_type||x.photo.type|
 await del(x.ticket_number);done++}
 await state(done?'Synced '+done+' ticket(s) to cloud.':'Nothing to sync.');if(done)document.getElementById('refresh')?.click()}
 $('syncOffline').onclick=()=>sync().catch(e=>state('Sync error: '+e.message));
+$('saveOffline').onclick=()=>queue().catch(e=>state('Offline save failed: '+e.message));
 $('save').addEventListener('click',e=>{if(navigator.onLine||$('save').textContent.includes('correction'))return;e.stopImmediatePropagation();queue().catch(err=>state('Offline save failed: '+err.message))},true);
 window.addEventListener('online',()=>sync().catch(()=>{}));
 async function autoSync(){if(!navigator.onLine)return;if((await all()).length)await sync()}
