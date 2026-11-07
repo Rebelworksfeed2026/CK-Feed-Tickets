@@ -5,7 +5,7 @@ const box=document.createElement('section');box.className='card';box.id='ticketH
 const placeholder=document.getElementById('historyLoading');if(placeholder)placeholder.replaceWith(box);else app.appendChild(box);
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let drivers=[],busy=false;
-async function setup(){const {data:{user}}=await db.auth.getUser();if(!user)return;const r=await db.from('drivers').select('id,name,company,user_id,is_admin').order('name');if(r.error){$('historyMessage').textContent='Unable to load drivers: '+r.error.message;return}drivers=r.data||[];}
+async function setup(){const {data:{user}}=await db.auth.getUser();if(!user){drivers=[];box._found=[];$('historyResults').innerHTML='';return}const r=await db.from('drivers').select('id,name,company,user_id,is_admin').order('name');if(r.error){$('historyMessage').textContent='Unable to load drivers: '+r.error.message;return}drivers=r.data||[];}
 async function search(){if(busy)return;const number=$('historyNumber').value.trim();if(!number){$('historyMessage').textContent='Enter a ticket number to search.';return}
 busy=true;$('historySearch').disabled=true;$('historyMessage').textContent='Searching…';$('historyResults').innerHTML='';
 try{let q=db.from('feed_tickets').select('id,driver_id,ticket_number,delivery_date,tons,destination,photo_path').is('deleted_at',null).order('delivery_date',{ascending:false}).order('ticket_number',{ascending:false}).limit(25);
