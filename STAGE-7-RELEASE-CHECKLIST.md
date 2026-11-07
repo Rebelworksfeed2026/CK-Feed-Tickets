@@ -37,3 +37,11 @@ Do not create sample production tickets or modify the original prototype.
 - Leaked-password protection requires Auth dashboard configuration; warning remains.
 - GitHub source and current versioned asset references were verified. An independent HTTP check of the GitHub Pages URL was inconclusive because external network resolution failed in the test environment; live availability is NOT independently confirmed.
 - No active ticket rows were created or modified. Final mobile Safari and live save/photo/offline tests remain for the user.
+
+## Final pre-Monday audit — November 7, 2026
+- Executed the synthetic preflight with Node.js v22: PASS. This does not simulate Safari, Supabase authentication, photo uploads, or network loss.
+- Re-read all live drivers/feed_tickets RLS policies. INSERT is restricted to a linked user's own driver_id. UPDATE requires both existing-row ownership and new-row ownership; administrators have an additional UPDATE policy. Driver INSERT/UPDATE permissions cannot be elevated by editing the client UI alone.
+- Database enforces UNIQUE(ticket_number) across all tickets, including archived rows. Verified 0 active and 8 archived tickets; no production rows changed.
+- Supabase security advisor still reports two warnings: callable read-only SECURITY DEFINER admin helper (intentional for existing RLS, not changed without role tests) and leaked-password protection (requires plan support). Do not mark security warnings resolved.
+- App password creation/reset guidance and validation now match 12-character mixed-case/digit/symbol requirements. Weekly comparison includes same-weekday cutoff and equal-load count, pending real-data validation.
+- Monday acceptance remains blocked on live iPhone Safari scan/save/photo/offline tests and other driver account onboarding. Do not claim production sign-off yet.
