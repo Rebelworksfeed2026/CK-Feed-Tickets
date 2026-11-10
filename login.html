@@ -27,7 +27,7 @@ button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#1834
 </form>
 <section id="profile" aria-live="polite">
 <h2 id="welcome"></h2><p id="role"></p>
-<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span style="display:block;margin-top:4px">Viewer version 3 · 10 Nov 2026</span><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><div style="overflow-x:auto"><table id="weekTable" hidden style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Ticket #</th><th>Tons</th><th>Destination</th></tr></thead><tbody id="weekRows"></tbody></table></div><p id="weekTotal" class="muted"></p><span>Cloud ticket entry and corrections are not enabled yet. The separate local prototype remains unchanged.</span></div><div class="tile"><strong>Weekly reports</strong><span>Printable reports will appear here after the cloud connection is tested.</span></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office corrections will be enabled after permissions testing.</span></div></div>
+<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span style="display:block;margin-top:4px">Viewer version 4 · 10 Nov 2026</span><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><div id="sheetHeading" class="muted"></div><div style="overflow-x:auto"><table id="weekTable" hidden style="width:100%;min-width:690px;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Load</th><th>Ticket #</th><th>Tons</th><th>Destination</th><th>Daily Tons</th><th>Weekly Tons</th></tr></thead><tbody id="weekRows"></tbody><tfoot id="weekFoot"></tfoot></table></div><p id="weekTotal" class="muted"></p><div id="weekHighlights" class="muted"></div><span>Cloud ticket entry and corrections are not enabled yet. The separate local prototype remains unchanged.</span></div><div class="tile"><strong>Weekly reports</strong><span>Printable reports will appear here after the cloud connection is tested.</span></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office corrections will be enabled after permissions testing.</span></div></div>
 <button id="logout" class="secondary" type="button">Sign out</button>
 </section>
 <p id="message" role="status" aria-live="polite"></p>
@@ -151,6 +151,9 @@ $("login").addEventListener("submit", async e => {
     $("cloudDriver").replaceChildren();
     $("weekTable").hidden = true;
     $("weekTotal").textContent = "";
+    $("weekHighlights").textContent = "";
+    $("sheetHeading").textContent = "";
+    $("weekFoot").replaceChildren();
     const now = new Date();
     now.setDate(now.getDate() - ((now.getDay() + 6) % 7));
     $("cloudWeek").value = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
@@ -189,22 +192,49 @@ $("loadWeek").addEventListener("click", async () => {
   $("weekMessage").textContent = "Loading selected week…";
   try {
     const rows = await CKCloud.listWeeklyTickets($("cloudDriver").value, $("cloudWeek").value);
-    let tons = 0;
+    const chosen = $("cloudDriver").selectedOptions[0]?.textContent || "Driver";
+    const weekStart = $("cloudWeek").value;
+    const startDate = new Date(weekStart + "T12:00:00");
+    const lastDate = new Date(startDate);
+    lastDate.setDate(lastDate.getDate() + 5);
+    const endText = lastDate.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    $("sheetHeading").textContent = chosen + " · Week " + weekStart + " through " + endText;
+    const totalsByDay = {};
+    for (const t of rows) totalsByDay[t.delivery_date] = (totalsByDay[t.delivery_date] || 0) + Number(t.tons);
+    const values = rows.map(t => Number(t.tons));
+    const heaviest = values.length ? Math.max(...values) : null;
+    const lightest = values.length ? Math.min(...values) : null;
+    const biggest = Math.max(0,...Object.values(totalsByDay));
+    const biggestDays = Object.keys(totalsByDay).filter(d => totalsByDay[d] === biggest);
+    let weekly = 0, daily = 0, load = 0, lastDay = "";
     for (const t of rows) {
+      if (t.delivery_date !== lastDay) { lastDay = t.delivery_date; load = 0; daily = 0; }
+      load++;
+      daily += Number(t.tons);
+      weekly += Number(t.tons);
+      const dayName = new Date(t.delivery_date + "T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+      const marker = (Number(t.tons) === heaviest ? "🟥 " : Number(t.tons) === lightest ? "🟩 " : biggestDays.includes(t.delivery_date) ? "🟦 " : "");
       const tr = document.createElement("tr");
-      const day = new Date(t.delivery_date + "T12:00:00").toLocaleDateString("en-US", {weekday:"short"});
-      for (const value of [day,t.ticket_number,Number(t.tons).toFixed(2),t.destination]) {
+      for (const value of [marker + dayName,load,t.ticket_number,Number(t.tons).toFixed(2),t.destination,daily.toFixed(2),weekly.toFixed(2)]) {
         const td = document.createElement("td");
         td.textContent = value;
-        td.style.cssText = "padding:8px 4px;border-bottom:1px solid #d8e3e9";
+        td.style.cssText = "padding:8px 4px;border-bottom:1px solid #d8e3e9;white-space:nowrap";
         tr.appendChild(td);
       }
       $("weekRows").appendChild(tr);
-      tons += Number(t.tons);
     }
+    const foot = document.createElement("tr");
+    for (const [i,value] of ["TOTAL",rows.length,"",weekly.toFixed(2),"","",weekly.toFixed(2)].entries()) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      cell.style.cssText = "padding:9px 4px;font-weight:700;background:#e3edf3";
+      foot.appendChild(cell);
+    }
+    $("weekFoot").appendChild(foot);
     $("weekTable").hidden = !rows.length;
     $("weekMessage").textContent = rows.length ? "Selected week loaded (read only)." : "No tickets recorded for the selected week.";
-    $("weekTotal").textContent = rows.length + " loads · " + tons.toFixed(2) + " tons";
+    $("weekTotal").textContent = rows.length + " loads · " + weekly.toFixed(2) + " tons";
+    $("weekHighlights").textContent = rows.length ? "🟥 Heaviest: " + heaviest.toFixed(2) + " tons · 🟩 Lightest: " + lightest.toFixed(2) + " tons · 🟦 Biggest day: " + biggestDays.map(d => new Date(d + "T12:00:00").toLocaleDateString("en-US",{weekday:"long"})).join(", ") + " (" + biggest.toFixed(2) + " tons)" : "";
   } catch (err) {
     $("weekMessage").textContent = "Could not load selected week: " + (err.message || err);
   } finally { $("loadWeek").disabled = false; }
