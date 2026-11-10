@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>C&K Feed Tickets — Loading Test</title>
+<style>body{font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;background:#eef3f6;color:#183449;margin:0;padding:20px}main{max-width:520px;margin:auto;background:white;border-radius:12px;padding:20px}button{border:0;border-radius:8px;background:#17628e;color:white;padding:12px;margin:5px;font-size:16px}button[aria-pressed=true]{background:#12364e}input{padding:12px;font-size:16px;width:95%}#result{padding:12px;background:#e7f3eb;border-radius:8px}</style></head><body><main><h1>C&K Feed Tickets</h1><p>Driver selection loading test — no tickets are read or saved.</p><div id="result" role="status">Starting…</div><h2>Drivers</h2><div id="tabs"><button>Sean</button><button>Ricky</button><button>Jakeleg</button><button>Cody</button></div><p id="selected">Select a driver</p><label for="week">Week starting Monday</label><input id="week" type="date"><p><a href="./login.html">Return to sign-in</a></p></main>
+<script>
+(function(){
+"use strict";
+var result=document.getElementById("result"),tabs=document.getElementById("tabs"),week=document.getElementById("week");
+try{
+var d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7);
+var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
+week.value=y+"-"+m+"-"+day;
+tabs.addEventListener("click",function(e){
+if(e.target.tagName!=="BUTTON")return;
+Array.prototype.forEach.call(tabs.querySelectorAll("button"),function(b){b.setAttribute("aria-pressed",String(b===e.target));});
+document.getElementById("selected").textContent="Selected: "+e.target.textContent;
+});
+result.textContent="Driver controls loaded successfully.";
+}catch(e){result.textContent="Loading error: "+e.message;}
+})();
+</script></body></html>
