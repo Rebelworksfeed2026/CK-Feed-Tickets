@@ -11,7 +11,7 @@ h1{font-size:24px;margin:0 0 8px}p{line-height:1.5;color:#526778}label{display:b
 input,button{font:inherit;width:100%;padding:12px;border-radius:8px}input{border:1px solid #b5c5d1}
 button{background:#17628e;color:white;border:0;margin-top:18px;font-weight:700;cursor:pointer}
 button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#183449}
-#message{min-height:22px;font-size:14px}#profile{display:none}.muted{font-size:13px}
+#message{min-height:22px;font-size:14px}#profile{display:none}.muted{font-size:13px}.dashboard{border-top:1px solid #d8e3e9;padding-top:12px}.tile{padding:14px;background:#eef3f6;border-radius:9px;margin:10px 0}.tile strong{display:block;margin-bottom:4px}.tile span{font-size:13px;color:#526778}
 </style>
 </head>
 <body>
@@ -27,7 +27,7 @@ button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#1834
 </form>
 <section id="profile" aria-live="polite">
 <h2 id="welcome"></h2><p id="role"></p>
-<p class="muted">Account verified. Delivery sheets will be connected after permissions testing is complete.</p>
+<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Feed delivery sheets</strong><span>Secure cloud sheets are being connected. Ticket entry is not yet enabled here.</span></div><div class="tile"><strong>Weekly reports</strong><span>Printable reports will appear here after the cloud connection is tested.</span></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office corrections will be enabled after permissions testing.</span></div></div>
 <button id="logout" class="secondary" type="button">Sign out</button>
 </section>
 <p id="message" role="status" aria-live="polite"></p>
@@ -49,6 +49,8 @@ $("login").addEventListener("submit", async e => {
     $("profile").style.display = "block";
     $("welcome").textContent = "Welcome, " + profile.name;
     $("role").textContent = "Access: " + (profile.is_admin ? "Administrator" : profile.is_office ? "Office" : "Driver") + " · " + profile.company;
+    $("adminTile").hidden = !profile.is_admin;
+    $("officeTile").hidden = !profile.is_office;
     $("message").textContent = "Signed in successfully.";
   } catch (err) {
     $("password").value = "";
@@ -64,6 +66,8 @@ $("logout").addEventListener("click", async () => {
   finally {
     $("logout").disabled = false;
     $("profile").style.display = "none";
+    $("adminTile").hidden = true;
+    $("officeTile").hidden = true;
     $("login").style.display = "block";
   }
 });
