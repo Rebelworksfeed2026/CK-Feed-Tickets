@@ -8,7 +8,7 @@
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:16px}
 main{width:100%;max-width:420px;background:#fff;border-radius:14px;padding:25px;box-shadow:0 4px 24px #1234}
 h1{font-size:24px;margin:0 0 8px}p{line-height:1.5;color:#526778}label{display:block;margin:15px 0 6px;font-weight:650}
-input,button{font:inherit;width:100%;padding:12px;border-radius:8px}input{border:1px solid #b5c5d1}
+input,button,select{font:inherit;width:100%;padding:12px;border-radius:8px}input{border:1px solid #b5c5d1}
 button{background:#17628e;color:white;border:0;margin-top:18px;font-weight:700;cursor:pointer}
 button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#183449}
 #message{min-height:22px;font-size:14px}#profile{display:none}.muted{font-size:13px}.dashboard{border-top:1px solid #d8e3e9;padding-top:12px}.tile{padding:14px;background:#eef3f6;border-radius:9px;margin:10px 0}.tile strong{display:block;margin-bottom:4px}.tile span{font-size:13px;color:#526778}
@@ -27,7 +27,7 @@ button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#1834
 </form>
 <section id="profile" aria-live="polite">
 <h2 id="welcome"></h2><p id="role"></p>
-<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets</strong><span>Cloud ticket access is not ready. You can open the existing local prototype separately for viewing and testing.</span><a id="openPrototype" href="./index.html" style="display:block;text-align:center;background:#17628e;color:white;text-decoration:none;border-radius:8px;padding:12px;margin-top:12px;font-weight:700">Open feed ticket prototype</a><span>Prototype is device-only and does not carry your signed-in permissions. Do not use for live deliveries.</span></div><div class="tile"><strong>Weekly reports</strong><span>Printable reports will appear here after the cloud connection is tested.</span></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office corrections will be enabled after permissions testing.</span></div></div>
+<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><div style="overflow-x:auto"><table id="weekTable" hidden style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Ticket #</th><th>Tons</th><th>Destination</th></tr></thead><tbody id="weekRows"></tbody></table></div><p id="weekTotal" class="muted"></p><span>Cloud ticket entry and corrections are not enabled yet. The separate local prototype remains unchanged.</span></div><div class="tile"><strong>Weekly reports</strong><span>Printable reports will appear here after the cloud connection is tested.</span></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office corrections will be enabled after permissions testing.</span></div></div>
 <button id="logout" class="secondary" type="button">Sign out</button>
 </section>
 <p id="message" role="status" aria-live="polite"></p>
@@ -51,12 +51,24 @@ $("login").addEventListener("submit", async e => {
     $("role").textContent = "Access: " + (profile.is_admin ? "Administrator" : profile.is_office ? "Office" : "Driver") + " · " + profile.company;
     $("adminTile").hidden = !profile.is_admin;
     $("officeTile").hidden = !profile.is_office;
+    $("cloudDriver").replaceChildren();
+    $("weekTable").hidden = true;
+    $("weekTotal").textContent = "";
+    const now = new Date();
+    now.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    $("cloudWeek").value = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
     $("driverDirectory").textContent = "Loading driver directory…";
     try {
       const drivers = await CKCloud.listDrivers();
       $("driverDirectory").replaceChildren();
       if (!drivers.length) $("driverDirectory").textContent = "No driver profiles available.";
       for (const d of drivers) {
+        if (!d.is_office) {
+          const option = document.createElement("option");
+          option.value = d.id;
+          option.textContent = d.name + " — " + d.company;
+          $("cloudDriver").appendChild(option);
+        }
         const item = document.createElement("p");
         item.textContent = d.name + " — " + d.company + (d.is_admin ? " (Administrator)" : d.is_office ? " (Office)" : "");
         $("driverDirectory").appendChild(item);
@@ -71,6 +83,34 @@ $("login").addEventListener("submit", async e => {
   } finally {
     $("submit").disabled = false;
   }
+});
+$("loadWeek").addEventListener("click", async () => {
+  $("loadWeek").disabled = true;
+  $("weekTable").hidden = true;
+  $("weekRows").replaceChildren();
+  $("weekTotal").textContent = "";
+  $("weekMessage").textContent = "Loading selected week…";
+  try {
+    const rows = await CKCloud.listWeeklyTickets($("cloudDriver").value, $("cloudWeek").value);
+    let tons = 0;
+    for (const t of rows) {
+      const tr = document.createElement("tr");
+      const day = new Date(t.delivery_date + "T12:00:00").toLocaleDateString("en-US", {weekday:"short"});
+      for (const value of [day,t.ticket_number,Number(t.tons).toFixed(2),t.destination]) {
+        const td = document.createElement("td");
+        td.textContent = value;
+        td.style.cssText = "padding:8px 4px;border-bottom:1px solid #d8e3e9";
+        tr.appendChild(td);
+      }
+      $("weekRows").appendChild(tr);
+      tons += Number(t.tons);
+    }
+    $("weekTable").hidden = !rows.length;
+    $("weekMessage").textContent = rows.length ? "Selected week loaded (read only)." : "No tickets recorded for the selected week.";
+    $("weekTotal").textContent = rows.length + " loads · " + tons.toFixed(2) + " tons";
+  } catch (err) {
+    $("weekMessage").textContent = "Could not load selected week: " + (err.message || err);
+  } finally { $("loadWeek").disabled = false; }
 });
 $("logout").addEventListener("click", async () => {
   $("logout").disabled = true;
