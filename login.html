@@ -102,7 +102,7 @@ window.CKCloud = (() => {
   async function listWeeklyTickets(driverId, monday) {
     if (!session?.access_token) throw Error("Sign in before viewing tickets.");
     if (!/^[0-9a-f-]{36}$/i.test(driverId)) throw Error("Invalid driver.");
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(monday)) throw Error("Invalid week.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(monday)) throw Error("Invalid week.");
     const first = new Date(monday + "T12:00:00");
     if (Number.isNaN(first.getTime()) || first.getDay() !== 1 ||
         first.getFullYear() + "-" + String(first.getMonth()+1).padStart(2,"0") + "-" + String(first.getDate()).padStart(2,"0") !== monday)
