@@ -63,6 +63,26 @@ window.CKCloud = (() => {
     return rows;
   }
 
+  async function listWeeklyTickets(driverId, monday) {
+    if (!session?.access_token) throw Error("Sign in before viewing tickets.");
+    if (!/^[0-9a-f-]{36}$/i.test(driverId)) throw Error("Invalid driver.");
+    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(monday)) throw Error("Invalid week.");
+    const first = new Date(monday + "T12:00:00");
+    if (Number.isNaN(first.getTime()) || first.getDay() !== 1 ||
+        first.getFullYear() + "-" + String(first.getMonth()+1).padStart(2,"0") + "-" + String(first.getDate()).padStart(2,"0") !== monday)
+      throw Error("Choose a Monday as the week start.");
+    const end = new Date(first);
+    end.setDate(end.getDate() + 7);
+    const next = end.getFullYear() + "-" + String(end.getMonth()+1).padStart(2,"0") + "-" + String(end.getDate()).padStart(2,"0");
+    const query = "/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination,driver_id" +
+      "&driver_id=eq." + encodeURIComponent(driverId) +
+      "&delivery_date=gte." + monday + "&delivery_date=lt." + next +
+      "&deleted_at=is.null&order=delivery_date.asc,ticket_number.asc&limit=500";
+    const rows = await request(query);
+    if (!Array.isArray(rows)) throw Error("Invalid weekly ticket response.");
+    return rows;
+  }
+
   async function signOut() {
     if (session) {
       try { await request("/auth/v1/logout", { method: "POST" }); }
@@ -71,5 +91,5 @@ window.CKCloud = (() => {
   }
 
   function isSignedIn() { return Boolean(session?.access_token); }
-  return { configured, health, signIn, signOut, myProfile, listDrivers, isSignedIn };
+  return { configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, isSignedIn };
 })();
