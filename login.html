@@ -13,20 +13,23 @@ button{background:#17628e;color:white;border:0;margin-top:18px;font-weight:700;c
 button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#183449}
 #message{min-height:22px;font-size:14px}#profile{display:none}.muted{font-size:13px}.dashboard{border-top:1px solid #d8e3e9;padding-top:12px}.tile{padding:14px;background:#eef3f6;border-radius:9px;margin:10px 0}.tile strong{display:block;margin-bottom:4px}.tile span{font-size:13px;color:#526778}
 @media print {
-@page { size: landscape; margin: 0.45in; }
-body {display:block!important;background:white!important;padding:0!important;margin:0!important;color:#172b3b!important}
-main {max-width:none!important;width:100%!important;padding:0!important;margin:0!important;box-shadow:none!important;border-radius:0!important}
+@page { size: letter landscape; margin: 0.35in; }
+html,body {width:100%!important;height:auto!important;margin:0!important;padding:0!important;overflow:visible!important;background:white!important;color:#172b3b!important}
+body {display:block!important}
+body > main {display:none!important}
+#printArea {position:fixed!important;top:0!important;left:0!important;width:100%!important;max-width:100%!important;min-height:0!important;height:auto!important;margin:0!important;padding:0!important;overflow:visible!important;background:white!important;font-family:Arial,sans-serif;color:#172b3b}
 body * {visibility:hidden!important}
 #printArea,#printArea * {visibility:visible!important}
-#printArea {position:absolute;top:0;left:0;width:100%;font-family:Arial,sans-serif;color:#172b3b}
-#printTitle {display:block!important;text-align:center;font-size:19pt;margin:0 0 8pt;font-weight:800}
-#sheetHeading {text-align:center;font-size:11pt;font-weight:700;margin:0 0 12pt}
-#weekTable {display:table!important;min-width:0!important;width:100%!important;border-collapse:collapse!important;font-size:9pt!important}
-#weekTable th {background:#dbeaf5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #a6b8c6;padding:7pt 4pt}
-#weekTable td {border:1px solid #b7c4cc!important;padding:5pt 4pt!important;white-space:normal!important}
+#printArea {position:absolute!important}
+#printArea > div {overflow:visible!important}
+#printTitle {display:block!important;text-align:center;font-size:17pt;margin:0 0 6pt;font-weight:800}
+#sheetHeading {text-align:center;font-size:10pt;font-weight:700;margin:0 0 9pt}
+#weekTable {display:table!important;min-width:0!important;width:100%!important;border-collapse:collapse!important;font-size:8pt!important}
+#weekTable th {background:#dbeaf5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #a6b8c6;padding:5pt 3pt}
+#weekTable td {border:1px solid #b7c4cc!important;padding:4pt 3pt!important;white-space:normal!important}
 #weekTable tfoot td {font-weight:700!important;background:#e3edf3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #weekTable tr {break-inside:avoid}
-#weekTotal,#weekHighlights {font-size:10pt!important;margin:9pt 0!important}
+#weekTotal,#weekHighlights {font-size:9pt!important;margin:6pt 0!important}
 }
 </style>
 </head>
@@ -43,7 +46,7 @@ body * {visibility:hidden!important}
 </form>
 <section id="profile" aria-live="polite">
 <h2 id="welcome"></h2><p id="role"></p>
-<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span style="display:block;margin-top:4px">Viewer version 5 · 10 Nov 2026</span><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><button id="printWeek" type="button" disabled class="secondary">Print / Save PDF</button><section id="printArea"><h2 id="printTitle" hidden>C&K FARMS — FEED DELIVERY SHEET</h2><div id="sheetHeading" class="muted"></div><div style="overflow-x:auto"><table id="weekTable" hidden style="width:100%;min-width:690px;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Load</th><th>Ticket #</th><th>Tons</th><th>Destination</th><th>Daily Tons</th><th>Weekly Tons</th></tr></thead><tbody id="weekRows"></tbody><tfoot id="weekFoot"></tfoot></table></div><p id="weekTotal" class="muted"></p><div id="weekHighlights" class="muted"></div></section><span>Cloud ticket entry and corrections are not enabled yet. The separate local prototype remains unchanged.</span></div><div class="tile"><strong>Weekly reports</strong><span>Printable reports will appear here after the cloud connection is tested.</span></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office corrections will be enabled after permissions testing.</span></div></div>
+<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span style="display:block;margin-top:4px">Viewer version 6 · 10 Nov 2026</span><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><button id="printWeek" type="button" disabled class="secondary">Print / Save PDF</button><section id="printArea"><h2 id="printTitle" hidden>C&K FARMS — FEED DELIVERY SHEET</h2><div id="sheetHeading" class="muted"></div><div style="overflow-x:auto"><table id="weekTable" hidden style="width:100%;min-width:690px;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Load</th><th>Ticket #</th><th>Tons</th><th>Destination</th><th>Daily Tons</th><th>Weekly Tons</th></tr></thead><tbody id="weekRows"></tbody><tfoot id="weekFoot"></tfoot></table></div><p id="weekTotal" class="muted"></p><div id="weekHighlights" class="muted"></div></section><span>Cloud ticket entry and corrections are not enabled yet. The separate local prototype remains unchanged.</span></div><div class="tile"><strong>Weekly reports</strong><span>Printable reports will appear here after the cloud connection is tested.</span></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office corrections will be enabled after permissions testing.</span></div></div>
 <button id="logout" class="secondary" type="button">Sign out</button>
 </section>
 <p id="message" role="status" aria-live="polite"></p>
@@ -200,12 +203,28 @@ $("login").addEventListener("submit", async e => {
     $("submit").disabled = false;
   }
 });
-$("printWeek").addEventListener("click", () => { if (!$("printWeek").disabled) window.print(); });
+$("printWeek").addEventListener("click", () => {
+  if ($("printWeek").disabled) return;
+  const area = $("printArea");
+  const parent = area.parentNode;
+  const next = area.nextSibling;
+  document.body.appendChild(area);
+  const restore = () => {
+    if (next && next.parentNode === parent) parent.insertBefore(area,next);
+    else parent.appendChild(area);
+    window.removeEventListener("afterprint",restore);
+  };
+  window.addEventListener("afterprint",restore);
+  window.print();
+});
 $("loadWeek").addEventListener("click", async () => {
   $("printWeek").disabled = true;
   $("loadWeek").disabled = true;
   $("weekTable").hidden = true;
   $("weekRows").replaceChildren();
+  $("weekFoot").replaceChildren();
+  $("weekHighlights").textContent = "";
+  $("sheetHeading").textContent = "";
   $("weekTotal").textContent = "";
   $("weekMessage").textContent = "Loading selected week…";
   try {
