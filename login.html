@@ -138,6 +138,36 @@ window.CKCloud = (() => {
     return rows;
   }
 
+  // Prepared for controlled security testing; the interface does not call this yet.
+  async function saveOwnTicket(ticket) {
+    if (!session?.access_token) throw Error("Sign in before saving tickets.");
+    const profile = await myProfile();
+    if (!profile || profile.is_office) throw Error("Office accounts cannot enter feed tickets.");
+    if (!ticket || typeof ticket !== "object") throw Error("Ticket details are missing.");
+    const date = String(ticket.delivery_date || "");
+    const parsed = new Date(date + "T12:00:00");
+    const dateValid = /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      !Number.isNaN(parsed.getTime()) && parsed.getDay() !== 0 &&
+      parsed.getFullYear() + "-" + String(parsed.getMonth()+1).padStart(2,"0") + "-" + String(parsed.getDate()).padStart(2,"0") === date;
+    const number = String(ticket.ticket_number || "").trim();
+    const tons = Number(ticket.tons);
+    const destination = String(ticket.destination || "").trim();
+    if (!dateValid || !/^\d{1,24}$/.test(number) ||
+        !Number.isFinite(tons) || tons <= 0 || tons > 100 ||
+        !destination || destination.length > 120)
+      throw Error("Check the delivery date, ticket number, tons, and destination.");
+    const rows = await request("/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination&limit=1", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        driver_id: profile.id, delivery_date: date,
+        ticket_number: number, tons, destination
+      })
+    });
+    if (!Array.isArray(rows) || rows.length !== 1) throw Error("Ticket save could not be verified.");
+    return rows[0];
+  }
+
   async function signOut() {
     if (session) {
       try { await request("/auth/v1/logout", { method: "POST" }); }
@@ -146,7 +176,7 @@ window.CKCloud = (() => {
   }
 
   function isSignedIn() { return Boolean(session?.access_token); }
-  return { configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, isSignedIn };
+  return { configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, saveOwnTicket, isSignedIn };
 })();
 
 </script>
