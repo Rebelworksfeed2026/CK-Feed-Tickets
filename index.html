@@ -9,6 +9,28 @@ window.addEventListener("unhandledrejection", function(e) {
   const el = document.getElementById("status");
   if (el) el.textContent = "App error: " + (e.reason?.message || "Unknown error") + ". Please send a screenshot.";
 });
+</script><script>
+(function () {
+  var status = document.getElementById("cloudStatus");
+  var week = document.getElementById("week");
+  var date = document.getElementById("date");
+  var driver = document.getElementById("driverLabel");
+  try {
+    var d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    var w = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    if (week) week.value = w;
+    if (date) date.value = new Date().getFullYear() + "-" + String(new Date().getMonth() + 1).padStart(2, "0") + "-" + String(new Date().getDate()).padStart(2, "0");
+    if (driver) driver.value = "Sean";
+    if (status) status.textContent = "Page loaded. Checking application startup…";
+  } catch (e) {
+    if (status) status.textContent = "Page startup error: " + e.message;
+  }
+  window.addEventListener("load", function () {
+    var rows = document.getElementById("rows");
+    if (rows && !rows.children.length && status) status.textContent = "App did not finish loading. Please report this message.";
+  });
+})();
 </script><script src="supabase-config.js"></script><script src="cloud.js"></script><script>
 (function () {
   var cloudStatus = document.getElementById("cloudStatus");
