@@ -56,6 +56,13 @@ window.CKCloud = (() => {
     return Array.isArray(rows) ? rows[0] || null : null;
   }
 
+  async function listDrivers() {
+    if (!session?.access_token) throw Error("Sign in before viewing drivers.");
+    const rows = await request("/rest/v1/drivers?select=id,name,company,is_admin,is_office&order=name.asc");
+    if (!Array.isArray(rows)) throw Error("Driver directory response was invalid.");
+    return rows;
+  }
+
   async function signOut() {
     if (session) {
       try { await request("/auth/v1/logout", { method: "POST" }); }
@@ -64,5 +71,5 @@ window.CKCloud = (() => {
   }
 
   function isSignedIn() { return Boolean(session?.access_token); }
-  return { configured, health, signIn, signOut, myProfile, isSignedIn };
+  return { configured, health, signIn, signOut, myProfile, listDrivers, isSignedIn };
 })();
