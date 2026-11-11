@@ -143,6 +143,9 @@ window.CKCloud = (() => {
     const profile=await myProfile();
     if(!profile || profile.is_office) throw Error("This account cannot correct tickets.");
     if(!/^[0-9a-f-]{36}$/i.test(id)) throw Error("Invalid ticket.");
+    const targetRows=await request("/rest/v1/feed_tickets?select=id,driver_id&id=eq."+encodeURIComponent(id)+"&deleted_at=is.null&limit=1");
+    if(!Array.isArray(targetRows) || targetRows.length!==1) throw Error("Ticket not found.");
+    if(!profile.is_admin && targetRows[0].driver_id!==profile.id) throw Error("You may correct only your own tickets.");
     const date=String(fields.delivery_date||"");
     const parsed=new Date(date+"T12:00:00");
     const number=String(fields.ticket_number||"").trim();
