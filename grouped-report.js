@@ -179,6 +179,39 @@
         companyTable.appendChild(tr);
       }
       output.appendChild(companyTable);
+      const companyDayTotals=new Map();
+      for(const ticket of validTickets){
+        const company=companyNames.get(ticket.driver_id)||"Unassigned company";
+        const date=String(ticket.delivery_date);
+        const key=date+"|"+company;
+        const entry=companyDayTotals.get(key)||{date,company,loads:0,hundredths:0};
+        entry.loads++;
+        entry.hundredths+=Math.round(Number(ticket.tons)*100);
+        companyDayTotals.set(key,entry);
+      }
+      const companyDayTitle=document.createElement("p");
+      companyDayTitle.style.fontWeight="700";
+      companyDayTitle.textContent="Daily totals by company";
+      output.appendChild(companyDayTitle);
+      const companyDayTable=document.createElement("table");
+      companyDayTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const companyDayHead=document.createElement("tr");
+      for(const label of ["Date","Company","Loads","Tons"]){
+        const th=document.createElement("th");th.textContent=label;
+        th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+        companyDayHead.appendChild(th);
+      }
+      companyDayTable.appendChild(companyDayHead);
+      for(const entry of [...companyDayTotals.values()].sort((a,b)=>a.date.localeCompare(b.date)||a.company.localeCompare(b.company))){
+        const tr=document.createElement("tr");
+        for(const value of [entry.date,entry.company,String(entry.loads),(entry.hundredths/100).toFixed(2)]){
+          const td=document.createElement("td");td.textContent=value;
+          td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+          tr.appendChild(td);
+        }
+        companyDayTable.appendChild(tr);
+      }
+      output.appendChild(companyDayTable);
       const breakdown=new Map();
       for(const ticket of validTickets){
         const group=groups.findGroup("Austin Farms",ticket.destination);
