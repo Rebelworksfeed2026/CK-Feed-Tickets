@@ -722,7 +722,9 @@ $("correctionForm").addEventListener("submit",async e=>{
   finally {button.disabled=false;}
 });
 let activePhotoUrl=null;
+let photoRequestSequence=0;
 async function showSavedPhoto(ticket) {
+  const requestSequence=++photoRequestSequence;
   const viewer=$("savedPhotoViewer"),message=$("savedPhotoStatus"),img=$("savedPhotoImage");
   viewer.hidden=false;
   // Fixed overlay keeps the photograph visible instead of jumping within the wide table.
@@ -732,16 +734,17 @@ async function showSavedPhoto(ticket) {
   try {
     const blob=await CKCloud.readTicketPhoto(ticket.photo_path);
     // The viewer may have been closed or the user may have signed out while the request ran.
-    if(viewer.hidden || !CKCloud.isSignedIn()) return;
+    if(requestSequence!==photoRequestSequence || viewer.hidden || !CKCloud.isSignedIn()) return;
     activePhotoUrl=URL.createObjectURL(blob);
     img.onload=()=>{if(!viewer.hidden)message.textContent="Ticket "+ticket.ticket_number+" — original saved photo";};
     img.onerror=()=>{if(!viewer.hidden)message.textContent="Photo downloaded but could not be displayed.";};
     img.src=activePhotoUrl;
     img.hidden=false;
     message.textContent="Ticket "+ticket.ticket_number+" — original saved photo";
-  } catch(error) { message.textContent="Unable to open photo: "+error.message; }
+  } catch(error) { if(requestSequence===photoRequestSequence && !viewer.hidden) message.textContent="Unable to open photo: "+error.message; }
 }
 $("closeSavedPhoto").addEventListener("click",()=>{
+  ++photoRequestSequence;
   $("savedPhotoViewer").hidden=true;
   $("savedPhotoImage").removeAttribute("src");
   if(activePhotoUrl) URL.revokeObjectURL(activePhotoUrl);
@@ -839,6 +842,7 @@ $("logout").addEventListener("click", async () => {
   catch (err) { $("message").textContent = "Sign-out error: " + err.message; }
   finally {
     $("logout").disabled = false;
+    ++photoRequestSequence;
     activeProfile=null;
     correctionTarget=null;
     $("correctionPanel").hidden=true;
