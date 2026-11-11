@@ -82,3 +82,10 @@ The previous assistant repeatedly retested completed features after changing cha
 - The grouped Austin matching remains **destination-text-based**, not true farm/tank foreign-key attribution. Do not claim farm/tank monthly/yearly reporting is complete.
 - NEXT PRIORITIES: (1) test actual correction PATCH on a safe test record, never change real ticket 102885 for testing; (2) Ricky login/permissions and other driver/office onboarding; (3) implement and test true offline save/sync safely; (4) farm/tank identity and monthly/yearly reporting; (5) final print/export and launch checks.
 - User prefers a **copy-link button** for iPhone, one concrete test request at a time, and no repetitive tiny updates. Do not ask to repeat the completed grouped-report layout test.
+
+## Verified live correction and original-photo test — 2026-11-11
+- Sean saved real delivery ticket 102887, dated 2026-11-11, 25.12 tons, initially destination `Tank 701, B1 & B3`, with original Delta Western photo.
+- Using Correct on second weekly row, changed only destination to `EG1 309`; selected weekly report displayed `Tank EG1 309`, unchanged 25.12 tons, 2 loads and 50.06 tons total. Live PATCH correction test PASSED.
+- Opened saved original photo afterward: original ticket 102887 still clearly displays `Tank 701, B1 & B3`. Photo retention/access test PASSED.
+- Do not repeat correction/photo tests or modify ticket 102887 merely for testing. User says office may later update printed destination wording; preserve actual delivered tank `EG1 309` unless user instructs otherwise.
+- NEXT: Ricky sign-in and permissions verification; then remaining onboarding, offline queue/sync, true farm/tank aggregation, final export and security tests.
