@@ -315,7 +315,13 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   dashboard.insertBefore(weekTile,firstTile);
   weekTile.querySelector("strong").textContent="My feed delivery tickets — this week";
   const photoInput=$("ticketPhoto");
-  cameraTile.querySelector("strong").textContent="Scan ticket / choose photo";
+  cameraTile.querySelector("strong").textContent="Ticket photo and scan status";
+  // The large top button is the sole camera entry point.
+  const duplicateCameraButton=$("openTicketCamera");
+  if(duplicateCameraButton) duplicateCameraButton.remove();
+  // Keep the scanner and entry form out of the way until a photo is chosen.
+  cameraTile.hidden=true;
+  ticketEntryTile.hidden=true;
   // Keep one prominent camera shortcut above the dashboard, not a duplicate.
   const otherTiles=[...dashboard.querySelectorAll(":scope > .tile")].filter(t=>
     t!==cameraTile && t!==ticketEntryTile && t!==weekTile);
@@ -385,6 +391,8 @@ function clearCameraPreview() {
   $("ticketPhotoPreview").hidden = true;
   $("clearTicketPhoto").hidden = true;
   $("cameraMessage").textContent = "Photo cleared. Nothing was saved.";
+  cameraTile.hidden=true;
+  ticketEntryTile.hidden=true;
 }
 $("clearTicketPhoto").addEventListener("click", clearCameraPreview);
 $("ticketPhoto").addEventListener("change", () => {
@@ -402,6 +410,8 @@ $("ticketPhoto").addEventListener("change", () => {
     $("cameraMessage").textContent = "Photo is too large. Choose an image under 10 MB.";
     return;
   }
+  cameraTile.hidden=false;
+  ticketEntryTile.hidden=false;
   cameraPreviewUrl = URL.createObjectURL(file);
   $("ticketPhotoPreview").src = cameraPreviewUrl;
   $("ticketPhotoPreview").hidden = false;
@@ -507,6 +517,8 @@ $("confirmSave").addEventListener("click", async () => {
     $("confirmPanel").hidden=true;
     $("ticketDraft").reset();
     $("ticketPhoto").value="";
+    cameraTile.hidden=true;
+    ticketEntryTile.hidden=true;
     $("ticketPhotoPreview").hidden=true;
     $("clearTicketPhoto").hidden=true;
     $("cameraMessage").textContent="Ticket saved. Choose a new photo for the next ticket.";
