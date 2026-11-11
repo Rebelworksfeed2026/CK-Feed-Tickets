@@ -760,7 +760,9 @@ $("closeSavedPhoto").addEventListener("click",()=>{
   if(activePhotoUrl) URL.revokeObjectURL(activePhotoUrl);
   activePhotoUrl=null;
 });
+let weekRequestSequence=0;
 $("loadWeek").addEventListener("click", async () => {
+  const requestSequence=++weekRequestSequence;
   $("printWeek").disabled = true;
   $("loadWeek").disabled = true;
   $("weekTable").hidden = true;
@@ -773,6 +775,7 @@ $("loadWeek").addEventListener("click", async () => {
   $("weekMessage").textContent = "Loading selected week…";
   try {
     const rows = await CKCloud.listWeeklyTickets($("cloudDriver").value, $("cloudWeek").value);
+    if(requestSequence!==weekRequestSequence || !CKCloud.isSignedIn()) return;
     const chosen = $("cloudDriver").selectedOptions[0]?.textContent || "Driver";
     const weekStart = $("cloudWeek").value;
     const startDate = new Date(weekStart + "T12:00:00");
@@ -843,12 +846,13 @@ $("loadWeek").addEventListener("click", async () => {
     $("weekTotal").textContent = rows.length + " loads · " + weekly.toFixed(2) + " tons";
     $("weekHighlights").textContent = rows.length ? "🟥 Heaviest: " + heaviest.toFixed(2) + " tons · 🟩 Lightest: " + lightest.toFixed(2) + " tons · 🟦 Biggest day: " + biggestDays.map(d => new Date(d + "T12:00:00").toLocaleDateString("en-US",{weekday:"long"})).join(", ") + " (" + biggest.toFixed(2) + " tons)" : "";
   } catch (err) {
-    $("weekMessage").textContent = "Could not load selected week: " + (err.message || err);
-  } finally { $("loadWeek").disabled = false; }
+    if(requestSequence===weekRequestSequence) $("weekMessage").textContent = "Could not load selected week: " + (err.message || err);
+  } finally { if(requestSequence===weekRequestSequence) $("loadWeek").disabled = false; }
 });
 $("logout").addEventListener("click", async () => {
   $("logout").disabled = true;
   // Clear private UI immediately, even if the logout network request is slow.
+  ++weekRequestSequence;
   ++photoRequestSequence;
   $("savedPhotoViewer").hidden=true;
   $("savedPhotoImage").removeAttribute("src");
