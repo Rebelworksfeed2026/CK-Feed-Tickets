@@ -72,10 +72,54 @@ window.CKCloud = (() => {
   const url = window.SUPABASE_URL;
   const key = window.SUPABASE_KEY;
   const configured = Boolean(url && key);
-  let session = null; // In-memory only; closing/reloading requires signing in again.
+  let session = null;
+  const sessionKey = "ck-feed-auth-v1";
+  let refreshPending = null;
+  function remember(value) {
+    session = value;
+    try {
+      if (value) localStorage.setItem(sessionKey, JSON.stringify(value));
+      else localStorage.removeItem(sessionKey);
+    } catch (_) { /* Private browsing may block storage. */ }
+  }
+  async function refreshSession() {
+    if (!session?.refresh_token) throw Error("Sign in again.");
+    if (refreshPending) return refreshPending;
+    refreshPending = (async () => {
+      const response = await fetch(url + "/auth/v1/token?grant_type=refresh_token", {
+        method: "POST", headers: {apikey:key,"Content-Type":"application/json"},
+        body: JSON.stringify({refresh_token:session.refresh_token})
+      });
+      const value = await response.json().catch(() => ({}));
+      if (!response.ok || !value.access_token || !value.refresh_token) {
+        remember(null);
+        throw Error("Your login expired. Please sign in again.");
+      }
+      remember(value);
+      return value;
+    })();
+    try { return await refreshPending; } finally { refreshPending = null; }
+  }
+  async function restoreSession() {
+    try {
+      const saved = localStorage.getItem(sessionKey);
+      if (!saved) return null;
+      const value = JSON.parse(saved);
+      if (!value?.refresh_token || !value?.user?.id) { remember(null); return null; }
+      session = value;
+      await refreshSession();
+      const profile = await myProfile();
+      if (!profile) { remember(null); return null; }
+      return profile;
+    } catch (e) {
+      if (navigator.onLine !== false && !session) remember(null);
+      return null;
+    }
+  }
 
   async function request(path, options = {}) {
     if (!configured) throw Error("Supabase is not configured.");
+    if (session?.expires_at && Date.now() >= (session.expires_at - 90) * 1000) await refreshSession();
     const response = await fetch(url + path, {
       ...options,
       headers: {
@@ -106,13 +150,13 @@ window.CKCloud = (() => {
       method: "POST", body: JSON.stringify({ email, password })
     });
     if (!result.access_token || !result.user?.id) throw Error("Sign-in response was incomplete.");
-    session = result;
+    remember(result);
     try {
       const profile = await myProfile();
       if (!profile) throw Error("This account has not been assigned to a feed-ticket user.");
       return profile;
     } catch (e) {
-      session = null;
+      remember(null);
       throw e;
     }
   }
@@ -310,7 +354,7 @@ window.CKCloud = (() => {
     if (!session) return;
     const priorSession=session;
     // Revoke the local session immediately so in-flight photo requests cannot reopen.
-    session=null;
+    remember(null);
     try {
       const response=await fetch(url+"/auth/v1/logout",{
         method:"POST",
@@ -352,7 +396,7 @@ window.CKCloud = (() => {
     }
     return request("/rest/v1/farm_manager_assignments",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({farm_id:farmId,manager_id:managerId,effective_from:effectiveDate})});
   }
-  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, saveTicketWithPhoto, readTicketPhoto, correctTicket, isSignedIn };
+  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, restoreSession, myProfile, listDrivers, listWeeklyTickets, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, saveTicketWithPhoto, readTicketPhoto, correctTicket, isSignedIn };
 })();
 
 </script>
@@ -644,12 +688,7 @@ $("ticketDraft").addEventListener("submit", async e => {
     button.disabled = false;
   }
 });
-$("login").addEventListener("submit", async e => {
-  e.preventDefault();
-  $("submit").disabled = true;
-  $("message").textContent = "Checking account…";
-  try {
-    const profile = await CKCloud.signIn($("email").value.trim(), $("password").value);
+async function showSignedIn(profile) {
     activeProfile=profile;
     $("password").value = "";
     $("login").style.display = "none";
@@ -699,6 +738,14 @@ $("login").addEventListener("submit", async e => {
       $("driverDirectory").textContent = "Could not load driver directory: " + err.message;
     }
     $("message").textContent = "Signed in. Driver directory is read-only. Ticket entry and private photo saving are enabled for authorized drivers.";
+}
+$("login").addEventListener("submit", async e => {
+  e.preventDefault();
+  $("submit").disabled = true;
+  $("message").textContent = "Checking account…";
+  try {
+    const profile = await CKCloud.signIn($("email").value.trim(), $("password").value);
+    await showSignedIn(profile);
   } catch (err) {
     $("password").value = "";
     $("message").textContent = err.message || "Sign-in failed.";
@@ -706,6 +753,9 @@ $("login").addEventListener("submit", async e => {
     $("submit").disabled = false;
   }
 });
+CKCloud.restoreSession().then(profile => {
+  if (profile) return showSignedIn(profile);
+}).catch(() => { $("message").textContent = "Please sign in."; });
 $("printWeek").addEventListener("click", () => {
   if ($("printWeek").disabled) return;
   const area = $("printArea");
