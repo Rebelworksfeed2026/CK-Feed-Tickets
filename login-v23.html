@@ -216,7 +216,7 @@ window.CKCloud = (() => {
   async function readTicketPhoto(photoPath) {
     if (!session?.access_token || !(await myProfile())) throw Error("Sign in to view ticket photos.");
     const path=String(photoPath||"");
-    if (!/^[0-9a-f-]{36}\\/[A-Za-z0-9_.\\/-]+$/i.test(path) || path.includes(".."))
+    if (!/^[0-9a-f-]{36}\/[A-Za-z0-9_.\/-]+$/i.test(path) || path.includes(".."))
       throw Error("Invalid ticket photo path.");
     const response=await fetch(url+"/storage/v1/object/authenticated/ticket-photos/"+path,{
       headers:{apikey:key,Authorization:"Bearer "+session.access_token}
