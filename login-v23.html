@@ -211,6 +211,19 @@ window.CKCloud = (() => {
 
   // Prepared secure save pipeline. UI remains disabled until signed-in testing.
   // Upload the private photo first, then insert a ticket referencing it.
+  // Read a stored private ticket photo with the current signed-in account.
+  // Returns a Blob; the caller can create and later revoke a local object URL.
+  async function readTicketPhoto(photoPath) {
+    if (!session?.access_token || !(await myProfile())) throw Error("Sign in to view ticket photos.");
+    const path=String(photoPath||"");
+    if (!/^[0-9a-f-]{36}\\/[A-Za-z0-9_.\\/-]+$/i.test(path) || path.includes(".."))
+      throw Error("Invalid ticket photo path.");
+    const response=await fetch(url+"/storage/v1/object/authenticated/ticket-photos/"+path,{
+      headers:{apikey:key,Authorization:"Bearer "+session.access_token}
+    });
+    if(!response.ok) throw Error("This ticket photo could not be opened ("+response.status+").");
+    return await response.blob();
+  }
   async function saveTicketWithPhoto(ticket,file) {
     if (!session?.access_token) throw Error("Sign in before saving.");
     const profile=await myProfile();
@@ -280,7 +293,7 @@ window.CKCloud = (() => {
     }
     return request("/rest/v1/farm_manager_assignments",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({farm_id:farmId,manager_id:managerId,effective_from:effectiveDate})});
   }
-  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, saveTicketWithPhoto, isSignedIn };
+  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, saveTicketWithPhoto, readTicketPhoto, isSignedIn };
 })();
 
 </script>
