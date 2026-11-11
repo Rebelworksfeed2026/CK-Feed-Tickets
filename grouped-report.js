@@ -8,6 +8,7 @@
   let reportSequence=0;
   const weekPicker=document.getElementById("cloudWeek");
   const logoutButton=document.getElementById("logout");
+  const driverPicker=document.getElementById("cloudDriver");
   function clearReport(){
     ++reportSequence;
     output.replaceChildren();
@@ -15,6 +16,7 @@
     button.disabled=false;
   }
   weekPicker.addEventListener("change",clearReport);
+  if(driverPicker)driverPicker.addEventListener("change",clearReport);
   logoutButton.addEventListener("click",clearReport);
   button.addEventListener("click",async()=>{
     const sequence=++reportSequence;
