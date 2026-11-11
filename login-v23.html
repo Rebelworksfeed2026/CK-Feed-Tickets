@@ -198,7 +198,7 @@ window.CKCloud = (() => {
       headers: { Prefer: "return=representation" },
       body: JSON.stringify({
         driver_id: profile.id, delivery_date: date,
-        ticket_number: number, tons, destination
+        ticket_number: number, tons, destination, ...(ticket.photo_path ? {photo_path:ticket.photo_path} : {})
       })
       });
     } catch (error) {
@@ -209,6 +209,29 @@ window.CKCloud = (() => {
     return rows[0];
   }
 
+  // Prepared secure save pipeline. UI remains disabled until signed-in testing.
+  // Upload the private photo first, then insert a ticket referencing it.
+  async function saveTicketWithPhoto(ticket,file) {
+    if (!session?.access_token) throw Error("Sign in before saving.");
+    const profile=await myProfile();
+    if (!profile || profile.is_office) throw Error("Only assigned drivers may save tickets.");
+    CKTicketPhotos.validate(file);
+    const number=String(ticket?.ticket_number||"").trim();
+    if (!number) throw Error("Ticket number is missing.");
+    if (await findTicketNumber(number)) throw Error("Duplicate ticket number. Nothing was saved.");
+    const ticketId=crypto.randomUUID();
+    const path=await CKTicketPhotos.upload({
+      file,ticketId,userId:session.user.id,accessToken:session.access_token
+    });
+    try {
+      const saved=await saveOwnTicket({...ticket,photo_path:path});
+      return {...saved,photo_path:path};
+    } catch(error) {
+      // Photo may be orphaned if the insert fails; retain it privately for recovery.
+      throw Error("Photo uploaded privately, but ticket was NOT saved: "+error.message+
+        ". Contact administrator before retrying; photo reference: "+path);
+    }
+  }
   async function signOut() {
     if (session) {
       try { await request("/auth/v1/logout", { method: "POST" }); }
@@ -246,7 +269,7 @@ window.CKCloud = (() => {
     }
     return request("/rest/v1/farm_manager_assignments",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({farm_id:farmId,manager_id:managerId,effective_from:effectiveDate})});
   }
-  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, isSignedIn };
+  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, saveTicketWithPhoto, isSignedIn };
 })();
 
 </script>
