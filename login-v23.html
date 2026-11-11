@@ -761,6 +761,20 @@ $("closeSavedPhoto").addEventListener("click",()=>{
   activePhotoUrl=null;
 });
 let weekRequestSequence=0;
+function clearStaleWeekReport() {
+  ++weekRequestSequence;
+  $("weekTable").hidden=true;
+  $("printWeek").disabled=true;
+  $("weekRows").replaceChildren();
+  $("weekFoot").replaceChildren();
+  $("weekTotal").textContent="";
+  $("weekHighlights").textContent="";
+  $("sheetHeading").textContent="";
+  $("weekMessage").textContent="Selection changed. Load the selected week to view its tickets.";
+  $("loadWeek").disabled=false;
+}
+$("cloudDriver").addEventListener("change",clearStaleWeekReport);
+$("cloudWeek").addEventListener("change",clearStaleWeekReport);
 $("loadWeek").addEventListener("click", async () => {
   const requestSequence=++weekRequestSequence;
   $("printWeek").disabled = true;
