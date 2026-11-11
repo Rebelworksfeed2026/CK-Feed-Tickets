@@ -569,6 +569,10 @@ $("confirmSave").addEventListener("click", async () => {
   if (!verifiedTicket) { $("draftResult").textContent="Check and preview the ticket again before saving."; return; }
   const file=$("ticketPhoto").files?.[0];
   if (!file) { $("draftResult").textContent="Select the original ticket photo before saving."; return; }
+  if (navigator.onLine === false) {
+    $("draftResult").textContent="No internet connection. Ticket NOT saved. Keep this page open and do not clear the photo. Retry when service returns. Offline storage and sync are not enabled yet.";
+    return;
+  }
   const button=$("confirmSave");
   button.disabled=true;
   $("draftResult").textContent="Saving ticket and private photo to the cloud…";
