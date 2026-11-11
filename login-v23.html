@@ -293,9 +293,18 @@ window.CKCloud = (() => {
     }
   }
   async function signOut() {
-    if (session) {
-      try { await request("/auth/v1/logout", { method: "POST" }); }
-      finally { session = null; }
+    if (!session) return;
+    const priorSession=session;
+    // Revoke the local session immediately so in-flight photo requests cannot reopen.
+    session=null;
+    try {
+      const response=await fetch(url+"/auth/v1/logout",{
+        method:"POST",
+        headers:{apikey:key,Authorization:"Bearer "+priorSession.access_token}
+      });
+      if(!response.ok) throw Error("Local sign-out completed, but the server could not confirm revocation.");
+    } catch(error) {
+      throw Error("Signed out on this device. Server sign-out could not be confirmed: "+error.message);
     }
   }
 
