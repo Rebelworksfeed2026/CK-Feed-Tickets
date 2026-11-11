@@ -46,7 +46,7 @@ body * {visibility:hidden!important}
 </form>
 <section id="profile" aria-live="polite">
 <h2 id="welcome"></h2><p id="role"></p>
-<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span style="display:block;margin-top:4px">Viewer version 23 · 11 Nov 2026</span><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><button id="printWeek" type="button" disabled class="secondary">Print / Save PDF</button><section id="printArea"><h2 id="printTitle" hidden>C&K FARMS — FEED DELIVERY SHEET</h2><div id="sheetHeading" class="muted"></div><p id="scrollHint" class="muted" hidden>Swipe left or right on the table to see all seven columns. The printed PDF includes the full sheet.</p><div id="weekScroll" style="overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch"><table id="weekTable" hidden style="width:100%;min-width:690px;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Load</th><th>Ticket #</th><th>Tons</th><th>Destination</th><th>Daily Tons</th><th>Weekly Tons</th></tr></thead><tbody id="weekRows"></tbody><tfoot id="weekFoot"></tfoot></table></div><p id="weekTotal" class="muted"></p><div id="weekHighlights" class="muted"></div></section><span>Cloud ticket entry and corrections are not enabled yet. The separate local prototype remains unchanged.</span></div><div class="tile" id="farmTile"><strong>Farm &amp; tank directory — read only</strong><span>Farms and their tanks will be listed here as they are registered. Farm and tank totals are being built; no existing ticket is changed.</span><button type="button" id="loadFarms">View farms and tanks</button><p id="farmMessage" class="muted" role="status">No farm directory loaded.</p><div id="farmDirectory"></div><section id="farmAdmin" hidden><h3>Register farms and tanks — administrator only</h3><form id="addFarmForm"><label for="newFarmName">Farm name</label><input id="newFarmName" type="text" maxlength="120" required><button type="submit">Add farm</button></form><p id="addFarmMessage" role="status" class="muted"></p><form id="addTankForm"><label for="tankFarm">Select farm</label><select id="tankFarm" required></select><label for="newTankLabel">Existing tank name or number</label><input id="newTankLabel" type="text" maxlength="80" required><button type="submit">Add tank to farm</button></form><p id="addTankMessage" role="status" class="muted"></p></section></div><div class="tile" id="cameraTile"><strong>Scan feed ticket — automatic reading test</strong><span>Choose Take Photo or Photo Library when prompted. The existing scanner will attempt to read the ticket number, tons, destination, and printed dispatch date when legible. Verify every field. Nothing is uploaded or saved.</span><label for="ticketPhoto">Ticket photo</label><input id="ticketPhoto" type="file" accept="image/*"><p id="cameraMessage" role="status" class="muted">No photo selected. Nothing will be saved.</p><img id="ticketPhotoPreview" alt="Selected feed ticket photo" hidden style="width:100%;height:auto;max-height:450px;object-fit:contain;border-radius:8px;margin-top:10px"><button type="button" id="clearTicketPhoto" class="secondary" hidden>Clear photo</button></div><div class="tile" id="ticketEntryTile"><strong>New feed ticket — cloud save preparation</strong><span>Scanned details flow into duplicate checking and final confirmation. Cloud saving remains locked until security checks finish.</span><form id="ticketDraft"><label for="draftDate">Delivery date</label><input id="draftDate" type="date" required><label for="draftNumber">Ticket number</label><input id="draftNumber" type="text" autocapitalize="characters" spellcheck="false" maxlength="24" required><label for="draftTons">Tons</label><input id="draftTons" type="number" min="0.01" max="100" step="0.01" required><label for="draftDestination">Destination</label><input id="draftDestination" type="text" maxlength="120" required><button type="submit">Check ticket number / preview</button></form><p id="draftResult" role="status" class="muted">Ticket entry is in test mode; saving is disabled.</p><div id="confirmPanel" hidden style="margin-top:14px;padding:14px;border:2px solid #17628e;border-radius:10px"><strong>Confirm ticket details</strong><p id="confirmDetails"></p><p class="muted">Cloud save is staged but still locked until account-permission tests are complete. No ticket or photo will be saved in this version.</p><button id="confirmSave" type="button" disabled>Save Ticket (security test pending)</button><button id="cancelSave" type="button" class="secondary">Cancel / change details</button></div></div><div class="tile"><strong>Austin Farms — grouped weekly feed totals (read only)</strong><span>Uses the selected Monday-start week and all available drivers. Original ticket destinations stay unchanged. Unmatched destinations are excluded, not guessed.</span><button type="button" id="groupedReportButton">Calculate grouped totals for selected week</button><p class="muted" id="groupedReportStatus" role="status">No report loaded.</p><div id="groupedReportResults"></div></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office access is view-only. Ticket entry and corrections are not available to office accounts.</span></div></div>
+<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span style="display:block;margin-top:4px">Viewer version 23 · 11 Nov 2026</span><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><button id="printWeek" type="button" disabled class="secondary">Print / Save PDF</button><section id="printArea"><h2 id="printTitle" hidden>C&K FARMS — FEED DELIVERY SHEET</h2><div id="sheetHeading" class="muted"></div><p id="scrollHint" class="muted" hidden>Swipe left or right on the table to see all seven columns. The printed PDF includes the full sheet.</p><div id="weekScroll" style="overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch"><table id="weekTable" hidden style="width:100%;min-width:690px;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Load</th><th>Ticket #</th><th>Tons</th><th>Destination</th><th>Daily Tons</th><th>Weekly Tons</th></tr></thead><tbody id="weekRows"></tbody><tfoot id="weekFoot"></tfoot></table></div><p id="weekTotal" class="muted"></p><div id="weekHighlights" class="muted"></div></section><span>Cloud ticket entry and corrections are not enabled yet. The separate local prototype remains unchanged.</span></div><div class="tile" id="farmTile"><strong>Farm &amp; tank directory — read only</strong><span>Farms and their tanks will be listed here as they are registered. Farm and tank totals are being built; no existing ticket is changed.</span><button type="button" id="loadFarms">View farms and tanks</button><p id="farmMessage" class="muted" role="status">No farm directory loaded.</p><div id="farmDirectory"></div><section id="farmAdmin" hidden><h3>Register farms and tanks — administrator only</h3><form id="addFarmForm"><label for="newFarmName">Farm name</label><input id="newFarmName" type="text" maxlength="120" required><button type="submit">Add farm</button></form><p id="addFarmMessage" role="status" class="muted"></p><form id="addTankForm"><label for="tankFarm">Select farm</label><select id="tankFarm" required></select><label for="newTankLabel">Existing tank name or number</label><input id="newTankLabel" type="text" maxlength="80" required><button type="submit">Add tank to farm</button></form><p id="addTankMessage" role="status" class="muted"></p></section><section id="managerAdmin" hidden><h3>Farm managers — administrator only</h3><form id="managerCreate"><label for="managerName">New manager name</label><input id="managerName" maxlength="120" required><button type="submit">Add manager</button></form><form id="managerAssign"><label for="managerFarm">Farm</label><select id="managerFarm" required></select><label for="managerSelect">Manager</label><select id="managerSelect" required></select><label for="managerDate">Effective date</label><input id="managerDate" type="date" required><button type="submit">Assign / transfer farm</button></form><button id="managerRefresh" type="button" class="secondary">Refresh manager assignments</button><p id="managerStatus" role="status"></p><div id="managerList"></div></section></div><div class="tile" id="cameraTile"><strong>Scan feed ticket — automatic reading test</strong><span>Choose Take Photo or Photo Library when prompted. The existing scanner will attempt to read the ticket number, tons, destination, and printed dispatch date when legible. Verify every field. Nothing is uploaded or saved.</span><label for="ticketPhoto">Ticket photo</label><input id="ticketPhoto" type="file" accept="image/*"><p id="cameraMessage" role="status" class="muted">No photo selected. Nothing will be saved.</p><img id="ticketPhotoPreview" alt="Selected feed ticket photo" hidden style="width:100%;height:auto;max-height:450px;object-fit:contain;border-radius:8px;margin-top:10px"><button type="button" id="clearTicketPhoto" class="secondary" hidden>Clear photo</button></div><div class="tile" id="ticketEntryTile"><strong>New feed ticket — cloud save preparation</strong><span>Scanned details flow into duplicate checking and final confirmation. Cloud saving remains locked until security checks finish.</span><form id="ticketDraft"><label for="draftDate">Delivery date</label><input id="draftDate" type="date" required><label for="draftNumber">Ticket number</label><input id="draftNumber" type="text" autocapitalize="characters" spellcheck="false" maxlength="24" required><label for="draftTons">Tons</label><input id="draftTons" type="number" min="0.01" max="100" step="0.01" required><label for="draftDestination">Destination</label><input id="draftDestination" type="text" maxlength="120" required><button type="submit">Check ticket number / preview</button></form><p id="draftResult" role="status" class="muted">Ticket entry is in test mode; saving is disabled.</p><div id="confirmPanel" hidden style="margin-top:14px;padding:14px;border:2px solid #17628e;border-radius:10px"><strong>Confirm ticket details</strong><p id="confirmDetails"></p><p class="muted">Cloud save is staged but still locked until account-permission tests are complete. No ticket or photo will be saved in this version.</p><button id="confirmSave" type="button" disabled>Save Ticket (security test pending)</button><button id="cancelSave" type="button" class="secondary">Cancel / change details</button></div></div><div class="tile"><strong>Austin Farms — grouped weekly feed totals (read only)</strong><span>Uses the selected Monday-start week and all available drivers. Original ticket destinations stay unchanged. Unmatched destinations are excluded, not guessed.</span><button type="button" id="groupedReportButton">Calculate grouped totals for selected week</button><p class="muted" id="groupedReportStatus" role="status">No report loaded.</p><div id="groupedReportResults"></div></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office access is view-only. Ticket entry and corrections are not available to office accounts.</span></div></div>
 <button id="logout" class="secondary" type="button">Sign out</button>
 </section>
 <p id="message" role="status" aria-live="polite"></p>
@@ -217,7 +217,36 @@ window.CKCloud = (() => {
   }
 
   function isSignedIn() { return Boolean(session?.access_token); }
-  return { configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, isSignedIn };
+  async function listManagersAndAssignments() {
+    if (!(await myProfile())) throw Error("Sign in first.");
+    const [managers, assignments, farms] = await Promise.all([
+      request("/rest/v1/feed_managers?select=id,name,active&order=name.asc"),
+      request("/rest/v1/farm_manager_assignments?select=id,farm_id,manager_id,effective_from,effective_to&order=effective_from.desc"),
+      request("/rest/v1/farms?select=id,name&order=name.asc")
+    ]);
+    return {managers,assignments,farms};
+  }
+  async function addManager(name) {
+    if (!(await myProfile())?.is_admin) throw Error("Administrator only.");
+    const clean=String(name||"").trim();
+    if (!clean || clean.length>120) throw Error("Enter a manager name.");
+    return request("/rest/v1/feed_managers",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({name:clean})});
+  }
+  async function transferFarm(farmId,managerId,effectiveDate) {
+    if (!(await myProfile())?.is_admin) throw Error("Administrator only.");
+    if (!/^[0-9a-f-]{36}$/i.test(farmId)||!/^[0-9a-f-]{36}$/i.test(managerId)) throw Error("Invalid selection.");
+    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(effectiveDate)) throw Error("Choose an effective date.");
+    const current=await request("/rest/v1/farm_manager_assignments?select=id,effective_from,effective_to&farm_id=eq."+encodeURIComponent(farmId)+"&effective_to=is.null");
+    if (current.length>1) throw Error("Multiple active assignments found. Contact administrator.");
+    if (current.length && current[0].effective_from>=effectiveDate) throw Error("New date must follow the current assignment start.");
+    if (current.length) {
+      const prior=new Date(effectiveDate+"T12:00:00");prior.setDate(prior.getDate()-1);
+      const end=prior.getFullYear()+"-"+String(prior.getMonth()+1).padStart(2,"0")+"-"+String(prior.getDate()).padStart(2,"0");
+      await request("/rest/v1/farm_manager_assignments?id=eq."+encodeURIComponent(current[0].id),{method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify({effective_to:end})});
+    }
+    return request("/rest/v1/farm_manager_assignments",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({farm_id:farmId,manager_id:managerId,effective_from:effectiveDate})});
+  }
+  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, isSignedIn };
 })();
 
 </script>
@@ -225,6 +254,37 @@ window.CKCloud = (() => {
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
+async function refreshManagers() {
+  const status=$("managerStatus");status.textContent="Loading managers…";
+  try {
+    const {managers,assignments,farms}=await CKCloud.listManagersAndAssignments();
+    const fill=(id,items)=>{const el=$(id);el.replaceChildren();for(const item of items){const o=document.createElement("option");o.value=item.id;o.textContent=item.name;el.appendChild(o);}};
+    fill("managerFarm",farms);fill("managerSelect",managers.filter(m=>m.active));
+    const list=$("managerList");list.replaceChildren();
+    for(const farm of farms) {
+      const history=assignments.filter(a=>a.farm_id===farm.id).sort((a,b)=>b.effective_from.localeCompare(a.effective_from));
+      const p=document.createElement("p");
+      p.textContent=farm.name+": "+(history.length?history.map(a=>(managers.find(m=>m.id===a.manager_id)?.name||"Unknown")+" ("+a.effective_from+" to "+(a.effective_to||"present")+")").join("; "):"Manager not assigned");
+      list.appendChild(p);
+    }
+    status.textContent=farms.length+" farms · "+managers.length+" managers. Historical assignments retained.";
+  }catch(e){status.textContent="Unable to load managers: "+e.message;}
+}
+$("managerRefresh").addEventListener("click",refreshManagers);
+$("managerCreate").addEventListener("submit",async e=>{
+  e.preventDefault();const b=e.target.querySelector("button");b.disabled=true;
+  try{await CKCloud.addManager($("managerName").value);$("managerName").value="";await refreshManagers();}
+  catch(err){$("managerStatus").textContent="Manager not added: "+err.message;}
+  finally{b.disabled=false;}
+});
+$("managerAssign").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!confirm("Change this farm's manager effective "+$("managerDate").value+"? Existing delivery tickets will remain unchanged."))return;
+  const b=e.target.querySelector("button");b.disabled=true;
+  try{await CKCloud.transferFarm($("managerFarm").value,$("managerSelect").value,$("managerDate").value);await refreshManagers();}
+  catch(err){$("managerStatus").textContent="Assignment not completed: "+err.message+" — refresh before retrying.";}
+  finally{b.disabled=false;}
+});
 let cameraPreviewUrl = null;
 function clearCameraPreview() {
   if (cameraPreviewUrl) URL.revokeObjectURL(cameraPreviewUrl);
@@ -402,6 +462,8 @@ $("login").addEventListener("submit", async e => {
     $("role").textContent = "Access: " + (profile.is_admin ? "Administrator" : profile.is_office ? "Office" : "Driver") + " · " + profile.company;
     $("adminTile").hidden = !profile.is_admin;
     $("farmAdmin").hidden = !profile.is_admin;
+    $("managerAdmin").hidden = !profile.is_admin;
+    if(profile.is_admin) refreshManagers();
     $("officeTile").hidden = !profile.is_office;
     $("cameraTile").hidden = Boolean(profile.is_office);
     $("ticketEntryTile").hidden = Boolean(profile.is_office);
@@ -536,6 +598,7 @@ $("logout").addEventListener("click", async () => {
     $("adminTile").hidden = true;
     $("officeTile").hidden = true;
     $("farmAdmin").hidden = true;
+    $("managerAdmin").hidden = true;
     $("cameraTile").hidden = false;
     $("ticketEntryTile").hidden = false;
     $("login").style.display = "block";
