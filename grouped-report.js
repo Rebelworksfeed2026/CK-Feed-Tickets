@@ -27,14 +27,21 @@
       const batches=await Promise.all(drivers.map(d=>CKCloud.listWeeklyTickets(d.id,monday)));
       const tickets=batches.flat();
       const driverNames=new Map(drivers.map(d=>[d.id,d.name]));
+      // Report totals are derived from one unique set of tickets, regardless of repeated query rows.
+      const unique=new Map();
+      for(const ticket of tickets){
+        const key=String(ticket.id||ticket.ticket_number||"");
+        if(key&&!unique.has(key))unique.set(key,ticket);
+      }
+      const reportTickets=[...unique.values()];
       const groups=window.CKTankGroups;
       if(sequence!==reportSequence || !CKCloud.isSignedIn() || document.getElementById("cloudWeek").value!==monday) {
         if(sequence===reportSequence)status.textContent="Report cancelled because the session or selected week changed.";
         return;
       }
-      const rows=groups.summarize(tickets,"Austin Farms","week");
+      const rows=groups.summarize(reportTickets,"Austin Farms","week");
       const heading=document.createElement("p");
-      heading.textContent="Week starting "+monday+" · "+tickets.length+" tickets checked across "+drivers.length+" drivers";
+      heading.textContent="Week starting "+monday+" · "+reportTickets.length+" tickets checked across "+drivers.length+" drivers";
       output.appendChild(heading);
       const table=document.createElement("table");
       table.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
@@ -57,7 +64,7 @@
       output.appendChild(table);
       // Break down each matched group by the driver who delivered the feed.
       const breakdown=new Map();
-      for(const ticket of tickets){
+      for(const ticket of reportTickets){
         const group=groups.findGroup("Austin Farms",ticket.destination);
         if(!group)continue;
         const key=group.label+"|"+ticket.driver_id;
@@ -95,7 +102,7 @@
       const destinations=new Map();
       const days=new Map();
       const uniqueTickets=new Set();
-      for(const ticket of tickets){
+      for(const ticket of reportTickets){
         const ticketKey=String(ticket.id||ticket.ticket_number||"");
         if(!ticketKey || uniqueTickets.has(ticketKey))continue;
         uniqueTickets.add(ticketKey);
@@ -162,7 +169,7 @@
         dailyTable.appendChild(tr);
       }
       output.appendChild(dailyTable);
-      const excluded=tickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
+      const excluded=reportTickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
       const note=document.createElement("p");note.className="muted";
       note.textContent="Provisional Austin group matches: "+totalLoads+" loads · "+(totalHundredths/100).toFixed(2)+" tons. "+
         excluded.length+" tickets not matched to Austin groups (may belong to other farms). "+
