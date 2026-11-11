@@ -56,9 +56,15 @@
       });
       const invalidCount=reportTickets.length-validTickets.length;
       const rows=groups.summarize(validTickets,"Austin Farms","week");
+      const allHundredths=validTickets.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
+      const allLoads=validTickets.length;
       const heading=document.createElement("p");
       heading.textContent="Week starting "+monday+" · "+reportTickets.length+" tickets checked across "+drivers.length+" drivers";
       output.appendChild(heading);
+      const summary=document.createElement("p");
+      summary.style.fontWeight="700";
+      summary.textContent="All drivers: "+allLoads+" loads · "+(allHundredths/100).toFixed(2)+" tons";
+      output.appendChild(summary);
       const table=document.createElement("table");
       table.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
       const head=document.createElement("tr");
