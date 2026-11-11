@@ -31,7 +31,8 @@ body * {visibility:hidden!important}
 #weekTable tr {break-inside:avoid}
 #weekTotal,#weekHighlights {font-size:9pt!important;margin:6pt 0!important}
 }
-@media print {.no-print,#savedPhotoViewer{display:none!important}}\n</style>
+@media print {.no-print,#savedPhotoViewer{display:none!important}}
+</style>
 </head>
 <body>
 <main>
@@ -344,7 +345,9 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   }
   dashboard.appendChild(extras);
 }
-// Keep the photo viewer outside collapsed dashboard sections so it can display.\ndocument.body.appendChild($("savedPhotoViewer"));\n$("quickCameraButton").addEventListener("click", () => $("ticketPhoto").click());
+// Keep the photo viewer outside collapsed dashboard sections so it can display.
+document.body.appendChild($("savedPhotoViewer"));
+$("quickCameraButton").addEventListener("click", () => $("ticketPhoto").click());
 const CKCloud = window.CKCloud;
 if (!CKCloud) {
   const message = $("message");
