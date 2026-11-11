@@ -10,11 +10,16 @@
     status.textContent="Reading selected week's tickets…";
     try{
       const monday=document.getElementById("cloudWeek").value;
+      if(!CKCloud.isSignedIn())throw Error("Sign in to calculate this report.");
       const drivers=(await CKCloud.listDrivers()).filter(d=>!d.is_office);
       const batches=await Promise.all(drivers.map(d=>CKCloud.listWeeklyTickets(d.id,monday)));
       const tickets=batches.flat();
       const driverNames=new Map(drivers.map(d=>[d.id,d.name]));
       const groups=window.CKTankGroups;
+      if(!CKCloud.isSignedIn() || document.getElementById("cloudWeek").value!==monday) {
+        status.textContent="Report cancelled because the session or selected week changed.";
+        return;
+      }
       const rows=groups.summarize(tickets,"Austin Farms","week");
       const heading=document.createElement("p");
       heading.textContent="Week starting "+monday+" · "+tickets.length+" tickets checked across "+drivers.length+" drivers";
