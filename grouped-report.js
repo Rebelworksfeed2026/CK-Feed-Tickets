@@ -39,7 +39,9 @@
         if(sequence===reportSequence)status.textContent="Report cancelled because the session or selected week changed.";
         return;
       }
-      const rows=groups.summarize(reportTickets,"Austin Farms","week");
+      const validTickets=reportTickets.filter(t=>Number.isFinite(Number(t.tons))&&Number(t.tons)>0&&Number(t.tons)<=100&&/^\d{4}-\d{2}-\d{2}$/.test(String(t.delivery_date||"")));
+      const invalidCount=reportTickets.length-validTickets.length;
+      const rows=groups.summarize(validTickets,"Austin Farms","week");
       const heading=document.createElement("p");
       heading.textContent="Week starting "+monday+" · "+reportTickets.length+" tickets checked across "+drivers.length+" drivers";
       output.appendChild(heading);
@@ -64,7 +66,7 @@
       output.appendChild(table);
       // Break down each matched group by the driver who delivered the feed.
       const breakdown=new Map();
-      for(const ticket of reportTickets){
+      for(const ticket of validTickets){
         const group=groups.findGroup("Austin Farms",ticket.destination);
         if(!group)continue;
         const key=group.label+"|"+ticket.driver_id;
@@ -101,7 +103,7 @@
       // Exact destination report across every driver. This does not guess farm ownership.
       const destinations=new Map();
       const days=new Map();
-      for(const ticket of reportTickets){
+      for(const ticket of validTickets){
         const destination=String(ticket.destination||"").trim()||"(Missing destination)";
         const key=destination.toUpperCase()+"|"+ticket.driver_id;
         const entry=destinations.get(key)||{destination,driver:driverNames.get(ticket.driver_id)||"Unknown driver",loads:0,hundredths:0};
@@ -165,12 +167,18 @@
         dailyTable.appendChild(tr);
       }
       output.appendChild(dailyTable);
-      const excluded=reportTickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
+      const excluded=validTickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
       const note=document.createElement("p");note.className="muted";
       note.textContent="Provisional Austin group matches: "+totalLoads+" loads · "+(totalHundredths/100).toFixed(2)+" tons. "+
         excluded.length+" tickets not matched to Austin groups (may belong to other farms). "+
         "This is a preliminary report based on destination text; farm identity is not yet linked to tickets.";
       output.appendChild(note);
+      if(invalidCount){
+        const warning=document.createElement("p");
+        warning.className="muted";
+        warning.textContent=invalidCount+" ticket(s) excluded from totals due to invalid date or tonnage; review source records.";
+        output.appendChild(warning);
+      }
       status.textContent="Read-only grouped report calculated. No tickets were modified.";
     }catch(error){if(sequence===reportSequence)status.textContent="Could not calculate grouped totals: "+(error.message||error);}
     finally{if(sequence===reportSequence)button.disabled=false;}
