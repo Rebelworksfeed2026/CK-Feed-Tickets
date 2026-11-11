@@ -60,3 +60,7 @@ The previous assistant repeatedly retested completed features after changing cha
 - Earlier conversation said Brenda may correct all drivers' tickets without being admin; newer Nov 11 app audit and handoff say Brenda office READ-ONLY. **This is an unresolved conflicting requirement; do not silently change permissions.** Ask user only if a change is actually necessary.
 - Original Stage 8 remaining included report calculations/format, Saturday office delivery, final real-account tests, security warnings, launch. Real ticket/photo save and view was subsequently verified Nov 11; do not repeat.
 - Previous report work included daily/weekly/monthly/yearly reports and All Drivers reporting correction for Office. Verify existing implementation before changing.
+
+## Offline feature forensic audit (2026-11-11)
+- GitHub historical commits `999f48be`, `d43084d8`, `7fe9c241` predate `login-v23.html`. Their `index.html` contains `localStorage` phone persistence and backup/export behavior; NOT evidence of working cloud sync queue.
+- Current `login-v23.html`, `ticket-photo-storage.js`, `ticket-ocr-v17.js`, `grouped-report.js` have no `indexedDB`, `localStorage`, `serviceWorker`, `navigator.onLine`, `offlineQueue`, or `syncQueue` references. Old offline local storage should not replace current cloud app. Need integrate safely after checking app dependencies.
