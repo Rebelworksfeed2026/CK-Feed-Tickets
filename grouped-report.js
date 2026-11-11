@@ -101,11 +101,7 @@
       // Exact destination report across every driver. This does not guess farm ownership.
       const destinations=new Map();
       const days=new Map();
-      const uniqueTickets=new Set();
       for(const ticket of reportTickets){
-        const ticketKey=String(ticket.id||ticket.ticket_number||"");
-        if(!ticketKey || uniqueTickets.has(ticketKey))continue;
-        uniqueTickets.add(ticketKey);
         const destination=String(ticket.destination||"").trim()||"(Missing destination)";
         const key=destination.toUpperCase()+"|"+ticket.driver_id;
         const entry=destinations.get(key)||{destination,driver:driverNames.get(ticket.driver_id)||"Unknown driver",loads:0,hundredths:0};
