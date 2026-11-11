@@ -31,11 +31,11 @@
         const th=document.createElement("th");th.textContent=label;th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";head.appendChild(th);
       }
       table.appendChild(head);
-      let totalLoads=0,totalTons=0;
+      let totalLoads=0,totalHundredths=0;
       for(const group of groups.groups.filter(g=>g.farm==="Austin Farms")){
         const row=rows.find(r=>r.group===group.label);
         const loads=row?.loads||0,tons=row?.tons||0;
-        totalLoads+=loads;totalTons+=tons;
+        totalLoads+=loads;totalHundredths+=Math.round(tons*100);
         const tr=document.createElement("tr");
         for(const val of [group.label,String(loads),tons.toFixed(2)]){
           const td=document.createElement("td");td.textContent=val;td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";tr.appendChild(td);
@@ -81,7 +81,7 @@
       }
       const excluded=tickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
       const note=document.createElement("p");note.className="muted";
-      note.textContent="Matched: "+totalLoads+" loads · "+totalTons.toFixed(2)+" tons. "+
+      note.textContent="Matched: "+totalLoads+" loads · "+(totalHundredths/100).toFixed(2)+" tons. "+
         excluded.length+" tickets not matched to Austin groups (may belong to other farms). "+
         "This is a preliminary report based on destination text; farm identity is not yet linked to tickets.";
       output.appendChild(note);
