@@ -11,7 +11,10 @@
   function findGroup(farm,ticketDestination){
     const f=normalize(farm), d=normalize(ticketDestination);
     const candidates=groups.filter(g=>normalize(g.farm)===f);
-    const tokens=d.match(/\d+[A-Z]?/g)||[];
+    const tankMatch=d.match(/\b(?:TANK|TNK)\s*[:#-]?\s*(\d{2,4})\b/);
+    // A06 is a secondary printed identifier, not another tank.
+    // Prefer the explicitly labeled tank; otherwise accept one unambiguous tank number.
+    const tokens=tankMatch?[tankMatch[1]]:(d.match(/\b\d{2,4}\b/g)||[]);
     const matches=candidates.filter(g=>tokens.some(t=>g.tanks.some(n=>normalize(n)===t)));
     return matches.length===1?matches[0]:null;
   }
@@ -25,7 +28,7 @@
       const group=findGroup(farm,ticket.destination);
       if(!group)continue;
       const date=String(ticket.delivery_date ?? "");
-      if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))continue;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date))continue;
       const tons=Number(ticket.tons);
       if(!Number.isFinite(tons)||tons<=0)continue;
       const d=new Date(date+"T12:00:00Z");
