@@ -814,7 +814,7 @@ $("loadWeek").addEventListener("click", async () => {
     $("weekScroll").scrollLeft = 0;
     $("printTitle").textContent = chosen.includes("Next Page") ? "NEXT PAGE — FEED DELIVERY SHEET" : "C&K FARMS — FEED DELIVERY SHEET";
     $("printWeek").disabled = false;
-    $("weekMessage").textContent = rows.length ? "Selected week loaded (read only)." : "No tickets recorded for the selected week.";
+    $("weekMessage").textContent = rows.length ? (!activeProfile?.is_office && (activeProfile?.is_admin || activeProfile?.id===$("cloudDriver").value) ? "Selected week loaded. You can correct authorized tickets." : "Selected week loaded (read only).") : "No tickets recorded for the selected week.";
     $("weekTotal").textContent = rows.length + " loads · " + weekly.toFixed(2) + " tons";
     $("weekHighlights").textContent = rows.length ? "🟥 Heaviest: " + heaviest.toFixed(2) + " tons · 🟩 Lightest: " + lightest.toFixed(2) + " tons · 🟦 Biggest day: " + biggestDays.map(d => new Date(d + "T12:00:00").toLocaleDateString("en-US",{weekday:"long"})).join(", ") + " (" + biggest.toFixed(2) + " tons)" : "";
   } catch (err) {
