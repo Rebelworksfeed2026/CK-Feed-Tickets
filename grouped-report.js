@@ -147,6 +147,38 @@
         dayTable.appendChild(tr);
       }
       output.appendChild(dayTable);
+      const companyNames=new Map(drivers.map(d=>[d.id,d.company||"Unassigned company"]));
+      const companyTotals=new Map();
+      for(const ticket of validTickets){
+        const company=companyNames.get(ticket.driver_id)||"Unassigned company";
+        const entry=companyTotals.get(company)||{company,loads:0,hundredths:0};
+        entry.loads++;
+        entry.hundredths+=Math.round(Number(ticket.tons)*100);
+        companyTotals.set(company,entry);
+      }
+      const companyTitle=document.createElement("p");
+      companyTitle.style.fontWeight="700";
+      companyTitle.textContent="Weekly totals by company";
+      output.appendChild(companyTitle);
+      const companyTable=document.createElement("table");
+      companyTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const companyHead=document.createElement("tr");
+      for(const label of ["Company","Loads","Tons"]){
+        const th=document.createElement("th");th.textContent=label;
+        th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+        companyHead.appendChild(th);
+      }
+      companyTable.appendChild(companyHead);
+      for(const entry of [...companyTotals.values()].sort((a,b)=>a.company.localeCompare(b.company))){
+        const tr=document.createElement("tr");
+        for(const value of [entry.company,String(entry.loads),(entry.hundredths/100).toFixed(2)]){
+          const td=document.createElement("td");td.textContent=value;
+          td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+          tr.appendChild(td);
+        }
+        companyTable.appendChild(tr);
+      }
+      output.appendChild(companyTable);
       const breakdown=new Map();
       for(const ticket of validTickets){
         const group=groups.findGroup("Austin Farms",ticket.destination);
