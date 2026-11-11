@@ -39,7 +39,21 @@
         if(sequence===reportSequence)status.textContent="Report cancelled because the session or selected week changed.";
         return;
       }
-      const validTickets=reportTickets.filter(t=>Number.isFinite(Number(t.tons))&&Number(t.tons)>0&&Number(t.tons)<=100&&/^\d{4}-\d{2}-\d{2}$/.test(String(t.delivery_date||"")));
+      const weekStart=new Date(monday+"T12:00:00Z");
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(monday)||Number.isNaN(weekStart.getTime())||weekStart.getUTCDay()!==1||weekStart.toISOString().slice(0,10)!==monday){
+        throw Error("Select a valid Monday as the starting date.");
+      }
+      const weekEnd=new Date(weekStart);
+      weekEnd.setUTCDate(weekStart.getUTCDate()+7);
+      const endDate=weekEnd.toISOString().slice(0,10);
+      const validTickets=reportTickets.filter(t=>{
+        const date=String(t.delivery_date||"");
+        const parsed=new Date(date+"T12:00:00Z");
+        return Number.isFinite(Number(t.tons))&&Number(t.tons)>0&&Number(t.tons)<=100&&
+          /^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(parsed.getTime())&&
+          parsed.toISOString().slice(0,10)===date&&parsed.getUTCDay()!==0&&
+          date>=monday&&date<endDate;
+      });
       const invalidCount=reportTickets.length-validTickets.length;
       const rows=groups.summarize(validTickets,"Austin Farms","week");
       const heading=document.createElement("p");
@@ -176,7 +190,7 @@
       if(invalidCount){
         const warning=document.createElement("p");
         warning.className="muted";
-        warning.textContent=invalidCount+" ticket(s) excluded from totals due to invalid date or tonnage; review source records.";
+        warning.textContent=invalidCount+" ticket(s) excluded from totals due to invalid date, Sunday/out-of-week delivery, or tonnage; review source records.";
         output.appendChild(warning);
       }
       status.textContent="Read-only grouped report calculated. No tickets were modified.";
