@@ -159,10 +159,17 @@ window.CKCloud = (() => {
     const duplicate=await request("/rest/v1/feed_tickets?select=id&id=neq."+encodeURIComponent(id)+
       "&ticket_number=eq."+encodeURIComponent(number)+"&deleted_at=is.null&limit=1");
     if(duplicate.length) throw Error("Another ticket already uses this number.");
-    const result=await request("/rest/v1/feed_tickets?id=eq."+encodeURIComponent(id),{
-      method:"PATCH",headers:{Prefer:"return=representation"},
-      body:JSON.stringify({delivery_date:date,ticket_number:number,tons,destination})
-    });
+    let result;
+    try {
+      result=await request("/rest/v1/feed_tickets?id=eq."+encodeURIComponent(id)+"&deleted_at=is.null",{
+        method:"PATCH",headers:{Prefer:"return=representation"},
+        body:JSON.stringify({delivery_date:date,ticket_number:number,tons,destination})
+      });
+    } catch(error) {
+      if(/duplicate key|23505|unique constraint/i.test(error.message))
+        throw Error("This ticket number already exists. No correction was saved.");
+      throw error;
+    }
     if(!Array.isArray(result) || result.length!==1) throw Error("Correction was not saved. Check account permissions.");
     return result[0];
   }
