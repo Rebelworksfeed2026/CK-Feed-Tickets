@@ -301,6 +301,12 @@ window.CKCloud = (() => {
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
+const CKCloud = window.CKCloud;
+if (!CKCloud) {
+  const message = $("message");
+  if (message) message.textContent = "App connection code did not load. Refresh this page once; if it continues, report this message.";
+  return;
+}
 async function refreshManagers() {
   const status=$("managerStatus");status.textContent="Loading managers…";
   try {
