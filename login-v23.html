@@ -216,8 +216,19 @@ window.CKCloud = (() => {
     const profile=await myProfile();
     if (!profile || profile.is_office) throw Error("Only assigned drivers may save tickets.");
     CKTicketPhotos.validate(file);
+    // Validate every field BEFORE uploading any private photo.
+    const date=String(ticket?.delivery_date||"");
+    const parsed=new Date(date+"T12:00:00");
     const number=String(ticket?.ticket_number||"").trim();
-    if (!number) throw Error("Ticket number is missing.");
+    const tons=Number(ticket?.tons);
+    const destination=String(ticket?.destination||"").trim();
+    const validDate=/^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      !Number.isNaN(parsed.getTime()) && parsed.getDay()!==0 &&
+      parsed.getFullYear()+"-"+String(parsed.getMonth()+1).padStart(2,"0")+"-"+String(parsed.getDate()).padStart(2,"0")===date;
+    if(!validDate || !/^[A-Za-z0-9][A-Za-z0-9-]{0,23}$/.test(number) ||
+       !Number.isFinite(tons) || tons<=0 || tons>100 ||
+       !destination || destination.length>120)
+      throw Error("Correct the date, ticket number, tons, or destination before saving.");
     if (await findTicketNumber(number)) throw Error("Duplicate ticket number. Nothing was saved.");
     const ticketId=crypto.randomUUID();
     const path=await CKTicketPhotos.upload({
