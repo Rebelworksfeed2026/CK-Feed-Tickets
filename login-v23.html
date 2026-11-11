@@ -158,7 +158,9 @@ window.CKCloud = (() => {
        !Number.isFinite(tons) || tons<=0 || tons>100 ||
        !destination || destination.length>120) throw Error("Check the date, number, tons, and destination.");
     const duplicate=await request("/rest/v1/feed_tickets?select=id&id=neq."+encodeURIComponent(id)+
-      "&ticket_number=eq."+encodeURIComponent(number)+"&deleted_at=is.null&limit=1");
+      "&ticket_number=eq."+encodeURIComponent(number)+"&limit=1");
+    // Ticket numbers are globally unique, including archived or soft-deleted records.
+    if(!Array.isArray(duplicate)) throw Error("Could not verify ticket number uniqueness.");
     if(duplicate.length) throw Error("Another ticket already uses this number.");
     let result;
     try {
