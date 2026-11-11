@@ -808,9 +808,11 @@ $("loadWeek").addEventListener("click", async () => {
     lastDate.setDate(lastDate.getDate() + 5);
     const endText = lastDate.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
     $("sheetHeading").textContent = chosen + " · Week " + weekStart + " through " + endText;
+    // Calculate in hundredths of a ton so daily/weekly totals and ties are exact.
+    const cents = t => Math.round(Number(t.tons) * 100);
     const totalsByDay = {};
-    for (const t of rows) totalsByDay[t.delivery_date] = (totalsByDay[t.delivery_date] || 0) + Number(t.tons);
-    const values = rows.map(t => Number(t.tons));
+    for (const t of rows) totalsByDay[t.delivery_date] = (totalsByDay[t.delivery_date] || 0) + cents(t);
+    const values = rows.map(cents);
     const heaviest = values.length ? Math.max(...values) : null;
     const lightest = values.length ? Math.min(...values) : null;
     const biggest = Math.max(0,...Object.values(totalsByDay));
@@ -819,13 +821,13 @@ $("loadWeek").addEventListener("click", async () => {
     for (const t of rows) {
       if (t.delivery_date !== lastDay) { lastDay = t.delivery_date; load = 0; daily = 0; }
       load++;
-      daily += Number(t.tons);
-      weekly += Number(t.tons);
+      daily += cents(t);
+      weekly += cents(t);
       const dayName = new Date(t.delivery_date + "T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
       const dayMarker = load === 1 && biggestDays.includes(t.delivery_date) ? "🟦 " : "";
-      const tonMarkers = (Number(t.tons) === heaviest ? "🟥 " : "") + (Number(t.tons) === lightest ? "🟩 " : "");
+      const tonMarkers = (cents(t) === heaviest ? "🟥 " : "") + (cents(t) === lightest ? "🟩 " : "");
       const tr = document.createElement("tr");
-      for (const value of [dayMarker + dayName,load,t.ticket_number,tonMarkers + Number(t.tons).toFixed(2),t.destination,daily.toFixed(2),weekly.toFixed(2)]) {
+      for (const value of [dayMarker + dayName,load,t.ticket_number,tonMarkers + Number(t.tons).toFixed(2),t.destination,(daily/100).toFixed(2),(weekly/100).toFixed(2)]) {
         const td = document.createElement("td");
         td.textContent = value;
         td.style.cssText = "padding:8px 4px;border-bottom:1px solid #d8e3e9;white-space:nowrap";
@@ -855,7 +857,7 @@ $("loadWeek").addEventListener("click", async () => {
       $("weekRows").appendChild(tr);
     }
     const foot = document.createElement("tr");
-    for (const [i,value] of ["TOTAL",rows.length,"",weekly.toFixed(2),"","",weekly.toFixed(2),"",""].entries()) {
+    for (const [i,value] of ["TOTAL",rows.length,"",(weekly/100).toFixed(2),"","",(weekly/100).toFixed(2),"",""].entries()) {
       const cell = document.createElement("td");
       cell.textContent = value;
       cell.style.cssText = "padding:9px 4px;font-weight:700;background:#e3edf3";
@@ -868,8 +870,8 @@ $("loadWeek").addEventListener("click", async () => {
     $("printTitle").textContent = chosen.includes("Next Page") ? "NEXT PAGE — FEED DELIVERY SHEET" : "C&K FARMS — FEED DELIVERY SHEET";
     $("printWeek").disabled = false;
     $("weekMessage").textContent = rows.length ? (!activeProfile?.is_office && (activeProfile?.is_admin || activeProfile?.id===$("cloudDriver").value) ? "Selected week loaded. You can correct authorized tickets." : "Selected week loaded (read only).") : "No tickets recorded for the selected week.";
-    $("weekTotal").textContent = rows.length + " loads · " + weekly.toFixed(2) + " tons";
-    $("weekHighlights").textContent = rows.length ? "🟥 Heaviest: " + heaviest.toFixed(2) + " tons · 🟩 Lightest: " + lightest.toFixed(2) + " tons · 🟦 Biggest day: " + biggestDays.map(d => new Date(d + "T12:00:00").toLocaleDateString("en-US",{weekday:"long"})).join(", ") + " (" + biggest.toFixed(2) + " tons)" : "";
+    $("weekTotal").textContent = rows.length + " loads · " + (weekly/100).toFixed(2) + " tons";
+    $("weekHighlights").textContent = rows.length ? "🟥 Heaviest: " + (heaviest/100).toFixed(2) + " tons · 🟩 Lightest: " + (lightest/100).toFixed(2) + " tons · 🟦 Biggest day: " + biggestDays.map(d => new Date(d + "T12:00:00").toLocaleDateString("en-US",{weekday:"long"})).join(", ") + " (" + (biggest/100).toFixed(2) + " tons)" : "";
   } catch (err) {
     if(requestSequence===weekRequestSequence) $("weekMessage").textContent = "Could not load selected week: " + (err.message || err);
   } finally { if(requestSequence===weekRequestSequence) $("loadWeek").disabled = false; }
