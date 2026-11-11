@@ -29,7 +29,7 @@
       const driverNames=new Map(drivers.map(d=>[d.id,d.name]));
       const groups=window.CKTankGroups;
       if(sequence!==reportSequence || !CKCloud.isSignedIn() || document.getElementById("cloudWeek").value!==monday) {
-        status.textContent="Report cancelled because the session or selected week changed.";
+        if(sequence===reportSequence)status.textContent="Report cancelled because the session or selected week changed.";
         return;
       }
       const rows=groups.summarize(tickets,"Austin Farms","week");
