@@ -423,7 +423,34 @@
         warning.textContent=invalidCount+" ticket(s) excluded from totals due to invalid date, Sunday/out-of-week delivery, or tonnage; review source records.";
         output.appendChild(warning);
       }
-      status.textContent="Read-only grouped report calculated. No tickets were modified.";
+      // Keep the iPhone report manageable: show the overview first, with expandable tables.
+      const sectionTitles=new Set([
+        "Daily Austin tank-group totals (provisional matching)",
+        "Weekly totals by driver",
+        "Daily totals — all drivers",
+        "Daily totals by driver",
+        "Weekly totals by company",
+        "Daily totals by company",
+        "Matched tank groups by driver",
+        "All destinations by driver (exact ticket text)",
+        "Daily deliveries by destination and driver",
+        "Destinations not matched to Austin groups"
+      ]);
+      for(const title of [...output.querySelectorAll("p")]){
+        if(!sectionTitles.has(title.textContent))continue;
+        const next=title.nextElementSibling;
+        if(!next||next.tagName!=="TABLE")continue;
+        const details=document.createElement("details");
+        details.style.cssText="margin:12px 0;border:1px solid #d8e3e9;border-radius:8px;padding:9px";
+        const summary=document.createElement("summary");
+        summary.textContent=title.textContent;
+        summary.style.cssText="font-weight:700;cursor:pointer;padding:5px";
+        details.appendChild(summary);
+        next.parentNode.insertBefore(details,title);
+        details.appendChild(next);
+        title.remove();
+      }
+      status.textContent="Read-only grouped report calculated. Open a section to view details. No tickets were modified.";
     }catch(error){if(sequence===reportSequence)status.textContent="Could not calculate grouped totals: "+(error.message||error);}
     finally{if(sequence===reportSequence)button.disabled=false;}
   });
