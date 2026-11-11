@@ -68,3 +68,9 @@ The previous assistant repeatedly retested completed features after changing cha
 ## Verified live database authorization (2026-11-11)
 - Read actual `pg_policies` on `public.feed_tickets`: `Drivers can add own tickets` INSERT WITH CHECK driver.user_id=auth.uid and not office; `Linked drivers can view all feed tickets` SELECT; `Admin can correct all feed tickets` UPDATE USING/WITH CHECK private.is_feed_admin(); `Drivers can update own tickets` UPDATE USING/WITH CHECK driver.user_id=auth.uid and not office.
 - No role-policy changes needed. This was independently checked against live Supabase. Never loosen permissions for non-admin drivers.
+
+## Stage 8 progress — 2026-11-11 follow-up
+- **Correction form display verified on real iPhone:** Sean opened Correct for ticket 102885; screenshot showed 2026-11-11, ticket 102885, 24.94 tons, Tank 106, A06 correctly prefilled. User tapped Cancel. **No correction was submitted; actual PATCH/save remains untested.** Do not ask to change ticket 102885 merely to test.
+- GitHub main HTML changes since handoff: authorized correction checks, duplicate check includes archived/deleted ticket numbers, stale report/photo request guards, stale report/correction clearing when changing week or driver, safe sign-out cleanup and load-button reset, exact hundredths-of-ton arithmetic for weekly totals and ties. These are code changes, **not proof of full live end-to-end tests**.
+- Current open items: live correction-save test on a safe test ticket; Ricky/other user login and role tests; Jakeleg/Cody/Brenda onboarding; offline save-and-sync (not verified); all-driver farm/tank daily/monthly/yearly totals; final report/print and security checks.
+- User wants concise results, copy-link controls when testing, and no repetitive microstep narration. Continue substantive work rather than declaring app finished.
