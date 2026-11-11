@@ -108,7 +108,7 @@
         entry.hundredths+=hundredths;
         destinations.set(key,entry);
         const date=String(ticket.delivery_date||"");
-        if(/^\\d{4}-\\d{2}-\\d{2}$/.test(date)){
+        if(/^\d{4}-\d{2}-\d{2}$/.test(date)){
           const dayKey=date+"|"+destination.toUpperCase()+"|"+ticket.driver_id;
           const dayEntry=days.get(dayKey)||{date,destination,driver:entry.driver,loads:0,hundredths:0};
           dayEntry.loads++;
