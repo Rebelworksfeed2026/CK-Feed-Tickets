@@ -301,11 +301,18 @@ $("addTankForm").addEventListener("submit", async event => {
   button.disabled = true;
   $("addTankMessage").textContent = "Registering tank…";
   try {
-    await CKCloud.registerTank($("tankFarm").value,$("newTankLabel").value);
+    const tankLabel = $("newTankLabel").value.trim();
+    const farmName = $("tankFarm").selectedOptions[0]?.textContent || "selected farm";
+    await CKCloud.registerTank($("tankFarm").value,tankLabel);
     $("newTankLabel").value = "";
-    $("addTankMessage").textContent = "Tank registered. Refreshing directory…";
+    $("addTankMessage").textContent = "Tank " + tankLabel + " added successfully to " + farmName + ".";
+    $("addTankMessage").style.color = "#155d39";
     $("loadFarms").click();
-  } catch (error) { $("addTankMessage").textContent = "Tank not added: " + error.message; }
+  } catch (error) {
+    const duplicate = /duplicate key|23505|unique constraint/i.test(error.message);
+    $("addTankMessage").textContent = duplicate ? "This tank is already registered to this farm." : "Tank not added: " + error.message;
+    $("addTankMessage").style.color = duplicate ? "#8a4b00" : "#a72d32";
+  }
   finally { button.disabled = false; }
 });
 let verifiedTicket = null;
