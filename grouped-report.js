@@ -116,6 +116,37 @@
         driverTable.appendChild(tr);
       }
       output.appendChild(driverTable);
+      const dayTotals=new Map();
+      for(const ticket of validTickets){
+        const date=String(ticket.delivery_date);
+        const entry=dayTotals.get(date)||{date,loads:0,hundredths:0};
+        entry.loads++;
+        entry.hundredths+=Math.round(Number(ticket.tons)*100);
+        dayTotals.set(date,entry);
+      }
+      const dayTitle=document.createElement("p");
+      dayTitle.style.fontWeight="700";
+      dayTitle.textContent="Daily totals — all drivers";
+      output.appendChild(dayTitle);
+      const dayTable=document.createElement("table");
+      dayTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const dayHead=document.createElement("tr");
+      for(const label of ["Date","Loads","Tons"]){
+        const th=document.createElement("th");th.textContent=label;
+        th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+        dayHead.appendChild(th);
+      }
+      dayTable.appendChild(dayHead);
+      for(const entry of [...dayTotals.values()].sort((a,b)=>a.date.localeCompare(b.date))){
+        const tr=document.createElement("tr");
+        for(const value of [entry.date,String(entry.loads),(entry.hundredths/100).toFixed(2)]){
+          const td=document.createElement("td");td.textContent=value;
+          td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+          tr.appendChild(td);
+        }
+        dayTable.appendChild(tr);
+      }
+      output.appendChild(dayTable);
       const breakdown=new Map();
       for(const ticket of validTickets){
         const group=groups.findGroup("Austin Farms",ticket.destination);
