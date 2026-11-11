@@ -376,9 +376,10 @@
       }
       output.appendChild(dailyTable);
       const excluded=validTickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
+      const excludedHundredths=excluded.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
       const note=document.createElement("p");note.className="muted";
       note.textContent="Provisional Austin group matches: "+totalLoads+" loads · "+(totalHundredths/100).toFixed(2)+" tons. "+
-        excluded.length+" tickets not matched to Austin groups (may belong to other farms). "+
+        "Unmatched destinations: "+excluded.length+" loads · "+(excludedHundredths/100).toFixed(2)+" tons (may belong to other farms). "+
         "This is a preliminary report based on destination text; farm identity is not yet linked to tickets.";
       output.appendChild(note);
       if(invalidCount){
