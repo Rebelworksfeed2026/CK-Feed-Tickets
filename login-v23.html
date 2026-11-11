@@ -837,6 +837,16 @@ $("logout").addEventListener("click", async () => {
   catch (err) { $("message").textContent = "Sign-out error: " + err.message; }
   finally {
     $("logout").disabled = false;
+    activeProfile=null;
+    correctionTarget=null;
+    $("correctionPanel").hidden=true;
+    $("savedPhotoViewer").hidden=true;
+    $("savedPhotoImage").removeAttribute("src");
+    if(activePhotoUrl) { URL.revokeObjectURL(activePhotoUrl); activePhotoUrl=null; }
+    $("weekRows").replaceChildren();
+    $("weekFoot").replaceChildren();
+    $("weekTable").hidden=true;
+    $("printWeek").disabled=true;
     $("profile").style.display = "none";
     $("driverDirectory").textContent = "Sign in to load the driver directory.";
     $("adminTile").hidden = true;
