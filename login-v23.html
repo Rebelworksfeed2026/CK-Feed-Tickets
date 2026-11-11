@@ -765,6 +765,9 @@ function clearStaleWeekReport() {
   ++weekRequestSequence;
   $("weekTable").hidden=true;
   $("printWeek").disabled=true;
+  $("scrollHint").hidden=true;
+  $("correctionPanel").hidden=true;
+  correctionTarget=null;
   $("weekRows").replaceChildren();
   $("weekFoot").replaceChildren();
   $("weekTotal").textContent="";
