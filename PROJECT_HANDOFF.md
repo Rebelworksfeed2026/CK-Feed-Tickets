@@ -64,3 +64,7 @@ The previous assistant repeatedly retested completed features after changing cha
 ## Offline feature forensic audit (2026-11-11)
 - GitHub historical commits `999f48be`, `d43084d8`, `7fe9c241` predate `login-v23.html`. Their `index.html` contains `localStorage` phone persistence and backup/export behavior; NOT evidence of working cloud sync queue.
 - Current `login-v23.html`, `ticket-photo-storage.js`, `ticket-ocr-v17.js`, `grouped-report.js` have no `indexedDB`, `localStorage`, `serviceWorker`, `navigator.onLine`, `offlineQueue`, or `syncQueue` references. Old offline local storage should not replace current cloud app. Need integrate safely after checking app dependencies.
+
+## Verified live database authorization (2026-11-11)
+- Read actual `pg_policies` on `public.feed_tickets`: `Drivers can add own tickets` INSERT WITH CHECK driver.user_id=auth.uid and not office; `Linked drivers can view all feed tickets` SELECT; `Admin can correct all feed tickets` UPDATE USING/WITH CHECK private.is_feed_admin(); `Drivers can update own tickets` UPDATE USING/WITH CHECK driver.user_id=auth.uid and not office.
+- No role-policy changes needed. This was independently checked against live Supabase. Never loosen permissions for non-admin drivers.
