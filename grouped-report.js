@@ -91,9 +91,48 @@
         }
         output.appendChild(detail);
       }
+      // Exact destination report across every driver. This does not guess farm ownership.
+      const destinations=new Map();
+      const uniqueTickets=new Set();
+      for(const ticket of tickets){
+        const ticketKey=String(ticket.id||ticket.ticket_number||"");
+        if(!ticketKey || uniqueTickets.has(ticketKey))continue;
+        uniqueTickets.add(ticketKey);
+        const destination=String(ticket.destination||"").trim()||"(Missing destination)";
+        const key=destination.toUpperCase()+"|"+ticket.driver_id;
+        const entry=destinations.get(key)||{destination,driver:driverNames.get(ticket.driver_id)||"Unknown driver",loads:0,hundredths:0};
+        const hundredths=Math.round(Number(ticket.tons)*100);
+        if(!Number.isFinite(hundredths))continue;
+        entry.loads++;
+        entry.hundredths+=hundredths;
+        destinations.set(key,entry);
+      }
+      const destinationTitle=document.createElement("p");
+      destinationTitle.style.fontWeight="700";
+      destinationTitle.textContent="All destinations by driver (exact ticket text)";
+      output.appendChild(destinationTitle);
+      const destinationTable=document.createElement("table");
+      destinationTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const destinationHead=document.createElement("tr");
+      for(const label of ["Destination","Driver","Loads","Tons"]){
+        const th=document.createElement("th");th.textContent=label;
+        th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+        destinationHead.appendChild(th);
+      }
+      destinationTable.appendChild(destinationHead);
+      for(const entry of [...destinations.values()].sort((a,b)=>a.destination.localeCompare(b.destination,undefined,{numeric:true})||a.driver.localeCompare(b.driver))){
+        const tr=document.createElement("tr");
+        for(const value of [entry.destination,entry.driver,String(entry.loads),(entry.hundredths/100).toFixed(2)]){
+          const td=document.createElement("td");td.textContent=value;
+          td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+          tr.appendChild(td);
+        }
+        destinationTable.appendChild(tr);
+      }
+      output.appendChild(destinationTable);
       const excluded=tickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
       const note=document.createElement("p");note.className="muted";
-      note.textContent="Matched: "+totalLoads+" loads · "+(totalHundredths/100).toFixed(2)+" tons. "+
+      note.textContent="Provisional Austin group matches: "+totalLoads+" loads · "+(totalHundredths/100).toFixed(2)+" tons. "+
         excluded.length+" tickets not matched to Austin groups (may belong to other farms). "+
         "This is a preliminary report based on destination text; farm identity is not yet linked to tickets.";
       output.appendChild(note);
