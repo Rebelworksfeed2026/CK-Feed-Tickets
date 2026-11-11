@@ -36,7 +36,12 @@ body * {visibility:hidden!important}
 #groupedReportResults table{min-width:0;width:100%;table-layout:fixed;font-size:12px!important}
 #groupedReportResults th,#groupedReportResults td{padding:5px 3px!important;overflow-wrap:anywhere;word-break:normal}
 #groupedReportResults details{max-width:100%;min-width:0}
-#groupedReportResults details table{width:100%;min-width:0}
+#groupedReportResults details table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
+#groupedReportResults table th,#groupedReportResults table td{box-sizing:border-box!important;min-width:0!important;max-width:none!important;white-space:normal!important}
+#groupedReportResults table th:last-child,#groupedReportResults table td:last-child{text-align:right!important}
+#groupedReportResults details{box-sizing:border-box!important;width:100%!important;overflow:hidden!important}
+#groupedReportResults details table th:first-child,#groupedReportResults details table td:first-child{width:44%!important}
+#groupedReportResults details table th:not(:first-child),#groupedReportResults details table td:not(:first-child){width:auto!important}
 @media(max-width:420px){#groupedReportResults table{font-size:11px!important}#groupedReportResults th,#groupedReportResults td{padding:4px 2px!important}}
 #groupedReportResults td,#groupedReportResults th{overflow-wrap:anywhere}
 </style>
