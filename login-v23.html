@@ -344,7 +344,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   }
   dashboard.appendChild(extras);
 }
-$("quickCameraButton").addEventListener("click", () => $("ticketPhoto").click());
+// Keep the photo viewer outside collapsed dashboard sections so it can display.\ndocument.body.appendChild($("savedPhotoViewer"));\n$("quickCameraButton").addEventListener("click", () => $("ticketPhoto").click());
 const CKCloud = window.CKCloud;
 if (!CKCloud) {
   const message = $("message");
