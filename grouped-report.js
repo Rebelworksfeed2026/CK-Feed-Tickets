@@ -13,6 +13,7 @@
       const drivers=(await CKCloud.listDrivers()).filter(d=>!d.is_office);
       const batches=await Promise.all(drivers.map(d=>CKCloud.listWeeklyTickets(d.id,monday)));
       const tickets=batches.flat();
+      const driverNames=new Map(drivers.map(d=>[d.id,d.name]));
       const groups=window.CKTankGroups;
       const rows=groups.summarize(tickets,"Austin Farms","week");
       const heading=document.createElement("p");
@@ -37,7 +38,42 @@
         table.appendChild(tr);
       }
       output.appendChild(table);
-      const matched=new Set(groups.groups.filter(g=>g.farm==="Austin Farms").flatMap(g=>g.tanks));
+      // Break down each matched group by the driver who delivered the feed.
+      const breakdown=new Map();
+      for(const ticket of tickets){
+        const group=groups.findGroup("Austin Farms",ticket.destination);
+        if(!group)continue;
+        const key=group.label+"|"+ticket.driver_id;
+        const entry=breakdown.get(key)||{group:group.label,driver:driverNames.get(ticket.driver_id)||"Unknown driver",loads:0,hundredths:0};
+        entry.loads++;
+        entry.hundredths+=Math.round(Number(ticket.tons)*100);
+        breakdown.set(key,entry);
+      }
+      if(breakdown.size){
+        const title=document.createElement("p");
+        title.textContent="Matched tank groups by driver";
+        title.style.fontWeight="700";
+        output.appendChild(title);
+        const detail=document.createElement("table");
+        detail.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+        const header=document.createElement("tr");
+        for(const label of ["Tank group","Driver","Loads","Tons"]){
+          const th=document.createElement("th");th.textContent=label;
+          th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+          header.appendChild(th);
+        }
+        detail.appendChild(header);
+        for(const entry of [...breakdown.values()].sort((a,b)=>a.group.localeCompare(b.group)||a.driver.localeCompare(b.driver))){
+          const tr=document.createElement("tr");
+          for(const value of [entry.group,entry.driver,String(entry.loads),(entry.hundredths/100).toFixed(2)]){
+            const td=document.createElement("td");td.textContent=value;
+            td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+            tr.appendChild(td);
+          }
+          detail.appendChild(tr);
+        }
+        output.appendChild(detail);
+      }
       const excluded=tickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
       const note=document.createElement("p");note.className="muted";
       note.textContent="Matched: "+totalLoads+" loads · "+totalTons.toFixed(2)+" tons. "+
