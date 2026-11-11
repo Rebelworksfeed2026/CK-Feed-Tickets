@@ -323,7 +323,7 @@ $("loadFarms").addEventListener("click", async () => {
   $("farmMessage").textContent = "Loading farm directory…";
   $("farmDirectory").replaceChildren();
   try {
-    const {farms,tanks} = await CKCloud.listFarmsAndTanks();
+    const [{farms,tanks},managerData] = await Promise.all([CKCloud.listFarmsAndTanks(),CKCloud.listManagersAndAssignments()]);
     $("tankFarm").replaceChildren();
     for (const farm of farms) { const option = document.createElement("option"); option.value = farm.id; option.textContent = farm.name; $("tankFarm").appendChild(option); }
     $("farmMessage").textContent = farms.length ? farms.length + " farms registered." : "No farms registered yet. Existing feed tickets are unchanged.";
@@ -332,6 +332,11 @@ $("loadFarms").addEventListener("click", async () => {
       const heading = document.createElement("strong");
       heading.textContent = farm.name;
       section.appendChild(heading);
+      const activeAssignment = managerData.assignments.find(a=>a.farm_id===farm.id && a.effective_to===null);
+      const manager = activeAssignment && managerData.managers.find(m=>m.id===activeAssignment.manager_id);
+      const managerLabel=document.createElement("p");
+      managerLabel.textContent="Manager: "+(manager?.name||"Not assigned");
+      section.appendChild(managerLabel);
       const matches = tanks.filter(t => t.farm_id === farm.id);
       const p = document.createElement("p");
       p.textContent = matches.length ? matches.map(t => t.tank_label).join(" · ") : "No tanks registered";
