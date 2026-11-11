@@ -848,11 +848,15 @@ $("loadWeek").addEventListener("click", async () => {
 });
 $("logout").addEventListener("click", async () => {
   $("logout").disabled = true;
+  // Clear private UI immediately, even if the logout network request is slow.
+  ++photoRequestSequence;
+  $("savedPhotoViewer").hidden=true;
+  $("savedPhotoImage").removeAttribute("src");
+  if(activePhotoUrl) { URL.revokeObjectURL(activePhotoUrl); activePhotoUrl=null; }
   try { await CKCloud.signOut(); $("message").textContent = "Signed out."; }
-  catch (err) { $("message").textContent = "Sign-out error: " + err.message; }
+  catch (err) { $("message").textContent = "Sign-out warning: " + err.message; }
   finally {
     $("logout").disabled = false;
-    ++photoRequestSequence;
     activeProfile=null;
     correctionTarget=null;
     $("correctionPanel").hidden=true;
