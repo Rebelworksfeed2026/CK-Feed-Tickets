@@ -276,6 +276,27 @@ $("loadFarms").addEventListener("click", async () => {
       const p = document.createElement("p");
       p.textContent = matches.length ? matches.map(t => t.tank_label).join(" · ") : "No tanks registered";
       section.appendChild(p);
+      if (window.CKTankGroups) {
+        const defined = window.CKTankGroups.groups.filter(g => g.farm.toLowerCase() === farm.name.trim().toLowerCase());
+        const registered = new Set(matches.map(t => String(t.tank_label).trim().toUpperCase()));
+        if (defined.length) {
+          const label = document.createElement("p");
+          label.style.fontWeight = "700";
+          label.textContent = "Reporting groups (read only)";
+          section.appendChild(label);
+          for (const group of defined) {
+            const item = document.createElement("p");
+            const missing = group.tanks.filter(t => !registered.has(t.toUpperCase()));
+            item.textContent = group.label + " — " + group.tanks.join(", ") +
+              (missing.length ? " (not yet registered: " + missing.join(", ") + ")" : "");
+            section.appendChild(item);
+          }
+          const note = document.createElement("p");
+          note.className = "muted";
+          note.textContent = "Groups are for future reporting. Original ticket destinations and totals remain unchanged.";
+          section.appendChild(note);
+        }
+      }
       $("farmDirectory").appendChild(section);
     }
   } catch (error) {
@@ -522,6 +543,7 @@ $("logout").addEventListener("click", async () => {
 });
 })();
 </script>
+<script src="tank-groups.js"></script>
 <script src="ticket-ocr-v17.js"></script>
 </body>
 </html>
