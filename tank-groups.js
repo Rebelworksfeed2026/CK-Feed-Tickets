@@ -10,8 +10,6 @@
   function normalize(value){return String(value ?? "").trim().toUpperCase().replace(/\s+/g," ");}
   function findGroup(farm,ticketDestination){
     const f=normalize(farm), d=normalize(ticketDestination);
-    // Bare tank numbers are ambiguous across farms; do not guess farm ownership.
-    if (!d.includes(f)) return null;
     const candidates=groups.filter(g=>normalize(g.farm)===f);
     const tokens=d.match(/\d+[A-Z]?/g)||[];
     const matches=candidates.filter(g=>tokens.some(t=>g.tanks.some(n=>normalize(n)===t)));
