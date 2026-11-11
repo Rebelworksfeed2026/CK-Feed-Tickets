@@ -301,6 +301,24 @@ window.CKCloud = (() => {
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
+// Put the daily driver workflow first; preserve all existing form handlers.
+const dashboard=document.querySelector("#profile .dashboard");
+const cameraTile=$("cameraTile");
+const ticketEntryTile=$("ticketEntryTile");
+if(dashboard && cameraTile && ticketEntryTile) {
+  const firstTile=dashboard.querySelector(".tile");
+  dashboard.insertBefore(cameraTile,firstTile);
+  dashboard.insertBefore(ticketEntryTile,firstTile);
+  const photoInput=$("ticketPhoto");
+  const cameraButton=document.createElement("button");
+  cameraButton.type="button";
+  cameraButton.id="openTicketCamera";
+  cameraButton.textContent="📷 Take Photo / Choose Ticket Photo";
+  cameraButton.style.cssText="width:100%;font-size:1.15rem;min-height:68px;margin:12px 0";
+  cameraButton.addEventListener("click",()=>photoInput.click());
+  cameraTile.insertBefore(cameraButton,photoInput.closest("label") || photoInput);
+  cameraTile.querySelector("strong").textContent="New delivery — scan ticket";
+}
 const CKCloud = window.CKCloud;
 if (!CKCloud) {
   const message = $("message");
