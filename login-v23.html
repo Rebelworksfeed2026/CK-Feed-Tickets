@@ -301,23 +301,42 @@ window.CKCloud = (() => {
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
-// Put the daily driver workflow first; preserve all existing form handlers.
+// Daily driver work stays visible; secondary tools start collapsed.
 const dashboard=document.querySelector("#profile .dashboard");
 const cameraTile=$("cameraTile");
 const ticketEntryTile=$("ticketEntryTile");
-if(dashboard && cameraTile && ticketEntryTile) {
+const weekTile=$("cloudDriver")?.closest(".tile");
+if(dashboard && cameraTile && ticketEntryTile && weekTile) {
+  const heading=dashboard.querySelector("h3");
+  if(heading) heading.textContent="Today's feed deliveries";
   const firstTile=dashboard.querySelector(".tile");
   dashboard.insertBefore(cameraTile,firstTile);
   dashboard.insertBefore(ticketEntryTile,firstTile);
+  dashboard.insertBefore(weekTile,firstTile);
+  weekTile.querySelector("strong").textContent="My feed delivery tickets — this week";
   const photoInput=$("ticketPhoto");
-  const cameraButton=document.createElement("button");
-  cameraButton.type="button";
-  cameraButton.id="openTicketCamera";
-  cameraButton.textContent="📷 Take Photo / Choose Ticket Photo";
-  cameraButton.style.cssText="width:100%;font-size:1.15rem;min-height:68px;margin:12px 0";
-  cameraButton.addEventListener("click",()=>photoInput.click());
-  cameraTile.insertBefore(cameraButton,photoInput.closest("label") || photoInput);
-  cameraTile.querySelector("strong").textContent="New delivery — scan ticket";
+  cameraTile.querySelector("strong").textContent="Scan ticket / choose photo";
+  // Keep one prominent camera shortcut above the dashboard, not a duplicate.
+  const otherTiles=[...dashboard.querySelectorAll(":scope > .tile")].filter(t=>
+    t!==cameraTile && t!==ticketEntryTile && t!==weekTile);
+  const extras=document.createElement("details");
+  extras.id="dashboardExtras";
+  extras.style.cssText="margin-top:14px;border:1px solid #cbd9e2;border-radius:10px;padding:12px";
+  const summary=document.createElement("summary");
+  summary.textContent="More options — drivers, farms, managers & reports";
+  summary.style.cssText="font-weight:700;font-size:17px;cursor:pointer;padding:8px";
+  extras.appendChild(summary);
+  for(const tile of otherTiles) {
+    const inner=document.createElement("details");
+    inner.style.cssText="margin-top:10px";
+    const title=document.createElement("summary");
+    title.textContent=tile.querySelector("strong")?.textContent || "More options";
+    title.style.cssText="font-weight:650;cursor:pointer;padding:10px";
+    inner.appendChild(title);
+    inner.appendChild(tile);
+    extras.appendChild(inner);
+  }
+  dashboard.appendChild(extras);
 }
 $("quickCameraButton").addEventListener("click", () => $("ticketPhoto").click());
 const CKCloud = window.CKCloud;
@@ -491,6 +510,7 @@ $("confirmSave").addEventListener("click", async () => {
     $("ticketPhotoPreview").hidden=true;
     $("clearTicketPhoto").hidden=true;
     $("cameraMessage").textContent="Ticket saved. Choose a new photo for the next ticket.";
+    $("loadWeek").click();
   } catch(error) {
     $("draftResult").textContent="Save unsuccessful: "+error.message;
   } finally { button.disabled=false; }
@@ -595,6 +615,7 @@ $("login").addEventListener("submit", async e => {
         const mine = drivers.find(d => d.id === profile.id);
         if (mine) $("cloudDriver").value = mine.id;
       }
+      $("loadWeek").click();
     } catch (err) {
       $("driverDirectory").textContent = "Could not load driver directory: " + err.message;
     }
