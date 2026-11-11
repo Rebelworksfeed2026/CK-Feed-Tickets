@@ -235,7 +235,7 @@ window.CKCloud = (() => {
   async function transferFarm(farmId,managerId,effectiveDate) {
     if (!(await myProfile())?.is_admin) throw Error("Administrator only.");
     if (!/^[0-9a-f-]{36}$/i.test(farmId)||!/^[0-9a-f-]{36}$/i.test(managerId)) throw Error("Invalid selection.");
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(effectiveDate)) throw Error("Choose an effective date.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(effectiveDate)) throw Error("Choose an effective date.");
     const current=await request("/rest/v1/farm_manager_assignments?select=id,effective_from,effective_to&farm_id=eq."+encodeURIComponent(farmId)+"&effective_to=is.null");
     if (current.length>1) throw Error("Multiple active assignments found. Contact administrator.");
     if (current.length && current[0].effective_from>=effectiveDate) throw Error("New date must follow the current assignment start.");
