@@ -5,7 +5,19 @@
   if(!button)return;
   const status=document.getElementById("groupedReportStatus");
   const output=document.getElementById("groupedReportResults");
+  let reportSequence=0;
+  const weekPicker=document.getElementById("cloudWeek");
+  const logoutButton=document.getElementById("logout");
+  function clearReport(){
+    ++reportSequence;
+    output.replaceChildren();
+    status.textContent="No report loaded for the current selection.";
+    button.disabled=false;
+  }
+  weekPicker.addEventListener("change",clearReport);
+  logoutButton.addEventListener("click",clearReport);
   button.addEventListener("click",async()=>{
+    const sequence=++reportSequence;
     button.disabled=true;output.replaceChildren();
     status.textContent="Reading selected week's tickets…";
     try{
@@ -16,7 +28,7 @@
       const tickets=batches.flat();
       const driverNames=new Map(drivers.map(d=>[d.id,d.name]));
       const groups=window.CKTankGroups;
-      if(!CKCloud.isSignedIn() || document.getElementById("cloudWeek").value!==monday) {
+      if(sequence!==reportSequence || !CKCloud.isSignedIn() || document.getElementById("cloudWeek").value!==monday) {
         status.textContent="Report cancelled because the session or selected week changed.";
         return;
       }
@@ -86,7 +98,7 @@
         "This is a preliminary report based on destination text; farm identity is not yet linked to tickets.";
       output.appendChild(note);
       status.textContent="Read-only grouped report calculated. No tickets were modified.";
-    }catch(error){status.textContent="Could not calculate grouped totals: "+(error.message||error);}
-    finally{button.disabled=false;}
+    }catch(error){if(sequence===reportSequence)status.textContent="Could not calculate grouped totals: "+(error.message||error);}
+    finally{if(sequence===reportSequence)button.disabled=false;}
   });
 })();
