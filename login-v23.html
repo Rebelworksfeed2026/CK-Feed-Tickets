@@ -136,6 +136,7 @@ window.CKCloud = (() => {
       "&deleted_at=is.null&order=delivery_date.asc,ticket_number.asc&limit=500";
     const rows = await request(query);
     if (!Array.isArray(rows)) throw Error("Invalid weekly ticket response.");
+    if (rows.length === 500) throw Error("This week has reached the 500-ticket display limit. Contact the administrator before using its totals; the report may be incomplete.");
     return rows;
   }
 
