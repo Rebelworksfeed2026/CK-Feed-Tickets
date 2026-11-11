@@ -52,3 +52,11 @@ The previous assistant repeatedly retested completed features after changing cha
 
 ## Resume instruction for new ChatGPT chat
 “Read `PROJECT_HANDOFF.md` from GitHub repo `Rebelworksfeed2026/CK-Feed-Tickets`, inspect actual current code/database, resume **Stage 8 of 8** with Stage 3/4 carryovers. Do not redo completed features or tests. Update the handoff after each milestone. Start with the latest unverified correction UI and then remaining onboarding/launch work.”
+
+## Recovered original stage history (2026-11-11, from earlier conversations)
+- Original eight stages: 1 basic app/feed sheets COMPLETE; 2 cloud storage tested; 3 driver accounts/permissions, final live account testing pending; 4 ticket scanning/offline operation, final verification pending; 5 history/backups built; 6 reports/calculations built; 7 security/reliability near-complete, final verification; 8 live testing/final approval ALMOST COMPLETE, not a fresh stage.
+- On 2026-11-10, earlier assistant reported Stage 4 offline queue/sync already built/tested, **but** audit of current `login-v23.html` found no offline logic. Investigate other files/versions before concluding offline feature absent; do not rewrite from scratch.
+- Original Stage 3/4 carryovers included: actual signed-in role tests, account permissions, ticket number uniqueness, validation, edit/soft-delete/audit, offline syncing verification.
+- Earlier conversation said Brenda may correct all drivers' tickets without being admin; newer Nov 11 app audit and handoff say Brenda office READ-ONLY. **This is an unresolved conflicting requirement; do not silently change permissions.** Ask user only if a change is actually necessary.
+- Original Stage 8 remaining included report calculations/format, Saturday office delivery, final real-account tests, security warnings, launch. Real ticket/photo save and view was subsequently verified Nov 11; do not repeat.
+- Previous report work included daily/weekly/monthly/yearly reports and All Drivers reporting correction for Office. Verify existing implementation before changing.
