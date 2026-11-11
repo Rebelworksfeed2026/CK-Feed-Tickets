@@ -731,9 +731,11 @@ async function showSavedPhoto(ticket) {
   if(activePhotoUrl) { URL.revokeObjectURL(activePhotoUrl); activePhotoUrl=null; }
   try {
     const blob=await CKCloud.readTicketPhoto(ticket.photo_path);
+    // The viewer may have been closed or the user may have signed out while the request ran.
+    if(viewer.hidden || !CKCloud.isSignedIn()) return;
     activePhotoUrl=URL.createObjectURL(blob);
-    img.onload=()=>{message.textContent="Ticket "+ticket.ticket_number+" — original saved photo";};
-    img.onerror=()=>{message.textContent="Photo downloaded but could not be displayed.";};
+    img.onload=()=>{if(!viewer.hidden)message.textContent="Ticket "+ticket.ticket_number+" — original saved photo";};
+    img.onerror=()=>{if(!viewer.hidden)message.textContent="Photo downloaded but could not be displayed.";};
     img.src=activePhotoUrl;
     img.hidden=false;
     message.textContent="Ticket "+ticket.ticket_number+" — original saved photo";
