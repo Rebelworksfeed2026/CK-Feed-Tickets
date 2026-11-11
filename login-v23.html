@@ -594,9 +594,9 @@ $("login").addEventListener("submit", async e => {
     $("managerAdmin").hidden = !profile.is_admin;
     if(profile.is_admin) refreshManagers();
     $("officeTile").hidden = !profile.is_office;
-    $("cameraTile").hidden = Boolean(profile.is_office);
+    $("cameraTile").hidden = true;
     $("quickCamera").hidden = Boolean(profile.is_office);
-    $("ticketEntryTile").hidden = Boolean(profile.is_office);
+    $("ticketEntryTile").hidden = true;
     $("cloudDriver").replaceChildren();
     $("weekTable").hidden = true;
     $("scrollHint").hidden = true;
@@ -730,8 +730,8 @@ $("logout").addEventListener("click", async () => {
     $("officeTile").hidden = true;
     $("farmAdmin").hidden = true;
     $("managerAdmin").hidden = true;
-    $("cameraTile").hidden = false;
-    $("ticketEntryTile").hidden = false;
+    $("cameraTile").hidden = true;
+    $("ticketEntryTile").hidden = true;
     $("login").style.display = "block";
   }
 });
