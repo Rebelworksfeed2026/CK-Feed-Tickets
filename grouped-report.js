@@ -24,6 +24,13 @@
     status.textContent="Reading selected week's tickets…";
     try{
       const monday=document.getElementById("cloudWeek").value;
+      const weekStart=new Date(monday+"T12:00:00Z");
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(monday)||Number.isNaN(weekStart.getTime())||weekStart.getUTCDay()!==1||weekStart.toISOString().slice(0,10)!==monday){
+        throw Error("Select a valid Monday as the starting date.");
+      }
+      const weekEnd=new Date(weekStart);
+      weekEnd.setUTCDate(weekStart.getUTCDate()+7);
+      const endDate=weekEnd.toISOString().slice(0,10);
       if(!CKCloud.isSignedIn())throw Error("Sign in to calculate this report.");
       const drivers=(await CKCloud.listDrivers()).filter(d=>!d.is_office);
       const batches=await Promise.all(drivers.map(d=>CKCloud.listWeeklyTickets(d.id,monday)));
@@ -41,13 +48,6 @@
         if(sequence===reportSequence)status.textContent="Report cancelled because the session or selected week changed.";
         return;
       }
-      const weekStart=new Date(monday+"T12:00:00Z");
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(monday)||Number.isNaN(weekStart.getTime())||weekStart.getUTCDay()!==1||weekStart.toISOString().slice(0,10)!==monday){
-        throw Error("Select a valid Monday as the starting date.");
-      }
-      const weekEnd=new Date(weekStart);
-      weekEnd.setUTCDate(weekStart.getUTCDate()+7);
-      const endDate=weekEnd.toISOString().slice(0,10);
       const validTickets=reportTickets.filter(t=>{
         const date=String(t.delivery_date||"");
         const parsed=new Date(date+"T12:00:00Z");
