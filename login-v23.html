@@ -896,6 +896,12 @@ $("logout").addEventListener("click", async () => {
     $("weekFoot").replaceChildren();
     $("weekTable").hidden=true;
     $("printWeek").disabled=true;
+    $("loadWeek").disabled=false;
+    $("scrollHint").hidden=true;
+    $("weekMessage").textContent="Sign in to view a weekly report.";
+    $("weekTotal").textContent="";
+    $("weekHighlights").textContent="";
+    $("sheetHeading").textContent="";
     $("profile").style.display = "none";
     $("driverDirectory").textContent = "Sign in to load the driver directory.";
     $("adminTile").hidden = true;
