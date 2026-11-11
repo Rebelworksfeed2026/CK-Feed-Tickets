@@ -716,19 +716,25 @@ function openTicketCorrection(t) {
 $("cancelCorrection").addEventListener("click",()=>{$("correctionPanel").hidden=true;correctionTarget=null;});
 $("correctionForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  if(!correctionTarget)return;
+  if(!correctionTarget || !CKCloud.isSignedIn())return;
+  const editingTicketId=correctionTarget;
+  const editingDriver=$("cloudDriver").value;
+  const editingWeek=$("cloudWeek").value;
   const button=$("correctionForm").querySelector('button[type="submit"]');
   button.disabled=true;
   $("correctionStatus").textContent="Saving correction…";
   try {
-    await CKCloud.correctTicket(correctionTarget,{
+    await CKCloud.correctTicket(editingTicketId,{
       delivery_date:$("correctionDate").value,ticket_number:$("correctionNumber").value.trim(),
       tons:Number($("correctionTons").value),destination:$("correctionDestination").value.trim()
     });
-    $("correctionPanel").hidden=true;
-    correctionTarget=null;
-    $("loadWeek").click();
-  } catch(err) {$("correctionStatus").textContent="Not saved: "+err.message;}
+    if(correctionTarget===editingTicketId) {
+      $("correctionPanel").hidden=true;
+      correctionTarget=null;
+    }
+    if(CKCloud.isSignedIn() && $("cloudDriver").value===editingDriver && $("cloudWeek").value===editingWeek)
+      $("loadWeek").click();
+  } catch(err) {if(correctionTarget===editingTicketId) $("correctionStatus").textContent="Not saved: "+err.message;}
   finally {button.disabled=false;}
 });
 let activePhotoUrl=null;
