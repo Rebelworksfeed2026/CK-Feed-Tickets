@@ -147,6 +147,39 @@
         dayTable.appendChild(tr);
       }
       output.appendChild(dayTable);
+      const driverDayTotals=new Map();
+      for(const ticket of validTickets){
+        const date=String(ticket.delivery_date);
+        const driver=driverNames.get(ticket.driver_id)||"Unknown driver";
+        const key=date+"|"+ticket.driver_id;
+        const entry=driverDayTotals.get(key)||{date,driver,loads:0,hundredths:0};
+        entry.loads++;
+        entry.hundredths+=Math.round(Number(ticket.tons)*100);
+        driverDayTotals.set(key,entry);
+      }
+      const driverDayTitle=document.createElement("p");
+      driverDayTitle.style.fontWeight="700";
+      driverDayTitle.textContent="Daily totals by driver";
+      output.appendChild(driverDayTitle);
+      const driverDayTable=document.createElement("table");
+      driverDayTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const driverDayHead=document.createElement("tr");
+      for(const label of ["Date","Driver","Loads","Tons"]){
+        const th=document.createElement("th");th.textContent=label;
+        th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+        driverDayHead.appendChild(th);
+      }
+      driverDayTable.appendChild(driverDayHead);
+      for(const entry of [...driverDayTotals.values()].sort((a,b)=>a.date.localeCompare(b.date)||a.driver.localeCompare(b.driver))){
+        const tr=document.createElement("tr");
+        for(const value of [entry.date,entry.driver,String(entry.loads),(entry.hundredths/100).toFixed(2)]){
+          const td=document.createElement("td");td.textContent=value;
+          td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+          tr.appendChild(td);
+        }
+        driverDayTable.appendChild(tr);
+      }
+      output.appendChild(driverDayTable);
       const companyNames=new Map(drivers.map(d=>[d.id,d.company||"Unassigned company"]));
       const companyTotals=new Map();
       for(const ticket of validTickets){
