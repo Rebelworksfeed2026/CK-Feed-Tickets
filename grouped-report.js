@@ -85,6 +85,37 @@
       }
       output.appendChild(table);
       // Break down each matched group by the driver who delivered the feed.
+      const driverTotals=new Map();
+      for(const ticket of validTickets){
+        const key=String(ticket.driver_id||"");
+        const entry=driverTotals.get(key)||{name:driverNames.get(ticket.driver_id)||"Unknown driver",loads:0,hundredths:0};
+        entry.loads++;
+        entry.hundredths+=Math.round(Number(ticket.tons)*100);
+        driverTotals.set(key,entry);
+      }
+      const driverTitle=document.createElement("p");
+      driverTitle.style.fontWeight="700";
+      driverTitle.textContent="Weekly totals by driver";
+      output.appendChild(driverTitle);
+      const driverTable=document.createElement("table");
+      driverTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const driverHead=document.createElement("tr");
+      for(const label of ["Driver","Loads","Tons"]){
+        const th=document.createElement("th");th.textContent=label;
+        th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+        driverHead.appendChild(th);
+      }
+      driverTable.appendChild(driverHead);
+      for(const entry of [...driverTotals.values()].sort((a,b)=>a.name.localeCompare(b.name))){
+        const tr=document.createElement("tr");
+        for(const value of [entry.name,String(entry.loads),(entry.hundredths/100).toFixed(2)]){
+          const td=document.createElement("td");td.textContent=value;
+          td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+          tr.appendChild(td);
+        }
+        driverTable.appendChild(tr);
+      }
+      output.appendChild(driverTable);
       const breakdown=new Map();
       for(const ticket of validTickets){
         const group=groups.findGroup("Austin Farms",ticket.destination);
