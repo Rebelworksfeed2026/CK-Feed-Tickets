@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C&K Feed Tickets — Sign In</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#183449;background:#eef3f6}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:16px}
+main{width:100%;max-width:420px;background:#fff;border-radius:14px;padding:25px;box-shadow:0 4px 24px #1234}
+h1{font-size:24px;margin:0 0 8px}p{line-height:1.5;color:#526778}label{display:block;margin:15px 0 6px;font-weight:650}
+input,button,select{font:inherit;width:100%;padding:12px;border-radius:8px}input{border:1px solid #b5c5d1}
+button{background:#17628e;color:white;border:0;margin-top:18px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#183449}
+#message{min-height:22px;font-size:14px}#profile{display:none}.muted{font-size:13px}.dashboard{border-top:1px solid #d8e3e9;padding-top:12px}.tile{padding:14px;background:#eef3f6;border-radius:9px;margin:10px 0}.tile strong{display:block;margin-bottom:4px}.tile span{font-size:13px;color:#526778}
+@media print {
+@page { size: letter landscape; margin: 0.35in; }
+html,body {width:100%!important;height:auto!important;margin:0!important;padding:0!important;overflow:visible!important;background:white!important;color:#172b3b!important}
+body {display:block!important}
+body > main {display:none!important}
+#printArea {position:fixed!important;top:0!important;left:0!important;width:100%!important;max-width:100%!important;min-height:0!important;height:auto!important;margin:0!important;padding:0!important;overflow:visible!important;background:white!important;font-family:Arial,sans-serif;color:#172b3b}
+body * {visibility:hidden!important}
+#printArea,#printArea * {visibility:visible!important}
+#printArea {position:absolute!important}
+#printArea > div {overflow:visible!important}
+#printTitle {display:block!important;text-align:center;font-size:17pt;margin:0 0 6pt;font-weight:800}
+#sheetHeading {text-align:center;font-size:10pt;font-weight:700;margin:0 0 9pt}
+#weekTable {display:table!important;min-width:0!important;width:100%!important;border-collapse:collapse!important;font-size:8pt!important}
+#weekTable th {background:#dbeaf5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #a6b8c6;padding:5pt 3pt}
+#weekTable td {border:1px solid #b7c4cc!important;padding:4pt 3pt!important;white-space:normal!important}
+#weekTable tfoot td {font-weight:700!important;background:#e3edf3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#weekTable tr {break-inside:avoid}
+#weekTotal,#weekHighlights {font-size:9pt!important;margin:6pt 0!important}
+}
+</style>
+</head>
+<body>
+<main>
+<h1>C&K Feed Tickets</h1>
+<p>Secure account sign-in setup</p>
+<form id="login">
+<label for="email">Email address</label>
+<input id="email" type="email" autocomplete="username" required>
+<label for="password">Password</label>
+<input id="password" type="password" autocomplete="current-password" required>
+<button id="submit" type="submit">Sign in</button>
+</form>
+<section id="profile" aria-live="polite">
+<h2 id="welcome"></h2><p id="role"></p>
+<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span style="display:block;margin-top:4px">Viewer version 19 · 11 Nov 2026</span><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><button id="printWeek" type="button" disabled class="secondary">Print / Save PDF</button><section id="printArea"><h2 id="printTitle" hidden>C&K FARMS — FEED DELIVERY SHEET</h2><div id="sheetHeading" class="muted"></div><div style="overflow-x:auto"><table id="weekTable" hidden style="width:100%;min-width:690px;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Load</th><th>Ticket #</th><th>Tons</th><th>Destination</th><th>Daily Tons</th><th>Weekly Tons</th></tr></thead><tbody id="weekRows"></tbody><tfoot id="weekFoot"></tfoot></table></div><p id="weekTotal" class="muted"></p><div id="weekHighlights" class="muted"></div></section><span>Cloud ticket entry and corrections are not enabled yet. The separate local prototype remains unchanged.</span></div><div class="tile" id="cameraTile"><strong>Scan feed ticket — automatic reading test</strong><span>Choose Take Photo or Photo Library when prompted. The existing scanner will attempt to read the ticket number, tons, destination, and printed dispatch date when legible. Verify every field. Nothing is uploaded or saved.</span><label for="ticketPhoto">Ticket photo</label><input id="ticketPhoto" type="file" accept="image/*"><p id="cameraMessage" role="status" class="muted">No photo selected. Nothing will be saved.</p><img id="ticketPhotoPreview" alt="Selected feed ticket photo" hidden style="width:100%;height:auto;max-height:450px;object-fit:contain;border-radius:8px;margin-top:10px"><button type="button" id="clearTicketPhoto" class="secondary" hidden>Clear photo</button></div><div class="tile" id="ticketEntryTile"><strong>New feed ticket — cloud save preparation</strong><span>Scanned details flow into duplicate checking and final confirmation. Cloud saving remains locked until security checks finish.</span><form id="ticketDraft"><label for="draftDate">Delivery date</label><input id="draftDate" type="date" required><label for="draftNumber">Ticket number</label><input id="draftNumber" type="text" inputmode="numeric" maxlength="24" required><label for="draftTons">Tons</label><input id="draftTons" type="number" min="0.01" max="100" step="0.01" required><label for="draftDestination">Destination</label><input id="draftDestination" type="text" maxlength="120" required><button type="submit">Check ticket number / preview</button></form><p id="draftResult" role="status" class="muted">Ticket entry is in test mode; saving is disabled.</p><div id="confirmPanel" hidden style="margin-top:14px;padding:14px;border:2px solid #17628e;border-radius:10px"><strong>Confirm ticket details</strong><p id="confirmDetails"></p><p class="muted">Cloud save is staged but still locked until account-permission tests are complete. No ticket or photo will be saved in this version.</p><button id="confirmSave" type="button" disabled>Save Ticket (security test pending)</button><button id="cancelSave" type="button" class="secondary">Cancel / change details</button></div></div><div class="tile"><strong>Weekly reports</strong><span>Printable reports will appear here after the cloud connection is tested.</span></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office access is view-only. Ticket entry and corrections are not available to office accounts.</span></div></div>
+<button id="logout" class="secondary" type="button">Sign out</button>
+</section>
+<p id="message" role="status" aria-live="polite"></p>
+<p class="muted">Only invited, assigned accounts can access this screen. Do not enter test tickets here.</p>
+</main>
+<script src="supabase-config.js"></script><script>
+/* Cloud connection and authenticated account helpers.
+   No feed tickets are uploaded by this module. */
+window.CKCloud = (() => {
+  const url = window.SUPABASE_URL;
+  const key = window.SUPABASE_KEY;
+  const configured = Boolean(url && key);
+  let session = null; // In-memory only; closing/reloading requires signing in again.
+
+  async function request(path, options = {}) {
+    if (!configured) throw Error("Supabase is not configured.");
+    const response = await fetch(url + path, {
+      ...options,
+      headers: {
+        apikey: key,
+        "Content-Type": "application/json",
+        ...(session ? { Authorization: "Bearer " + session.access_token } : {}),
+        ...(options.headers || {})
+      }
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw Error(body.msg || body.message || body.error_description || "Cloud request failed.");
+    return body;
+  }
+
+  async function health() {
+    if (!configured) return { ok: false, message: "Cloud settings missing" };
+    try {
+      await request("/auth/v1/health");
+      return { ok: true, message: "Supabase server reachable; sign-in and sync not yet enabled" };
+    } catch (e) {
+      return { ok: false, message: "Cloud connection check failed: " + e.message };
+    }
+  }
+
+  async function signIn(email, password) {
+    if (!email || !password) throw Error("Enter email and password.");
+    const result = await request("/auth/v1/token?grant_type=password", {
+      method: "POST", body: JSON.stringify({ email, password })
+    });
+    if (!result.access_token || !result.user?.id) throw Error("Sign-in response was incomplete.");
+    session = result;
+    try {
+      const profile = await myProfile();
+      if (!profile) throw Error("This account has not been assigned to a feed-ticket user.");
+      return profile;
+    } catch (e) {
+      session = null;
+      throw e;
+    }
+  }
+
+  async function myProfile() {
+    if (!session?.user?.id) return null;
+    const id = encodeURIComponent(session.user.id);
+    const rows = await request("/rest/v1/drivers?select=id,name,company,is_admin,is_office,user_id&user_id=eq." + id + "&limit=1");
+    return Array.isArray(rows) ? rows[0] || null : null;
+  }
+
+  async function listDrivers() {
+    if (!session?.access_token) throw Error("Sign in before viewing drivers.");
+    const rows = await request("/rest/v1/drivers?select=id,name,company,is_admin,is_office&order=name.asc");
+    if (!Array.isArray(rows)) throw Error("Driver directory response was invalid.");
+    return rows;
+  }
+
+  async function listWeeklyTickets(driverId, monday) {
+    if (!session?.access_token) throw Error("Sign in before viewing tickets.");
+    if (!/^[0-9a-f-]{36}$/i.test(driverId)) throw Error("Invalid driver.");
+    if (typeof monday !== "string" || monday.length !== 10 || monday[4] !== "-" || monday[7] !== "-") throw Error("Invalid week value. Please reselect the Monday date.");
+    const first = new Date(monday + "T12:00:00");
+    if (Number.isNaN(first.getTime()) || first.getDay() !== 1 ||
+        first.getFullYear() + "-" + String(first.getMonth()+1).padStart(2,"0") + "-" + String(first.getDate()).padStart(2,"0") !== monday)
+      throw Error("Choose a Monday as the week start.");
+    const end = new Date(first);
+    end.setDate(end.getDate() + 7);
+    const next = end.getFullYear() + "-" + String(end.getMonth()+1).padStart(2,"0") + "-" + String(end.getDate()).padStart(2,"0");
+    const query = "/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination,driver_id" +
+      "&driver_id=eq." + encodeURIComponent(driverId) +
+      "&delivery_date=gte." + monday + "&delivery_date=lt." + next +
+      "&deleted_at=is.null&order=delivery_date.asc,ticket_number.asc&limit=500";
+    const rows = await request(query);
+    if (!Array.isArray(rows)) throw Error("Invalid weekly ticket response.");
+    return rows;
+  }
+
+  async function findTicketNumber(ticketNumber) {
+    if (!session?.access_token) throw Error("Sign in before checking ticket numbers.");
+    const number = String(ticketNumber || "").trim();
+    if (!/^\d{1,24}$/.test(number)) throw Error("Enter a numeric ticket number.");
+    const rows = await request("/rest/v1/feed_tickets?select=ticket_number,delivery_date,driver_id&ticket_number=eq." +
+      encodeURIComponent(number) + "&limit=1");
+    if (!Array.isArray(rows)) throw Error("Ticket lookup failed.");
+    return rows[0] || null;
+  }
+
+  // Prepared for controlled security testing; the interface does not call this yet.
+  async function saveOwnTicket(ticket) {
+    if (!session?.access_token) throw Error("Sign in before saving tickets.");
+    const profile = await myProfile();
+    if (!profile || profile.is_office) throw Error("Office accounts cannot enter feed tickets.");
+    if (!ticket || typeof ticket !== "object") throw Error("Ticket details are missing.");
+    const date = String(ticket.delivery_date || "");
+    const parsed = new Date(date + "T12:00:00");
+    const dateValid = /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      !Number.isNaN(parsed.getTime()) && parsed.getDay() !== 0 &&
+      parsed.getFullYear() + "-" + String(parsed.getMonth()+1).padStart(2,"0") + "-" + String(parsed.getDate()).padStart(2,"0") === date;
+    const number = String(ticket.ticket_number || "").trim();
+    const tons = Number(ticket.tons);
+    const destination = String(ticket.destination || "").trim();
+    if (!dateValid || !/^\d{1,24}$/.test(number) ||
+        !Number.isFinite(tons) || tons <= 0 || tons > 100 ||
+        !destination || destination.length > 120)
+      throw Error("Check the delivery date, ticket number, tons, and destination.");
+    let rows;
+    try {
+      rows = await request("/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination&limit=1", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        driver_id: profile.id, delivery_date: date,
+        ticket_number: number, tons, destination
+      })
+      });
+    } catch (error) {
+      if (/duplicate key|23505|unique constraint/i.test(error.message)) throw Error("This ticket number already exists. Check the ticket history before trying again.");
+      throw error;
+    }
+    if (!Array.isArray(rows) || rows.length !== 1) throw Error("Ticket save could not be verified.");
+    return rows[0];
+  }
+
+  async function signOut() {
+    if (session) {
+      try { await request("/auth/v1/logout", { method: "POST" }); }
+      finally { session = null; }
+    }
+  }
+
+  function isSignedIn() { return Boolean(session?.access_token); }
+  return { configured, health, signIn, signOut, myProfile, listDrivers, listWeeklyTickets, findTicketNumber, saveOwnTicket, isSignedIn };
+})();
+
+</script>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+let cameraPreviewUrl = null;
+function clearCameraPreview() {
+  if (cameraPreviewUrl) URL.revokeObjectURL(cameraPreviewUrl);
+  cameraPreviewUrl = null;
+  $("ticketPhoto").value = "";
+  $("ticketPhotoPreview").removeAttribute("src");
+  $("ticketPhotoPreview").hidden = true;
+  $("clearTicketPhoto").hidden = true;
+  $("cameraMessage").textContent = "Photo cleared. Nothing was saved.";
+}
+$("clearTicketPhoto").addEventListener("click", clearCameraPreview);
+$("ticketPhoto").addEventListener("change", () => {
+  if (cameraPreviewUrl) URL.revokeObjectURL(cameraPreviewUrl);
+  cameraPreviewUrl = null;
+  const file = $("ticketPhoto").files?.[0];
+  if (!file) { clearCameraPreview(); return; }
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    clearCameraPreview();
+    $("cameraMessage").textContent = "Choose a JPEG, PNG, or WebP image. Other formats are not supported by ticket storage.";
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    clearCameraPreview();
+    $("cameraMessage").textContent = "Photo is too large. Choose an image under 10 MB.";
+    return;
+  }
+  cameraPreviewUrl = URL.createObjectURL(file);
+  $("ticketPhotoPreview").src = cameraPreviewUrl;
+  $("ticketPhotoPreview").hidden = false;
+  $("clearTicketPhoto").hidden = false;
+  $("cameraMessage").textContent = "Photo selected: " + file.name + ". Photo selected. Automatic reading will start. Not uploaded or saved.";
+});
+let verifiedTicket = null;
+$("confirmSave").addEventListener("click", async () => {
+  // Intentionally locked until server-side permissions have been tested with real accounts.
+  $("draftResult").textContent = "Cloud saving remains locked until security testing is complete. Nothing was saved.";
+});
+const ticketFields = ["draftDate","draftNumber","draftTons","draftDestination"];
+for (const id of ticketFields) {
+  $(id).addEventListener("input", () => {
+    verifiedTicket = null;
+    $("confirmPanel").hidden = true;
+    $("draftResult").textContent = "Details changed. Check ticket number again.";
+  });
+}
+$("cancelSave").addEventListener("click", () => {
+  verifiedTicket = null;
+  $("confirmPanel").hidden = true;
+  $("draftResult").textContent = "Confirmation canceled. Nothing was saved.";
+});
+$("ticketDraft").addEventListener("submit", async e => {
+  e.preventDefault();
+  const date = $("draftDate").value;
+  const number = $("draftNumber").value.trim();
+  const tons = Number($("draftTons").value);
+  const destination = $("draftDestination").value.trim();
+  const day = new Date(date + "T12:00:00");
+  if (!date || Number.isNaN(day.getTime()) || day.getDay() === 0 ||
+      !/^\d{1,24}$/.test(number) || !Number.isFinite(tons) ||
+      tons <= 0 || tons > 100 || !destination) {
+    $("draftResult").textContent = "Check the fields. Deliveries are Monday through Saturday; ticket numbers must contain digits only.";
+    return;
+  }
+  const button = $("ticketDraft").querySelector('button[type="submit"]');
+  button.disabled = true;
+  verifiedTicket = null;
+  $("confirmPanel").hidden = true;
+  $("draftResult").textContent = "Checking ticket number against cloud history…";
+  try {
+    const duplicate = await CKCloud.findTicketNumber(number);
+    if (duplicate) {
+      $("draftResult").textContent = "Duplicate ticket " + number + " already exists in cloud history (" + duplicate.delivery_date + "). Nothing was saved.";
+      return;
+    }
+    $("draftResult").textContent = "Ticket number available. Review the confirmation below. Nothing has been saved.";
+    verifiedTicket = Object.freeze({delivery_date:date,ticket_number:number,tons,destination});
+    $("confirmDetails").textContent = "Date: " + date + " | Ticket: " + number +
+      " | Tons: " + tons.toFixed(2) + " | Destination: " + destination;
+    $("confirmPanel").hidden = false;
+  } catch (error) {
+    $("draftResult").textContent = "Could not check cloud history: " + error.message + ". Nothing was saved.";
+  } finally {
+    button.disabled = false;
+  }
+});
+$("login").addEventListener("submit", async e => {
+  e.preventDefault();
+  $("submit").disabled = true;
+  $("message").textContent = "Checking account…";
+  try {
+    const profile = await CKCloud.signIn($("email").value.trim(), $("password").value);
+    $("password").value = "";
+    $("login").style.display = "none";
+    $("profile").style.display = "block";
+    $("welcome").textContent = "Welcome, " + profile.name;
+    $("role").textContent = "Access: " + (profile.is_admin ? "Administrator" : profile.is_office ? "Office" : "Driver") + " · " + profile.company;
+    $("adminTile").hidden = !profile.is_admin;
+    $("officeTile").hidden = !profile.is_office;
+    $("cloudDriver").replaceChildren();
+    $("weekTable").hidden = true;
+    $("weekTotal").textContent = "";
+    $("weekHighlights").textContent = "";
+    $("sheetHeading").textContent = "";
+    $("weekFoot").replaceChildren();
+    const now = new Date();
+    now.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    $("cloudWeek").value = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+    $("driverDirectory").textContent = "Loading driver directory…";
+    try {
+      const drivers = await CKCloud.listDrivers();
+      $("driverDirectory").replaceChildren();
+      if (!drivers.length) $("driverDirectory").textContent = "No driver profiles available.";
+      for (const d of drivers) {
+        if (!d.is_office) {
+          const option = document.createElement("option");
+          option.value = d.id;
+          option.textContent = d.name + " — " + d.company;
+          $("cloudDriver").appendChild(option);
+        }
+        const item = document.createElement("p");
+        item.textContent = d.name + " — " + d.company + (d.is_admin ? " (Administrator)" : d.is_office ? " (Office)" : "");
+        $("driverDirectory").appendChild(item);
+      }
+      if (!profile.is_office) {
+        const mine = drivers.find(d => d.id === profile.id);
+        if (mine) $("cloudDriver").value = mine.id;
+      }
+    } catch (err) {
+      $("driverDirectory").textContent = "Could not load driver directory: " + err.message;
+    }
+    $("message").textContent = "Signed in. Driver directory is read-only; cloud ticket entry remains disabled.";
+  } catch (err) {
+    $("password").value = "";
+    $("message").textContent = err.message || "Sign-in failed.";
+  } finally {
+    $("submit").disabled = false;
+  }
+});
+$("printWeek").addEventListener("click", () => {
+  if ($("printWeek").disabled) return;
+  const area = $("printArea");
+  const parent = area.parentNode;
+  const next = area.nextSibling;
+  document.body.appendChild(area);
+  const restore = () => {
+    if (next && next.parentNode === parent) parent.insertBefore(area,next);
+    else parent.appendChild(area);
+    window.removeEventListener("afterprint",restore);
+  };
+  window.addEventListener("afterprint",restore);
+  window.print();
+});
+$("loadWeek").addEventListener("click", async () => {
+  $("printWeek").disabled = true;
+  $("loadWeek").disabled = true;
+  $("weekTable").hidden = true;
+  $("weekRows").replaceChildren();
+  $("weekFoot").replaceChildren();
+  $("weekHighlights").textContent = "";
+  $("sheetHeading").textContent = "";
+  $("weekTotal").textContent = "";
+  $("weekMessage").textContent = "Loading selected week…";
+  try {
+    const rows = await CKCloud.listWeeklyTickets($("cloudDriver").value, $("cloudWeek").value);
+    const chosen = $("cloudDriver").selectedOptions[0]?.textContent || "Driver";
+    const weekStart = $("cloudWeek").value;
+    const startDate = new Date(weekStart + "T12:00:00");
+    const lastDate = new Date(startDate);
+    lastDate.setDate(lastDate.getDate() + 5);
+    const endText = lastDate.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    $("sheetHeading").textContent = chosen + " · Week " + weekStart + " through " + endText;
+    const totalsByDay = {};
+    for (const t of rows) totalsByDay[t.delivery_date] = (totalsByDay[t.delivery_date] || 0) + Number(t.tons);
+    const values = rows.map(t => Number(t.tons));
+    const heaviest = values.length ? Math.max(...values) : null;
+    const lightest = values.length ? Math.min(...values) : null;
+    const biggest = Math.max(0,...Object.values(totalsByDay));
+    const biggestDays = Object.keys(totalsByDay).filter(d => totalsByDay[d] === biggest);
+    let weekly = 0, daily = 0, load = 0, lastDay = "";
+    for (const t of rows) {
+      if (t.delivery_date !== lastDay) { lastDay = t.delivery_date; load = 0; daily = 0; }
+      load++;
+      daily += Number(t.tons);
+      weekly += Number(t.tons);
+      const dayName = new Date(t.delivery_date + "T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+      const dayMarker = load === 1 && biggestDays.includes(t.delivery_date) ? "🟦 " : "";
+      const tonMarkers = (Number(t.tons) === heaviest ? "🟥 " : "") + (Number(t.tons) === lightest ? "🟩 " : "");
+      const tr = document.createElement("tr");
+      for (const value of [dayMarker + dayName,load,t.ticket_number,tonMarkers + Number(t.tons).toFixed(2),t.destination,daily.toFixed(2),weekly.toFixed(2)]) {
+        const td = document.createElement("td");
+        td.textContent = value;
+        td.style.cssText = "padding:8px 4px;border-bottom:1px solid #d8e3e9;white-space:nowrap";
+        tr.appendChild(td);
+      }
+      $("weekRows").appendChild(tr);
+    }
+    const foot = document.createElement("tr");
+    for (const [i,value] of ["TOTAL",rows.length,"",weekly.toFixed(2),"","",weekly.toFixed(2)].entries()) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      cell.style.cssText = "padding:9px 4px;font-weight:700;background:#e3edf3";
+      foot.appendChild(cell);
+    }
+    $("weekFoot").appendChild(foot);
+    $("weekTable").hidden = false;
+    $("printTitle").textContent = chosen.includes("Next Page") ? "NEXT PAGE — FEED DELIVERY SHEET" : "C&K FARMS — FEED DELIVERY SHEET";
+    $("printWeek").disabled = false;
+    $("weekMessage").textContent = rows.length ? "Selected week loaded (read only)." : "No tickets recorded for the selected week.";
+    $("weekTotal").textContent = rows.length + " loads · " + weekly.toFixed(2) + " tons";
+    $("weekHighlights").textContent = rows.length ? "🟥 Heaviest: " + heaviest.toFixed(2) + " tons · 🟩 Lightest: " + lightest.toFixed(2) + " tons · 🟦 Biggest day: " + biggestDays.map(d => new Date(d + "T12:00:00").toLocaleDateString("en-US",{weekday:"long"})).join(", ") + " (" + biggest.toFixed(2) + " tons)" : "";
+  } catch (err) {
+    $("weekMessage").textContent = "Could not load selected week: " + (err.message || err);
+  } finally { $("loadWeek").disabled = false; }
+});
+$("logout").addEventListener("click", async () => {
+  $("logout").disabled = true;
+  try { await CKCloud.signOut(); $("message").textContent = "Signed out."; }
+  catch (err) { $("message").textContent = "Sign-out error: " + err.message; }
+  finally {
+    $("logout").disabled = false;
+    $("profile").style.display = "none";
+    $("driverDirectory").textContent = "Sign in to load the driver directory.";
+    $("adminTile").hidden = true;
+    $("officeTile").hidden = true;
+    $("login").style.display = "block";
+  }
+});
+})();
+</script>
+<script src="ticket-ocr-v17.js"></script>
+</body>
+</html>
