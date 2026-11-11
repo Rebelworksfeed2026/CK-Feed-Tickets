@@ -33,7 +33,11 @@ body * {visibility:hidden!important}
 }
 @media print {.no-print,#savedPhotoViewer{display:none!important}}
 #groupedReportResults{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-#groupedReportResults table{min-width:340px}
+#groupedReportResults table{min-width:0;width:100%;table-layout:fixed;font-size:12px!important}
+#groupedReportResults th,#groupedReportResults td{padding:5px 3px!important;overflow-wrap:anywhere;word-break:normal}
+#groupedReportResults details{max-width:100%;min-width:0}
+#groupedReportResults details table{width:100%;min-width:0}
+@media(max-width:420px){#groupedReportResults table{font-size:11px!important}#groupedReportResults th,#groupedReportResults td{padding:4px 2px!important}}
 #groupedReportResults td,#groupedReportResults th{overflow-wrap:anywhere}
 </style>
 </head>
