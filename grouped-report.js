@@ -86,6 +86,32 @@
         table.appendChild(tr);
       }
       output.appendChild(table);
+      const groupDays=groups.summarize(validTickets,"Austin Farms","day");
+      const groupDayTitle=document.createElement("p");
+      groupDayTitle.style.fontWeight="700";
+      groupDayTitle.textContent="Daily Austin tank-group totals (provisional matching)";
+      output.appendChild(groupDayTitle);
+      const groupDayTable=document.createElement("table");
+      groupDayTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const groupDayHead=document.createElement("tr");
+      for(const label of ["Date","Tank group","Loads","Tons"]){
+        const th=document.createElement("th");
+        th.textContent=label;
+        th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+        groupDayHead.appendChild(th);
+      }
+      groupDayTable.appendChild(groupDayHead);
+      for(const entry of groupDays){
+        const tr=document.createElement("tr");
+        for(const value of [entry.period,entry.group,String(entry.loads),entry.tons.toFixed(2)]){
+          const td=document.createElement("td");
+          td.textContent=value;
+          td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+          tr.appendChild(td);
+        }
+        groupDayTable.appendChild(tr);
+      }
+      output.appendChild(groupDayTable);
       // Break down each matched group by the driver who delivered the feed.
       const driverTotals=new Map();
       for(const ticket of validTickets){
