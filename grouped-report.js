@@ -375,6 +375,41 @@
         dailyTable.appendChild(tr);
       }
       output.appendChild(dailyTable);
+      const unmatchedDestinations=new Map();
+      for(const ticket of validTickets){
+        if(groups.findGroup("Austin Farms",ticket.destination))continue;
+        const destination=String(ticket.destination||"").trim()||"(Missing destination)";
+        const key=destination.toUpperCase();
+        const entry=unmatchedDestinations.get(key)||{destination,loads:0,hundredths:0};
+        entry.loads++;
+        entry.hundredths+=Math.round(Number(ticket.tons)*100);
+        unmatchedDestinations.set(key,entry);
+      }
+      if(unmatchedDestinations.size){
+        const title=document.createElement("p");
+        title.style.fontWeight="700";
+        title.textContent="Destinations not matched to Austin groups";
+        output.appendChild(title);
+        const table=document.createElement("table");
+        table.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+        const header=document.createElement("tr");
+        for(const label of ["Destination","Loads","Tons"]){
+          const th=document.createElement("th");th.textContent=label;
+          th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";
+          header.appendChild(th);
+        }
+        table.appendChild(header);
+        for(const entry of [...unmatchedDestinations.values()].sort((a,b)=>a.destination.localeCompare(b.destination,undefined,{numeric:true}))){
+          const tr=document.createElement("tr");
+          for(const value of [entry.destination,String(entry.loads),(entry.hundredths/100).toFixed(2)]){
+            const td=document.createElement("td");td.textContent=value;
+            td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+        output.appendChild(table);
+      }
       const excluded=validTickets.filter(t=>!groups.findGroup("Austin Farms",t.destination));
       const excludedHundredths=excluded.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
       const note=document.createElement("p");note.className="muted";
