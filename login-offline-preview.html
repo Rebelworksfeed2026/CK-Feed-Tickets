@@ -676,15 +676,15 @@ offlineStatus.id="offlineQueueStatus";
 offlineStatus.setAttribute("role","status");
 offlineStatus.className="muted";
 offlineStatus.textContent="Offline queue: checking…";
-$("ticketEntryTile").appendChild(offlineStatus);
+$("quickCamera").appendChild(offlineStatus);
 let offlineBusy=false;
 async function updateOfflineStatus(){
   if(!activeProfile?.user_id||!window.CKOfflineStaged)return;
   try{
     const items=await CKOfflineStaged.pending(activeProfile.user_id);
-    offlineStatus.textContent=items.length
+    offlineStatus.textContent=(offlineStatus.dataset.syncError ? "Sync needs attention: "+offlineStatus.dataset.syncError+". " : "")+(items.length
       ? items.length+" ticket(s) safely stored on this device, waiting to sync: "+items.map(x=>x.ticket_number).join(", ")
-      : "Offline queue: no tickets waiting.";
+      : "Offline queue: no tickets waiting.");
   }catch(e){offlineStatus.textContent="Offline queue unavailable: "+e.message;}
 }
 async function syncOfflineQueue(){
@@ -693,11 +693,12 @@ async function syncOfflineQueue(){
   try{
     const items=await CKOfflineStaged.pending(activeProfile.user_id);
     if(!items.length)return;
+    delete offlineStatus.dataset.syncError;
     offlineStatus.textContent="Syncing "+items.length+" saved offline ticket(s)…";
     const result=await CKOfflineStaged.sync(activeProfile.user_id,CKCloud);
     offlineStatus.textContent="Synced "+result.synced+" ticket(s) to cloud.";
     $("loadWeek").click();
-  }catch(e){offlineStatus.textContent="Offline tickets retained. Sync needs attention: "+e.message;}
+  }catch(e){offlineStatus.textContent="Offline tickets retained. Sync needs attention: "+e.message;offlineStatus.dataset.syncError=e.message;}
   finally{offlineBusy=false;await updateOfflineStatus();}
 }
 window.addEventListener("online",()=>{syncOfflineQueue();});
