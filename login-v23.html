@@ -534,8 +534,10 @@ $("loadFarms").addEventListener("click", async () => {
   $("farmDirectory").replaceChildren();
   try {
     const [{farms,tanks},managerData] = await Promise.all([CKCloud.listFarmsAndTanks(),CKCloud.listManagersAndAssignments()]);
+    const previouslySelectedFarm = $("tankFarm").value;
     $("tankFarm").replaceChildren();
     for (const farm of farms) { const option = document.createElement("option"); option.value = farm.id; option.textContent = farm.name; $("tankFarm").appendChild(option); }
+    if (farms.some(farm => farm.id === previouslySelectedFarm)) $("tankFarm").value = previouslySelectedFarm;
     $("farmMessage").textContent = farms.length ? farms.length + " farms registered." : "No farms registered yet. Existing feed tickets are unchanged.";
     for (const farm of farms) {
       const section = document.createElement("section");
