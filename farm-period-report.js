@@ -1,4 +1,4 @@
-/* Read-only monthly/yearly verified allocation report. */
+/* Read-only daily, weekly, monthly, yearly verified allocation report. */
 (()=>{
 "use strict";
 const $=id=>document.getElementById(id);
@@ -18,8 +18,8 @@ function table(title,headers,rows){
  if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=headers.length;td.textContent="No matching records";tr.appendChild(td);t.appendChild(tr);}
  output.appendChild(t);
 }
-for(const control of [$("farmPeriod"),dateInput,$("cloudWeek")])control.addEventListener("change",()=>{sequence++;output.replaceChildren();status.textContent="Selection changed. Calculate again.";});
-$("logout").addEventListener("click",()=>{sequence++;output.replaceChildren();status.textContent="Sign in to view reports.";});
+for(const control of [$("farmPeriod"),dateInput,$("cloudWeek")])control.addEventListener("change",()=>{sequence++;button.disabled=false;output.replaceChildren();status.textContent="Selection changed. Calculate again.";});
+$("logout").addEventListener("click",()=>{sequence++;button.disabled=false;output.replaceChildren();status.textContent="Sign in to view reports.";});
 button.addEventListener("click",async()=>{
  const token=++sequence;button.disabled=true;output.replaceChildren();status.textContent="Calculating verified totals…";
  try{
