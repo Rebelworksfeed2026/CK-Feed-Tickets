@@ -97,3 +97,9 @@ The previous assistant repeatedly retested completed features after changing cha
 - Live database checked November allocations: Austin Farms tank 106 24.94 tons; Gililiand EG1 309 25.12 tons; total 50.06. No data modifications.
 - Fixed only one newly identified UI defect: changing report period/date while loading could leave Calculate button disabled (commit `54c8f7f`).
 - **Remaining priority**: one iPhone acceptance test of period report, then Ricky sign-in/role verification and onboarding, offline queue/sync audit, final print/export. Do not re-test verified ticket save, photo view, correction, or weekly report layout. Never change real tickets merely to test.
+
+## Verified iPhone monthly farm report — 2026-11-12
+- User opened installed Home Screen app and expanded farm/pond reporting; confirmed all period choices visible. Selected Month and November 12, 2026, calculated live November report successfully.
+- Screenshot: 6 November tickets, 150.16 total tons; 50.06 tons assigned to tanks; 100.10 tons not assigned. Austin Farms pond 106 = 24.94 tons; Gililiand EG1 309 = 25.12 tons. Both assigned rows show driver Sean. Four tickets flagged for allocation review: 102823 (21.76), 102838 (26.22), 102829 (25.95), 102841 (26.17). **Do not auto-assign or alter these tickets without user approval.**
+- User screenshot exposed narrow columns with mid-number line breaks. Fixed farm-period report table layout to horizontally scroll with nowrap cells (commit 1784185). This visual fix still needs confirmation eventually, but no need to repeat calculation test.
+- Monthly report acceptance: live calculation and correct verified allocations PASSED. Day/week/year report period calculations not yet individually acceptance-tested. Next priority: other accounts/Ricky login and role testing, or careful offline implementation audit. Do not rebuild reports.
