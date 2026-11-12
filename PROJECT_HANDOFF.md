@@ -299,3 +299,7 @@ User explicitly requests assistant finish all possible remaining work independen
 ## 2026-11-12 — offline integration static gate (no release)
 - Re-fetched current GitHub adapter, preview page and SW. All parsed successfully: adapter, 3 preview inline JS blocks, SW. Verified `CKCloud.myProfile` exists to support new sync authorization check, `CKOfflineStaged.enqueue` is wired to offline photo save, uncertain cloud upload preserves queued copy via `markBlocked`, and SW handles only same-origin GET requests for listed assets. These are **static integration checks**, not actual IndexedDB/network end-to-end tests; do not claim offline launch acceptance.
 - No production change, no ticket or account change, no coworker contact. Offline preview remains staged until actual save/sync acceptance and offline standalone behavior are verified.
+
+## 2026-11-12 — user changes launch scope: ONLINE ONLY
+- User explicitly stated offline operation is not important: without internet, the app should simply not work. **Remove offline queue, delayed sync, offline Home Screen operation and offline OCR from launch requirements.** Do not promote `login-offline-preview.html` or `offline-current-adapter.js`; keep live `login-v23.html` as stable online-only release candidate.
+- Next launch work: clear connection-required feedback, ensure online save/report behavior, review one-time email onboarding and access permissions, final online launch acceptance. Do not contact coworkers until ready. No live code changed by this scope update.
