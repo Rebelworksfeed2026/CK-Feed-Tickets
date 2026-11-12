@@ -39,7 +39,9 @@ button.addEventListener("click",async()=>{
   const weekEnd=nextWeek.getFullYear()+"-"+String(nextWeek.getMonth()+1).padStart(2,"0")+"-"+String(nextWeek.getDate()).padStart(2,"0");
   const end=period==="day"?dayEnd:period==="week"?weekEnd:period==="year"?(y+1)+"-01-01":(m===12?(y+1)+"-01-01":y+"-"+String(m+1).padStart(2,"0")+"-01");
   const [allTickets,drivers,directory]=await Promise.all([CKCloud.listTicketsForPeriod(start,end),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks()]);
-  const tickets=period==="week"?allTickets.filter(t=>new Date(t.delivery_date+"T12:00:00").getDay()!==0):allTickets;
+  const periodTickets=period==="week"?allTickets.filter(t=>new Date(t.delivery_date+"T12:00:00").getDay()!==0):allTickets;
+  const testTickets=periodTickets.filter(t=>t.is_test===true);
+  const tickets=periodTickets.filter(t=>t.is_test!==true);
   if(token!==sequence||!CKCloud.isSignedIn())return;
   const allocations=await CKCloud.listReportTankAllocations(tickets.map(t=>t.id));
   if(token!==sequence||!CKCloud.isSignedIn())return;
@@ -65,7 +67,7 @@ button.addEventListener("click",async()=>{
   const ticketCents=tickets.reduce((n,t)=>n+Math.round(Number(t.tons)*100),0);
   const allocatedCents=[...allocated.values()].reduce((a,b)=>a+b,0);
   const problems=tickets.filter(t=>allocated.get(t.id)!==Math.round(Number(t.tons)*100));
-  const p=document.createElement("p");p.textContent=(period==="year"?"Year":period==="month"?"Month":period==="week"?"Week":"Day")+" starting "+start+": "+tickets.length+" tickets, "+(ticketCents/100).toFixed(2)+" total tons; "+(allocatedCents/100).toFixed(2)+" assigned tons.";output.appendChild(p);
+  const p=document.createElement("p");p.textContent=(period==="year"?"Year":period==="month"?"Month":period==="week"?"Week":"Day")+" starting "+start+": "+tickets.length+" tickets, "+(ticketCents/100).toFixed(2)+" total tons; "+(allocatedCents/100).toFixed(2)+" assigned tons. "+testTickets.length+" test tickets ("+(testTickets.reduce((n,t)=>n+Math.round(Number(t.tons)*100),0)/100).toFixed(2)+" tons) excluded from production totals.";output.appendChild(p);
   const farmTotals=new Map();
   for(const entry of totals.values()){
    const farm=farmTotals.get(entry.farm)||{farm:entry.farm,cents:0,tickets:new Set()};
