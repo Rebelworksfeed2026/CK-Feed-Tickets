@@ -129,3 +129,8 @@ The previous assistant repeatedly retested completed features after changing cha
 - Direct Supabase query: Sean (admin), Ricky (driver), Jakeleg (driver), Cody (Next Page driver), Brenda (office/read-only) **all five have non-null `drivers.user_id` links**. No account creation or re-linking required.
 - Audited RLS: linked drivers can view all feed tickets; non-office drivers can insert their own; update own tickets; administrator can update all; office cannot insert/update. Driver table SELECT for feed members and admin-only insert/update. No policy changes required.
 - **Do not repeat account provisioning**. Remaining: actual sign-in on Ricky/Jakeleg/Cody/Brenda devices and UI role verification; account linkage alone does not confirm successful sign-in.
+
+## 2026-11-12 offline audit / Brenda status
+- User confirms Brenda has received her invitation, but user is awaiting her reply; **successful sign-in not confirmed**. Do not resend or recreate account.
+- Re-inspected current live `login-v23.html`: ticket confirmation explicitly rejects `navigator.onLine===false` with `Ticket NOT saved`; `CKCloud.saveTicketWithPhoto` uploads photo then creates cloud ticket; no IndexedDB draft queue, service worker or reconnect upload worker. Prior offline prototype's localStorage is unrelated to current production cloud flow.
+- Offline feature remains **NOT IMPLEMENTED**. Do not claim offline save/sync works. Implementation requires atomic durable photo+metadata local storage, per-driver isolation, reconnect auth, idempotent cloud upload, duplicate detection, clear queued/failed/synced statuses, and tests. Do not alter verified live tickets/photos.
