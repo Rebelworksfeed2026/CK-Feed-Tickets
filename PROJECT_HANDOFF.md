@@ -244,3 +244,7 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — read-only farm/tank allocation reconciliation
 - SQL compared `feed_tickets.tons` to summed `ticket_tank_allocations.tons` for all six active tickets. Production ticket 102885 24.94/24.94 tons, 102887 25.12/25.12 tons, combined 50.06/50.06. No real ticket allocation mismatch. Four active test tickets 102823, 102829, 102838, 102841 have zero allocation; report code filters `is_test=true` out of production totals. No data changed. This verifies stored allocation arithmetic, not browser-rendered reports or all future data.
+
+## 2026-11-12 — offline queue blocked-row continuation fix
+- `offline-current-adapter.js` commit `aea8c4280291cfe14ba2c0f15c967ee980486010`: in `sync`, skip records already `needs_review` instead of throwing and halting the entire queue. The blocked record/photo stays untouched, and later pending tickets may sync using the existing cloud duplicate check and fail-closed ambiguous-upload logic. Any newly encountered duplicate/ambiguous upload still halts the run for safety; no unsafe automatic retry.
+- `offline-preview-sw.js` cache version v3 -> v4 commit `dd69b50a036795dc6dc380f18f7cebd4f36e9ead` to pick up adapter change. JS parse checks passed. Preview only, not live; end-to-end behavior still requires testing.
