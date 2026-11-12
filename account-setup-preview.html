@@ -34,8 +34,9 @@ else if(hash.has("access_token")&&hash.has("refresh_token")){
 }
 $("request").addEventListener("submit",async e=>{e.preventDefault();const b=$("send");b.disabled=true;try{
   const email=$("email").value.trim();
-  await call("/auth/v1/otp?redirect_to="+encodeURIComponent(here),{email,create_user:false});
-  message("If this email has an existing account, a one-time link has been requested. Check your inbox and open the newest link.");
+  message("Requesting your one-time sign-in email… Please wait.");
+  await Promise.race([call("/auth/v1/otp?redirect_to="+encodeURIComponent(here),{email,create_user:false}),new Promise((_,reject)=>setTimeout(()=>reject(Error("The email request timed out. Check your connection before trying again.")),20000))]);
+  message("Request accepted. Open the NEW email from the sign-in service and tap its sign-in link. This page does not sign you in until that email link is opened.");
 }catch(err){message("Unable to request a link: "+err.message);}finally{b.disabled=false;}});
 })();
 </script></body></html>
