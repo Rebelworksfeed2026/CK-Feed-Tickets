@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>C&K Feed Tickets — Account Setup Preview</title>
+<style>body{font:16px system-ui,sans-serif;background:#eef3f6;color:#183449;padding:20px}main{max-width:440px;margin:5vh auto;background:white;border-radius:12px;padding:24px}label{display:block;margin:14px 0 6px}input,button{font:inherit;box-sizing:border-box;width:100%;padding:12px;border-radius:7px}button{background:#17628e;color:white;border:0;margin-top:14px}button:disabled{opacity:.5}#status{white-space:pre-wrap;overflow-wrap:anywhere}small{color:#526778}</style></head><body><main><h1>Account setup preview</h1><p>Existing C&K Feed Tickets accounts only. This page is not the live login.</p>
+<form id="request"><label for="email">Your assigned email address</label><input id="email" type="email" autocomplete="email" required><button id="send">Email me a one-time sign-in link</button></form>
+<p id="status" role="status" aria-live="polite"></p><small>Only request a link when you are ready to open it on this device. Links expire. If your email is not assigned, contact the administrator.</small></main>
+<script src="supabase-config.js"></script><script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id),status=$("status"),url=window.SUPABASE_URL,key=window.SUPABASE_KEY;
+const home=new URL("login-v23.html",location.href).href;
+const here=new URL("account-setup-preview.html",location.href).href;
+function message(t){status.textContent=t;}
+async function call(path,body){const r=await fetch(url+path,{method:"POST",headers:{"apikey":key,"Content-Type":"application/json"},body:JSON.stringify(body)});const data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.msg||data.error_description||data.message||"Request failed");return data;}
+const hash=new URLSearchParams(location.hash.replace(/^#/,""));
+if(hash.has("error")||hash.has("error_description")){message("This sign-in link could not be used. Please request a fresh link when ready.");history.replaceState(null,"",location.pathname);}
+else if(hash.has("access_token")&&hash.has("refresh_token")){
+  (async()=>{try{
+    const session={access_token:hash.get("access_token"),refresh_token:hash.get("refresh_token"),token_type:hash.get("token_type")||"bearer",expires_in:Number(hash.get("expires_in")||3600),expires_at:Math.floor(Date.now()/1000)+Number(hash.get("expires_in")||3600)};
+    const r=await fetch(url+"/auth/v1/user",{headers:{"apikey":key,"Authorization":"Bearer "+session.access_token}});
+    if(!r.ok)throw Error("Unable to verify account.");
+    session.user=await r.json();
+    const p=await fetch(url+"/rest/v1/drivers?select=id&user_id=eq."+encodeURIComponent(session.user.id)+"&limit=1",{headers:{"apikey":key,"Authorization":"Bearer "+session.access_token}});
+    if(!p.ok||!(await p.json()).length)throw Error("Account not assigned to a feed-ticket user.");
+    localStorage.setItem("ck-feed-auth-v1",JSON.stringify(session));
+    history.replaceState(null,"",location.pathname);
+    message("Account verified. Opening your feed tickets…");
+    location.replace(home);
+  }catch(e){history.replaceState(null,"",location.pathname);message("Setup could not finish: "+e.message);}
+  })();
+}
+$("request").addEventListener("submit",async e=>{e.preventDefault();const b=$("send");b.disabled=true;try{
+  const email=$("email").value.trim();
+  await call("/auth/v1/otp",{email,create_user:false});
+  message("If this email has an existing account, a one-time link has been requested. Check your inbox and open the newest link.");
+}catch(err){message("Unable to request a link: "+err.message);}finally{b.disabled=false;}});
+})();
+</script></body></html>
