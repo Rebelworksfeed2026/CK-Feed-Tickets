@@ -306,3 +306,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — primary online login now links to tested OTP onboarding
 - Owner explicitly wants actual unfinished work, not repeated audits. Added a visible `Sign in with a one-time email link instead` link **inside** the login form of production `login-v23.html`, pointing to the separately proven `account-setup-preview.html` OTP flow. Existing password sign-in untouched. Because link is inside the form, it disappears when the form hides after login. Commits `d702819d2d4c6e4a7d97aa65bebe6d188ef5e2c6` and `824c097ddb3075d8cb08dd35fd4caa464ceeba69`; inline JS syntax parsed. No new user/browser acceptance performed. No coworker contact, tickets, or Supabase changes.
+
+## 2026-11-12 — email login presentation finalized
+- Updated `account-setup-preview.html` visible title from 'Account setup preview' to 'Sign in by email', removed misleading 'not live login' wording, and clarified that it emails a one-time sign-in link for assigned accounts. Preserved existing verified callback URL and authentication logic, since Supabase redirect allowlist includes this exact path. Commit `66cb8a0961a770ace4af6c359cd84a004a6d090a`. Inline JS parsed; no new browser sign-in attempted. Primary online login already links to this page. No user action required.
