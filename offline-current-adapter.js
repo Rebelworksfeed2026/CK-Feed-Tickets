@@ -21,6 +21,14 @@ async function sync(userId,cloud){
     // remains intact and can be retried when connectivity is restored.
     if(navigator.onLine===false)throw Error("Device is offline. Saved tickets remain on this device.");
     const rows=(await list()).filter(x=>x.userId===userId).sort((a,b)=>a.created-b.created);
+    // Recheck the account at sync time: a cached offline session must not
+    // silently upload tickets after the user has been made office-only.
+    if(rows.some(x=>x.state!=="needs_review")){
+      if(typeof cloud.myProfile!=="function")throw Error("Cannot verify account permissions before sync.");
+      let profile;
+      try{profile=await cloud.myProfile();}catch(e){throw Error("Cannot verify account permissions: "+e.message);}
+      if(!profile||profile.is_office||profile.user_id!==userId)throw Error("This account is not authorized to sync driver tickets. Saved copies retained.");
+    }
     let synced=0;
     for(const row of rows){
       // A previously blocked ticket must not prevent later independent tickets
