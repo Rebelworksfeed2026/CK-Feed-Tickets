@@ -400,6 +400,20 @@ window.CKCloud = (() => {
     return request("/rest/v1/farm_manager_assignments",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({farm_id:farmId,manager_id:managerId,effective_from:effectiveDate})});
   }
 
+  async function listReportTankAllocations(ticketIds) {
+    if (!session?.access_token) throw Error("Sign in first.");
+    if (!Array.isArray(ticketIds) || !ticketIds.length) return [];
+    const ids=[...new Set(ticketIds)];
+    if(ids.some(id=>!/^[0-9a-f-]{36}$/i.test(id)))throw Error("Invalid report ticket ID.");
+    const result=[];
+    for(let i=0;i<ids.length;i+=100){
+      const part=ids.slice(i,i+100);
+      const rows=await request("/rest/v1/ticket_tank_allocations?select=ticket_id,tank_id,tons&ticket_id=in.("+part.join(",")+")&limit=2000");
+      if(!Array.isArray(rows)||rows.length===2000)throw Error("Tank allocation report incomplete.");
+      result.push(...rows);
+    }
+    return result;
+  }
   async function listTankAllocations(ticketId) {
     if (!session?.access_token) throw Error("Sign in first.");
     if (!/^[0-9a-f-]{36}$/i.test(ticketId)) throw Error("Invalid ticket.");
@@ -415,7 +429,7 @@ window.CKCloud = (() => {
     const records=items.map(x=>({ticket_id:ticketId,tank_id:x.tank_id,tons:x.tons}));
     return request("/rest/v1/ticket_tank_allocations",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify(records)});
   }
-  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, restoreSession, myProfile, listDrivers, listWeeklyTickets, listTankAllocations, createTankAllocations, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, saveTicketWithPhoto, readTicketPhoto, correctTicket, isSignedIn };
+  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, restoreSession, myProfile, listDrivers, listWeeklyTickets, listTankAllocations, listReportTankAllocations, createTankAllocations, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, saveTicketWithPhoto, readTicketPhoto, correctTicket, isSignedIn };
 })();
 
 </script>
