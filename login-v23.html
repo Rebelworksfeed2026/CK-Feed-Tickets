@@ -405,7 +405,7 @@ window.CKCloud = (() => {
     if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||start>=end)throw Error("Invalid report dates.");
     const result=[];
     for(let offset=0;;offset+=500){
-      const rows=await request("/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination,driver_id&delivery_date=gte."+start+"&delivery_date=lt."+end+"&deleted_at=is.null&order=delivery_date.asc,id.asc&limit=500&offset="+offset);
+      const rows=await request("/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination,driver_id,is_test&delivery_date=gte."+start+"&delivery_date=lt."+end+"&deleted_at=is.null&order=delivery_date.asc,id.asc&limit=500&offset="+offset);
       if(!Array.isArray(rows))throw Error("Invalid report response.");
       result.push(...rows);
       if(rows.length<500)break;
