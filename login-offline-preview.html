@@ -708,7 +708,22 @@ async function syncOfflineQueue(){
   }catch(e){offlineStatus.textContent="Offline tickets retained. Sync needs attention: "+e.message;offlineStatus.dataset.syncError=e.message;}
   finally{offlineBusy=false;await updateOfflineStatus();}
 }
-window.addEventListener("online",()=>{syncOfflineQueue();});
+window.addEventListener("online",()=>{
+  if(activeProfile){
+    $("adminTile").hidden=!activeProfile.is_admin;
+    $("farmAdmin").hidden=!activeProfile.is_admin;
+    $("managerAdmin").hidden=!activeProfile.is_admin;
+  }
+  syncOfflineQueue();
+});
+window.addEventListener("offline",()=>{
+  if(activeProfile){
+    $("adminTile").hidden=true;
+    $("farmAdmin").hidden=true;
+    $("managerAdmin").hidden=true;
+    updateOfflineStatus();
+  }
+});
 
 let verifiedTicket = null;
 $("confirmSave").addEventListener("click", async () => {
@@ -830,9 +845,9 @@ async function showSignedIn(profile) {
     $("profile").style.display = "block";
     $("welcome").textContent = "Welcome, " + profile.name;
     $("role").textContent = "Access: " + (profile.is_admin ? "Administrator" : profile.is_office ? "Office" : "Driver") + " · " + profile.company;
-    $("adminTile").hidden = !profile.is_admin;
-    $("farmAdmin").hidden = !profile.is_admin;
-    $("managerAdmin").hidden = !profile.is_admin;
+    $("adminTile").hidden = !profile.is_admin || navigator.onLine===false;
+    $("farmAdmin").hidden = !profile.is_admin || navigator.onLine===false;
+    $("managerAdmin").hidden = !profile.is_admin || navigator.onLine===false;
     if(profile.is_admin && navigator.onLine!==false) refreshManagers();
     $("officeTile").hidden = !profile.is_office;
     $("cameraTile").hidden = true;
