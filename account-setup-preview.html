@@ -11,17 +11,20 @@ const here=new URL("account-setup-preview.html",location.href).href;
 function message(t){status.textContent=t;}
 async function call(path,body){const r=await fetch(url+path,{method:"POST",headers:{"apikey":key,"Content-Type":"application/json"},body:JSON.stringify(body)});const data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.msg||data.error_description||data.message||"Request failed");return data;}
 const hash=new URLSearchParams(location.hash.replace(/^#/,""));
+const query=new URLSearchParams(location.search);
 // Remove sensitive callback tokens from browser history immediately.
-if(location.hash)history.replaceState(null,"",location.pathname);
-if(hash.has("error")||hash.has("error_description")){message("This sign-in link could not be used. Please request a fresh link when ready.");history.replaceState(null,"",location.pathname);}
+if(location.hash||query.has("error")||query.has("error_code")||query.has("error_description"))history.replaceState(null,"",location.pathname);
+if(hash.has("error")||hash.has("error_description")||query.has("error")||query.has("error_code")||query.has("error_description")){message("This sign-in link could not be used. Please request a fresh link when ready.");history.replaceState(null,"",location.pathname);}
 else if(hash.has("access_token")&&hash.has("refresh_token")){
   (async()=>{try{
     const session={access_token:hash.get("access_token"),refresh_token:hash.get("refresh_token"),token_type:hash.get("token_type")||"bearer",expires_in:Number(hash.get("expires_in")||3600),expires_at:Math.floor(Date.now()/1000)+Number(hash.get("expires_in")||3600)};
     const r=await fetch(url+"/auth/v1/user",{headers:{"apikey":key,"Authorization":"Bearer "+session.access_token}});
     if(!r.ok)throw Error("Unable to verify account.");
     session.user=await r.json();
-    const p=await fetch(url+"/rest/v1/drivers?select=id&user_id=eq."+encodeURIComponent(session.user.id)+"&limit=1",{headers:{"apikey":key,"Authorization":"Bearer "+session.access_token}});
-    if(!p.ok||!(await p.json()).length)throw Error("Account not assigned to a feed-ticket user.");
+    const p=await fetch(url+"/rest/v1/drivers?select=id,name,company,is_admin,is_office,user_id&user_id=eq."+encodeURIComponent(session.user.id)+"&limit=1",{headers:{"apikey":key,"Authorization":"Bearer "+session.access_token}});
+    if(!p.ok)throw Error("Unable to verify account permissions.");
+    const profiles=await p.json();
+    if(!Array.isArray(profiles)||profiles.length!==1)throw Error("Account not assigned to a feed-ticket user.");
     localStorage.setItem("ck-feed-auth-v1",JSON.stringify(session));
     history.replaceState(null,"",location.pathname);
     message("Account verified. Opening your feed tickets…");
