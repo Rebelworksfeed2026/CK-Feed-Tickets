@@ -218,3 +218,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — iOS resumed-browser offline sync check
 - Preview-only `login-offline-preview.html` commit `1a4f347f8af12c34a62e5a709493785d2099c7d7`: added guarded `pageshow` and `visibilitychange` checks to call existing `syncOfflineQueue` when an authenticated iOS browser tab returns online. Complements online event and manual retry because iOS may suspend tabs during connectivity changes. Existing `offlineBusy` prevents concurrent sync. All three inline JS scripts parse. Actual end-to-end sync still unverified. Live page and data unchanged.
+
+## 2026-11-12 — blocked queue safety
+- Preview-only `login-offline-preview.html` commit `d22e922dad7a0e38e7aa3ec2e2423a838877b7a0`: if all offline queue records are `needs_review`, skip repeated automatic sync attempts and show administrator review required. Hide retry button while a sync is active. No blocked record is deleted or retried. Three inline scripts parse. Actual offline save/sync remains untested. Live unchanged.
