@@ -79,6 +79,18 @@
         const entry=verified.get(key)||{farm,tank:tank.tank_label,loads:new Set(),cents:0};
         entry.loads.add(ticket.id);entry.cents+=cents;verified.set(key,entry);
       }
+      const verifiedDaily=new Map();
+      for(const a of allocations){
+        const ticket=ticketById.get(a.ticket_id),tank=tankById.get(a.tank_id);
+        if(!ticket||!tank)continue;
+        const cents=Math.round(Number(a.tons)*100);
+        if(!Number.isFinite(cents)||cents<=0)continue;
+        const farm=farmById.get(tank.farm_id)||"Unknown farm";
+        const driver=driverNames.get(ticket.driver_id)||"Unknown driver";
+        const key=[ticket.delivery_date,tank.farm_id,tank.id,ticket.driver_id].join("|");
+        const entry=verifiedDaily.get(key)||{date:ticket.delivery_date,farm,tank:tank.tank_label,driver,tickets:new Set(),cents:0};
+        entry.tickets.add(ticket.id);entry.cents+=cents;verifiedDaily.set(key,entry);
+      }
       const allocationIssues=validTickets.filter(t=>(allocatedByTicket.get(t.id)||0)!==Math.round(Number(t.tons)*100));
       const verifiedTitle=document.createElement("p");
       verifiedTitle.style.fontWeight="700";
@@ -105,6 +117,25 @@
         ?allocationIssues.length+" ticket(s) have missing, partial, or excessive tank allocations. Their full ticket tons remain in the all-driver totals; review assignments before relying on farm totals."
         :"All "+validTickets.length+" valid ticket(s) are fully allocated to registered tanks.";
       output.appendChild(verifiedNote);
+      const dailyVerifiedTitle=document.createElement("p");
+      dailyVerifiedTitle.style.fontWeight="700";
+      dailyVerifiedTitle.textContent="Verified daily farm and tank totals by driver";
+      output.appendChild(dailyVerifiedTitle);
+      const dailyVerifiedTable=document.createElement("table");
+      dailyVerifiedTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const dailyVerifiedHead=document.createElement("tr");
+      for(const label of ["Date","Farm","Tank","Driver","Tickets","Tons"]){
+        const th=document.createElement("th");th.textContent=label;th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";dailyVerifiedHead.appendChild(th);
+      }
+      dailyVerifiedTable.appendChild(dailyVerifiedHead);
+      for(const entry of [...verifiedDaily.values()].sort((a,b)=>a.date.localeCompare(b.date)||a.farm.localeCompare(b.farm)||a.tank.localeCompare(b.tank,undefined,{numeric:true})||a.driver.localeCompare(b.driver))){
+        const tr=document.createElement("tr");
+        for(const value of [entry.date,entry.farm,entry.tank,entry.driver,String(entry.tickets.size),(entry.cents/100).toFixed(2)]){
+          const td=document.createElement("td");td.textContent=value;td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";tr.appendChild(td);
+        }
+        dailyVerifiedTable.appendChild(tr);
+      }
+      output.appendChild(dailyVerifiedTable);
       const rows=groups.summarize(validTickets,"Austin Farms","week");
       const allHundredths=validTickets.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
       const allLoads=validTickets.length;
@@ -477,6 +508,7 @@
       // Keep the iPhone report manageable: show the overview first, with expandable tables.
       const sectionTitles=new Set([
         "Verified farm and tank allocations — all drivers",
+        "Verified daily farm and tank totals by driver",
         "Daily Austin tank-group totals (provisional matching)",
         "Weekly totals by driver",
         "Daily totals — all drivers",
