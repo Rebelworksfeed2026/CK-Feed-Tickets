@@ -288,3 +288,7 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — offline preview disconnected-sync guard
 - Preview-only adapter `offline-current-adapter.js` now refuses sync if `navigator.onLine===false`, leaving saved tickets untouched (commit `3ce42e7673d6b1422c59b9e8bd9a0506bbce7198`). Offline preview SW cache bumped to v6 (commit `10bdb038b1dd189419e3295246ee120752658233`). JS syntax checked; real end-to-end sync not re-tested. Production `login-v23.html` unchanged. User will independently log next actual feed ticket online when available; do not fabricate a test ticket.
+
+## 2026-11-12 — read-only live authorization verification
+- Queried Supabase `pg_policies` for `public.drivers`, `public.feed_tickets`, `public.ticket_tank_allocations`, `public.farms`, and `storage.objects` ticket photo policies. Confirmed ticket INSERT requires matching authenticated driver with `is_office=false`; UPDATE own or admin, office has no edit policy; linked users SELECT; farms admin-only writes; tank allocation writes own/admin; ticket photo INSERT requires owner user-ID folder and non-office member; ticket photo SELECT restricted to linked accounts. This is policy inspection, **not** actual coworker login test.
+- No DB mutation, production change, account email, or ticket changes. User's Sean magic-link acceptance already passed and must not be repeated. Offline preview still not released.
