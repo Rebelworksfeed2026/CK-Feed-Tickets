@@ -42,7 +42,6 @@
         const key=String(ticket.id||ticket.ticket_number||"");
         if(key&&!unique.has(key))unique.set(key,ticket);
       }
-      const testTickets=[...unique.values()].filter(t=>t.is_test===true);
       const reportTickets=[...unique.values()].filter(t=>t.is_test!==true);
       const groups=window.CKTankGroups;
       if(sequence!==reportSequence || !CKCloud.isSignedIn() || document.getElementById("cloudWeek").value!==monday) {
