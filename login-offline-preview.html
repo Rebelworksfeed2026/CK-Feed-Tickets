@@ -713,7 +713,9 @@ async function syncOfflineQueue(){
     delete offlineStatus.dataset.lastSync;
     offlineStatus.textContent="Syncing "+items.length+" saved offline ticket(s)…";
     const result=await CKOfflineStaged.sync(activeProfile.user_id,CKCloud);
-    offlineStatus.dataset.lastSync="Synced "+result.synced+" ticket(s) to cloud.";
+    offlineStatus.dataset.lastSync=result.synced>0
+      ? "Synced "+result.synced+" ticket(s) to cloud."+(result.remaining?" "+result.remaining+" ticket(s) still saved on this device.":"")
+      : "No tickets synced."+(result.remaining?" "+result.remaining+" ticket(s) remain on this device for review or retry.":"");
     offlineStatus.textContent=offlineStatus.dataset.lastSync;
     $("loadWeek").click();
   }catch(e){offlineStatus.textContent="Offline tickets retained. Sync needs attention: "+e.message;offlineStatus.dataset.syncError=e.message;}
