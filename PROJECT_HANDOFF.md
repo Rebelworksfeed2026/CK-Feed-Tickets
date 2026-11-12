@@ -312,3 +312,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — online-only connection notice added to production
 - Updated `login-v23.html` with a visible `Internet connection required. Ticket saving and reports are unavailable until you reconnect.` notice whenever `navigator.onLine === false`, clearing when `online` fires. No offline queue or retry claims. Commit `877eaaa755f3348280157f17d84600759a615bbb`; all three inline scripts parsed. Browser/network detection not runtime tested; online indicator alone cannot prove remote server availability. No user action, coworker contact, database or ticket changes.
+
+## 2026-11-12 — requested yearly driver/combined totals report implemented
+- Added `Yearly feed totals — all drivers` panel to live `login-v23.html` with year selector and Calculate button. Uses existing paginated `CKCloud.listTicketsForPeriod` and `CKCloud.listDrivers`, excludes `is_test===true`, `deleted_at` already excluded by period query, displays per-driver loads/tons and combined loads/tons. No database mutation. Commit `21ed0e63ab699846bd85fd2ca8df450b7725378f`. Three inline JS scripts syntax-checked. **Not browser runtime verified**. User did not need to test anything; coworkers not contacted.
