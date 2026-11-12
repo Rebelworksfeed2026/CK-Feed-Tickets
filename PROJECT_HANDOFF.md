@@ -295,3 +295,7 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — offline sync authorization recheck
 - Preview-only `offline-current-adapter.js` now rechecks `cloud.myProfile()` before uploading any queued ticket, requiring same `user_id` and non-office profile; failure retains all queued tickets/photos. Prevents cached offline driver queue being silently uploaded after office-only role change. Commit `44191121c338281a2f386d5019d866611d17f716`; preview SW cache bumped v6 to v7 commit `0608788f159dcaa5de2a69c76e7d6f083329fbfe`. JS syntax checks passed, runtime integration not yet tested. No production/account/ticket changes.
+
+## 2026-11-12 — offline integration static gate (no release)
+- Re-fetched current GitHub adapter, preview page and SW. All parsed successfully: adapter, 3 preview inline JS blocks, SW. Verified `CKCloud.myProfile` exists to support new sync authorization check, `CKOfflineStaged.enqueue` is wired to offline photo save, uncertain cloud upload preserves queued copy via `markBlocked`, and SW handles only same-origin GET requests for listed assets. These are **static integration checks**, not actual IndexedDB/network end-to-end tests; do not claim offline launch acceptance.
+- No production change, no ticket or account change, no coworker contact. Offline preview remains staged until actual save/sync acceptance and offline standalone behavior are verified.
