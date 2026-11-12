@@ -221,3 +221,7 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — blocked queue safety
 - Preview-only `login-offline-preview.html` commit `d22e922dad7a0e38e7aa3ec2e2423a838877b7a0`: if all offline queue records are `needs_review`, skip repeated automatic sync attempts and show administrator review required. Hide retry button while a sync is active. No blocked record is deleted or retried. Three inline scripts parse. Actual offline save/sync remains untested. Live unchanged.
+
+## 2026-11-12 — live Supabase read-only security audit
+- Ran Supabase `get_advisors(type=security)` against `przmlyzmwnixfgqdafyk`: one WARN `auth_leaked_password_protection` (leaked password protection disabled), remediation https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection. Do not silently change auth configuration; consider enabling before launch.
+- Queried `pg_policies` read-only for `drivers`, `feed_tickets`, `farms`, `ticket_tank_allocations`. Confirmed: authenticated linked users can SELECT, `feed_tickets` INSERT requires matching `drivers.user_id=auth.uid()` and `is_office=false`; own UPDATE requires same and WITH CHECK; admin UPDATE via `private.is_feed_admin()` with WITH CHECK; office users have no feed ticket write policies. `ticket_tank_allocations` INSERT/UPDATE/DELETE requires owning driver or admin; farms INSERT/UPDATE admin only. This is policy inspection, not a real-account penetration test. No rows or settings changed.
