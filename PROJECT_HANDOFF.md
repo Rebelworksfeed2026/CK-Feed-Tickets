@@ -159,3 +159,8 @@ The previous assistant repeatedly retested completed features after changing cha
 - Created `offline-current-adapter.js` in GitHub commit `d4ee95d8bd20169ea6a181407ca958a993beede9`. It adapts the original Beta IndexedDB idea to current CKCloud ticket shape, preserves original photo bytes, scopes queue records by user ID, rejects duplicate queued ticket numbers, and retains local copies on cloud duplicate/conflict rather than silently deleting them.
 - **NOT loaded by live `login-v23.html`; NOT yet integrated or tested.** No live app behavior changed and no ticket/photo data touched. This is a safe staging milestone, not completion.
 - Important remaining design issue: CKCloud currently uploads photo before insert; partial failures may leave private orphan photos. Before activating adapter, implement safe retry/reconciliation, account identification, UI pending state, reconnect trigger and confirm-save flow, and verify JS syntax. Avoid automatic sync until conflict and photo idempotency are handled.
+
+## Offline staged adapter validation correction — 2026-11-12
+- Confirmed current CKCloud exports `myProfile`, `findTicketNumber`, `saveTicketWithPhoto` required by staged adapter.
+- Corrected escaping in staged adapter validation regexes (date and image MIME), commit `dfa59df3640d931075ac577240f6ad6baa6bc3e0`. The previous staged version would have rejected valid dates/photos. Live HTML remains unchanged.
+- Staged adapter still NOT activated. Remaining critical integration: signed-in user ID from `CKCloud.myProfile().user_id`, offline confirm-save UI and pending counter, sync on reconnect, photo upload partial-failure reconciliation and safe duplicate resolution. No claim of current Home Screen offline readiness.
