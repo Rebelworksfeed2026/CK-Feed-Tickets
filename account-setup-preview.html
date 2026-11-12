@@ -29,7 +29,7 @@ else if(hash.has("access_token")&&hash.has("refresh_token")){
 }
 $("request").addEventListener("submit",async e=>{e.preventDefault();const b=$("send");b.disabled=true;try{
   const email=$("email").value.trim();
-  await call("/auth/v1/otp",{email,create_user:false});
+  await call("/auth/v1/otp?redirect_to="+encodeURIComponent(here),{email,create_user:false});
   message("If this email has an existing account, a one-time link has been requested. Check your inbox and open the newest link.");
 }catch(err){message("Unable to request a link: "+err.message);}finally{b.disabled=false;}});
 })();
