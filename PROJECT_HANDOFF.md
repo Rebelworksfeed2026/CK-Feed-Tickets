@@ -120,3 +120,7 @@ The previous assistant repeatedly retested completed features after changing cha
 - `CKCloud.listWeeklyTickets` now reads `is_test`. Weekly driver sheet defaults to production tickets only; an opt-in `Include test tickets in this weekly sheet (testing only)` checkbox shows test history for corrections/review. The sheet heading discloses test exclusion or inclusion. Commit `052f6f0`.
 - Existing `grouped-report.js` now filters `is_test===true` before computing all-driver weekly production totals, commit `ec40dab`. No changes to tickets/photos/allocations.
 - Database November production remains 2 tickets 50.06 tons; test 4 tickets 100.10 tons. **These weekly UI changes are code-reviewed but not yet acceptance-tested on iPhone.**
+
+## Weekly production sheet iPhone acceptance PASSED — 2026-11-12
+- User screenshots of installed Home Screen app, week Monday 2026-11-09 through Saturday 2026-11-14: only two real tickets displayed, 102885 (24.94 tons) and 102887 (25.12 tons), 2 loads, 50.06 tons. Test tickets excluded. Weekly running totals 24.94, 50.06; heaviest 25.12, lightest 24.94, biggest day Wednesday 50.06. Sideways table scroll verified on iPhone.
+- **Do not repeat weekly production ticket exclusion acceptance test.** All-driver grouped weekly report exclusion is code implemented but not separately acceptance-tested. Continue with remaining Stage 8 driver roles, offline and print/export verification.
