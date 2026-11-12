@@ -701,9 +701,14 @@ async function updateOfflineStatus(){
 async function syncOfflineQueue(){
   if(offlineBusy||navigator.onLine===false||!activeProfile?.user_id||!CKCloud.isSignedIn())return;
   offlineBusy=true;
+  retryOfflineSync.hidden=true;
   try{
     const items=await CKOfflineStaged.pending(activeProfile.user_id);
     if(!items.length)return;
+    if(items.every(x=>x.state==="needs_review")){
+      offlineStatus.dataset.syncError="All saved tickets require administrator review; no automatic upload attempted";
+      return;
+    }
     delete offlineStatus.dataset.syncError;
     delete offlineStatus.dataset.lastSync;
     offlineStatus.textContent="Syncing "+items.length+" saved offline ticket(s)…";
