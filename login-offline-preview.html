@@ -684,11 +684,15 @@ offlineStatus.setAttribute("role","status");
 offlineStatus.className="muted";
 offlineStatus.textContent="Offline queue: checking…";
 $("quickCamera").appendChild(offlineStatus);
+const retryOfflineSync=document.createElement("button");
+retryOfflineSync.type="button";retryOfflineSync.className="secondary";retryOfflineSync.textContent="Retry saved ticket sync";retryOfflineSync.hidden=true;
+$("quickCamera").appendChild(retryOfflineSync);
 let offlineBusy=false;
 async function updateOfflineStatus(){
   if(!activeProfile?.user_id||!window.CKOfflineStaged)return;
   try{
     const items=await CKOfflineStaged.pending(activeProfile.user_id);
+    retryOfflineSync.hidden=offlineBusy||navigator.onLine===false||!items.some(x=>x.state!=="needs_review");
     offlineStatus.textContent=(offlineStatus.dataset.syncError ? "Sync needs attention: "+offlineStatus.dataset.syncError+". " : "")+(items.length
       ? items.length+" ticket(s) safely stored on this device, waiting to sync: "+items.map(x=>x.ticket_number+(x.state==="needs_review"?" (needs review)":"")).join(", ")
       : (offlineStatus.dataset.lastSync || "Offline queue: no tickets waiting."));
@@ -710,6 +714,7 @@ async function syncOfflineQueue(){
   }catch(e){offlineStatus.textContent="Offline tickets retained. Sync needs attention: "+e.message;offlineStatus.dataset.syncError=e.message;}
   finally{offlineBusy=false;await updateOfflineStatus();}
 }
+retryOfflineSync.addEventListener("click",()=>syncOfflineQueue());
 window.addEventListener("online",()=>{
   if(activeProfile){
     $("adminTile").hidden=!activeProfile.is_admin;
