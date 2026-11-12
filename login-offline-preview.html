@@ -726,6 +726,9 @@ $("confirmSave").addEventListener("click", async () => {
   button.disabled=true;
   $("draftResult").textContent="Saving ticket and private photo to the cloud…";
   try {
+    const queued=activeProfile?.user_id ? await CKOfflineStaged.pending(activeProfile.user_id) : [];
+    if(queued.some(x=>x.ticket_number===verifiedTicket.ticket_number))
+      throw Error("Ticket already stored offline on this device. Resolve the queued copy before saving online.");
     const result=await CKCloud.saveTicketWithPhoto(verifiedTicket,file);
     $("draftResult").textContent="Saved to cloud: ticket "+result.ticket_number+". Photo attached.";
     verifiedTicket=null;
@@ -785,6 +788,11 @@ $("ticketDraft").addEventListener("submit", async e => {
       $("confirmDetails").textContent="OFFLINE — cloud duplicate check will occur during sync. Date: "+date+" | Ticket: "+number+" | Tons: "+tons.toFixed(2)+" | Destination: "+destination+" | Photo: "+photo.name;
       $("confirmPanel").hidden=false;
       $("draftResult").textContent="Review the offline ticket and photo, then save to this device.";
+      return;
+    }
+    const queued=activeProfile?.user_id ? await CKOfflineStaged.pending(activeProfile.user_id) : [];
+    if(queued.some(x=>x.ticket_number===number)){
+      $("draftResult").textContent="Ticket "+number+" is already stored on this device waiting to sync or review. Nothing was saved.";
       return;
     }
     const duplicate = await CKCloud.findTicketNumber(number);
