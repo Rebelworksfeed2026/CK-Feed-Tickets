@@ -89,3 +89,11 @@ The previous assistant repeatedly retested completed features after changing cha
 - Opened saved original photo afterward: original ticket 102887 still clearly displays `Tank 701, B1 & B3`. Photo retention/access test PASSED.
 - Do not repeat correction/photo tests or modify ticket 102887 merely for testing. User says office may later update printed destination wording; preserve actual delivered tank `EG1 309` unless user instructs otherwise.
 - NEXT: Ricky sign-in and permissions verification; then remaining onboarding, offline queue/sync, true farm/tank aggregation, final export and security tests.
+
+## Stage 8 audit — 2026-11-12 (avoid duplicate work)
+- Compared actual live source files `login-v23.html`, `grouped-report.js`, `farm-period-report.js` with handoff history. **Do not rebuild already implemented reporting**.
+- Verified existing code exports `CKCloud.listTicketsForPeriod`, `CKCloud.listReportTankAllocations`, `CKCloud.listFarmsAndTanks` and loads the farm-period report. The report offers day, Monday–Saturday week, month and year; shows farm rollups, pond totals, driver breakdowns and incomplete assignments. This is **code inspection only**, not an iPhone acceptance test.
+- Verified live Supabase policies for feed_tickets, ticket_tank_allocations, farms, farm_tanks and drivers; read access exists for linked feed members. No policy edits needed.
+- Live database checked November allocations: Austin Farms tank 106 24.94 tons; Gililiand EG1 309 25.12 tons; total 50.06. No data modifications.
+- Fixed only one newly identified UI defect: changing report period/date while loading could leave Calculate button disabled (commit `54c8f7f`).
+- **Remaining priority**: one iPhone acceptance test of period report, then Ricky sign-in/role verification and onboarding, offline queue/sync audit, final print/export. Do not re-test verified ticket save, photo view, correction, or weekly report layout. Never change real tickets merely to test.
