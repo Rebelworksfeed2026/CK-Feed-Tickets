@@ -124,3 +124,8 @@ The previous assistant repeatedly retested completed features after changing cha
 ## Weekly production sheet iPhone acceptance PASSED — 2026-11-12
 - User screenshots of installed Home Screen app, week Monday 2026-11-09 through Saturday 2026-11-14: only two real tickets displayed, 102885 (24.94 tons) and 102887 (25.12 tons), 2 loads, 50.06 tons. Test tickets excluded. Weekly running totals 24.94, 50.06; heaviest 25.12, lightest 24.94, biggest day Wednesday 50.06. Sideways table scroll verified on iPhone.
 - **Do not repeat weekly production ticket exclusion acceptance test.** All-driver grouped weekly report exclusion is code implemented but not separately acceptance-tested. Continue with remaining Stage 8 driver roles, offline and print/export verification.
+
+## Driver accounts and permissions audited — 2026-11-12
+- Direct Supabase query: Sean (admin), Ricky (driver), Jakeleg (driver), Cody (Next Page driver), Brenda (office/read-only) **all five have non-null `drivers.user_id` links**. No account creation or re-linking required.
+- Audited RLS: linked drivers can view all feed tickets; non-office drivers can insert their own; update own tickets; administrator can update all; office cannot insert/update. Driver table SELECT for feed members and admin-only insert/update. No policy changes required.
+- **Do not repeat account provisioning**. Remaining: actual sign-in on Ricky/Jakeleg/Cody/Brenda devices and UI role verification; account linkage alone does not confirm successful sign-in.
