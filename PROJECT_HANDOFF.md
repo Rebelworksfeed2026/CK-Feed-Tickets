@@ -309,3 +309,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — email login presentation finalized
 - Updated `account-setup-preview.html` visible title from 'Account setup preview' to 'Sign in by email', removed misleading 'not live login' wording, and clarified that it emails a one-time sign-in link for assigned accounts. Preserved existing verified callback URL and authentication logic, since Supabase redirect allowlist includes this exact path. Commit `66cb8a0961a770ace4af6c359cd84a004a6d090a`. Inline JS parsed; no new browser sign-in attempted. Primary online login already links to this page. No user action required.
+
+## 2026-11-12 — online-only connection notice added to production
+- Updated `login-v23.html` with a visible `Internet connection required. Ticket saving and reports are unavailable until you reconnect.` notice whenever `navigator.onLine === false`, clearing when `online` fires. No offline queue or retry claims. Commit `877eaaa755f3348280157f17d84600759a615bbb`; all three inline scripts parsed. Browser/network detection not runtime tested; online indicator alone cannot prove remote server availability. No user action, coworker contact, database or ticket changes.
