@@ -235,3 +235,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — database-level duplicate enforcement verified
 - Read-only `pg_indexes` query confirms `public.feed_tickets` has `feed_tickets_ticket_number_key`, a UNIQUE btree index on `ticket_number` across all rows, plus primary key on `id`. This enforces uniqueness independently of client-side checks, including concurrent uploads. No database changes made. Note: unique index also includes archived rows, consistent with historical ticket-number reuse prohibition.
+
+## 2026-11-12 — read-only account linkage check
+- Queried `public.drivers` for name, company, `is_admin`, `is_office`, and whether `user_id` is populated. All five configured accounts (Sean, Ricky, Jakeleg, Cody, Brenda) have non-null linked user IDs. Sean is sole admin; Brenda office-only; others ordinary drivers. Cody company Next Page, others C&K Farms. This does NOT prove login/password/invite success, user confirmation, or permission behavior in a live browser. Brenda's prior `otp_expired` remains unresolved. No accounts modified.
