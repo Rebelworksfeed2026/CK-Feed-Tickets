@@ -251,3 +251,8 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — Stage 8 offline preview partial-sync clarity
 - Rechecked preview HTML 3 inline scripts, offline SW and IndexedDB adapter syntax: all parse. All seven local external scripts referenced by preview are included in offline SW cache asset list. Corrected preview `syncOfflineQueue` message in commit `cc1e21f81be6ce106ec5e51c00b16b61a0034eb0` to show how many synced and how many remain, avoiding misleading `Synced 0` success when only review-blocked items remain. No production changes. **Still not an end-to-end iPhone/cloud acceptance test.** Keep original Stage 8 five-item checklist; do not count small patches as new stages.
+
+## 2026-11-12 — Sean-first operational launch decision
+- User explicitly prioritizes using his own working account now, without waiting for Brenda/Ricky/Jakeleg/Cody activation. Do not gate Sean's ticket entry on their sign-ins. Do not repeat completed historical offline tests.
+- Read-only review of `login-v23.html`: contains authenticated cloud save with photo, duplicate safeguards, weekly/report interface; all 8 inline JS blocks parse. **Production `login-v23.html` does NOT contain offline queue functionality** (no `offline` references). Preview is separate. Do not tell user live app supports offline saving or silently promote preview. Existing Sean auth confirmed and signed in; live browser end-to-end save not freshly tested in this review.
+- Operational guidance: Sean can begin using live `login-v23.html` for ONLINE loads, provided he confirms a real save when available. Offline capability remains preview-only pending safe acceptance/promotion. Other accounts can activate later. No live files/data changed.
