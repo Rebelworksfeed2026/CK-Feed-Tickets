@@ -113,8 +113,14 @@ window.CKCloud = (() => {
       await refreshSession();
       const profile = await myProfile();
       if (!profile) { remember(null); return null; }
+      try { localStorage.setItem("ck-feed-offline-profile-v1",JSON.stringify(profile)); } catch (_) {}
       return profile;
     } catch (e) {
+      if(navigator.onLine===false && session?.user?.id){
+        try { const profile=JSON.parse(localStorage.getItem("ck-feed-offline-profile-v1")||"null");
+          if(profile?.user_id===session.user.id && !profile.is_office)return profile;
+        } catch(_) {}
+      }
       if (navigator.onLine !== false && !session) remember(null);
       return null;
     }
@@ -157,6 +163,7 @@ window.CKCloud = (() => {
     try {
       const profile = await myProfile();
       if (!profile) throw Error("This account has not been assigned to a feed-ticket user.");
+      try { localStorage.setItem("ck-feed-offline-profile-v1",JSON.stringify(profile)); } catch (_) {}
       return profile;
     } catch (e) {
       remember(null);
