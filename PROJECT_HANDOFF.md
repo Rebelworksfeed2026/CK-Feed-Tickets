@@ -114,3 +114,9 @@ The previous assistant repeatedly retested completed features after changing cha
 - `CKCloud.listTicketsForPeriod` now selects `is_test`; `farm-period-report.js` excludes flagged test tickets from daily/weekly/monthly/yearly production totals, with excluded test count/tons separately disclosed. GitHub commits `6fc969f`, `747636c`.
 - Database post-change verified November 2026: production 2 tickets, 50.06 tons; test 4 tickets, 100.10 tons. **Period-report frontend update not yet retested on iPhone.**
 - The existing weekly driver sheet and older grouped report may still show test tickets; do not claim all reporting screens exclude them until reviewed. Preserve test tickets for historical testing and duplicate detection.
+
+## Weekly production reports now exclude test tickets — 2026-11-12
+- Audited existing weekly sheet and all-driver grouped report; both previously counted user-confirmed test tickets. No duplicate reporting implementation added.
+- `CKCloud.listWeeklyTickets` now reads `is_test`. Weekly driver sheet defaults to production tickets only; an opt-in `Include test tickets in this weekly sheet (testing only)` checkbox shows test history for corrections/review. The sheet heading discloses test exclusion or inclusion. Commit `052f6f0`.
+- Existing `grouped-report.js` now filters `is_test===true` before computing all-driver weekly production totals, commit `ec40dab`. No changes to tickets/photos/allocations.
+- Database November production remains 2 tickets 50.06 tons; test 4 tickets 100.10 tons. **These weekly UI changes are code-reviewed but not yet acceptance-tested on iPhone.**
