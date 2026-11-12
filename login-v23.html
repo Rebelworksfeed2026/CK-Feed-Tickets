@@ -809,7 +809,18 @@ function allocationAddRow(){
   if(!allocationState.tanks.length)return;
   const line=document.createElement("div");line.style.cssText="display:flex;gap:6px;align-items:end;margin:8px 0;flex-wrap:wrap";
   const tank=document.createElement("select");tank.style.flex="2 1 150px";
-  for(const t of allocationState.tanks){const o=document.createElement("option");o.value=t.id;o.textContent=t.label;tank.appendChild(o);}
+  const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="Select a tank";tank.appendChild(placeholder);
+  const byFarm=new Map();
+  for(const t of allocationState.tanks){
+    if(!byFarm.has(t.farm))byFarm.set(t.farm,[]);
+    byFarm.get(t.farm).push(t);
+  }
+  for(const [farm,items] of byFarm){
+    const group=document.createElement("optgroup");group.label=farm;
+    for(const t of items){const o=document.createElement("option");o.value=t.id;o.textContent=t.tank;group.appendChild(o);}
+    tank.appendChild(group);
+  }
+  tank.value="";
   const amount=document.createElement("input");amount.type="number";amount.min="0.01";amount.max="100";amount.step="0.01";amount.placeholder="Tons";amount.style.flex="1 1 90px";
   const remove=document.createElement("button");remove.type="button";remove.className="secondary";remove.textContent="Remove";remove.style.flex="0 0 auto";
   line.append(tank,amount,remove);$("allocationRows").appendChild(line);
@@ -836,7 +847,7 @@ $("allocationLoad").addEventListener("click",async()=>{
   try{
     const [tickets,directory]=await Promise.all([CKCloud.listWeeklyTickets($("cloudDriver").value,$("cloudWeek").value),CKCloud.listFarmsAndTanks()]);
     allocationState.tickets=tickets;
-    allocationState.tanks=directory.tanks.map(t=>({id:t.id,label:(directory.farms.find(f=>f.id===t.farm_id)?.name||"Farm")+" — "+t.tank_label})).sort((a,b)=>a.label.localeCompare(b.label));
+    allocationState.tanks=directory.tanks.map(t=>({id:t.id,farm:(directory.farms.find(f=>f.id===t.farm_id)?.name||"Farm"),tank:t.tank_label,label:(directory.farms.find(f=>f.id===t.farm_id)?.name||"Farm")+" — "+t.tank_label})).sort((a,b)=>a.label.localeCompare(b.label));
     $("allocationTicket").replaceChildren();
     for(const t of tickets){const o=document.createElement("option");o.value=t.id;o.textContent=t.ticket_number+" | "+t.destination+" | "+allocationMoney(t.tons)+" tons";$("allocationTicket").appendChild(o);}
     allocationStatus(tickets.length?tickets.length+" tickets loaded. Select a ticket and assign its tanks.":"No tickets for this driver and week.");
@@ -851,7 +862,7 @@ $("allocationSave").addEventListener("click",async()=>{
   if(!ticket||allocationState.saved)return;
   const items=allocationState.rows.map(r=>({tank_id:r.tank.value,tons:Number(r.amount.value)}));
   const cents=items.reduce((sum,x)=>sum+Math.round(x.tons*100),0);
-  if(!items.length||items.some(x=>!Number.isFinite(x.tons)||x.tons<=0||Math.round(x.tons*100)!==x.tons*100)||new Set(items.map(x=>x.tank_id)).size!==items.length||cents!==Math.round(Number(ticket.tons)*100)){
+  if(!items.length||items.some(x=>!x.tank_id)||items.some(x=>!Number.isFinite(x.tons)||x.tons<=0||Math.round(x.tons*100)!==x.tons*100)||new Set(items.map(x=>x.tank_id)).size!==items.length||cents!==Math.round(Number(ticket.tons)*100)){
     allocationStatus("Each tank must be different, amounts must be positive with two decimals, and the total must match the ticket. Nothing saved.");return;
   }
   if(!window.confirm("Assign "+allocationMoney(ticket.tons)+" tons across "+items.length+" tank(s) for ticket "+ticket.ticket_number+"?"))return;
