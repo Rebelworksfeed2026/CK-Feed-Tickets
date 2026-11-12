@@ -55,6 +55,14 @@ button.addEventListener("click",async()=>{
   const allocatedCents=[...allocated.values()].reduce((a,b)=>a+b,0);
   const problems=tickets.filter(t=>allocated.get(t.id)!==Math.round(Number(t.tons)*100));
   const p=document.createElement("p");p.textContent=(period==="year"?"Year":"Month")+" starting "+start+": "+tickets.length+" tickets, "+(ticketCents/100).toFixed(2)+" total tons; "+(allocatedCents/100).toFixed(2)+" assigned tons.";output.appendChild(p);
+  const farmTotals=new Map();
+  for(const entry of totals.values()){
+   const farm=farmTotals.get(entry.farm)||{farm:entry.farm,cents:0,tickets:new Set()};
+   farm.cents+=entry.cents;
+   for(const id of entry.tickets)farm.tickets.add(id);
+   farmTotals.set(entry.farm,farm);
+  }
+  table("Verified farm totals — all ponds",["Farm","Unique tickets","Tons"],[...farmTotals.values()].sort((a,b)=>a.farm.localeCompare(b.farm)).map(x=>[x.farm,x.tickets.size,(x.cents/100).toFixed(2)]));
   table("Verified totals by farm and pond",["Farm","Pond","Tickets","Tons"],[...totals.values()].sort((a,b)=>a.farm.localeCompare(b.farm)||a.tank.localeCompare(b.tank,undefined,{numeric:true})).map(x=>[x.farm,x.tank,x.tickets.size,(x.cents/100).toFixed(2)]));
   table("Verified totals by driver, farm and pond",["Farm","Pond","Driver","Tickets","Tons"],[...details.values()].sort((a,b)=>a.farm.localeCompare(b.farm)||a.tank.localeCompare(b.tank,undefined,{numeric:true})||a.driver.localeCompare(b.driver)).map(x=>[x.farm,x.tank,x.driver,x.tickets.size,(x.cents/100).toFixed(2)]));
   table("Tickets requiring allocation review",["Ticket","Destination","Ticket tons","Assigned tons"],problems.map(t=>[t.ticket_number,t.destination,Number(t.tons).toFixed(2),((allocated.get(t.id)||0)/100).toFixed(2)]));
