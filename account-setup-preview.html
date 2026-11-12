@@ -11,6 +11,8 @@ const here=new URL("account-setup-preview.html",location.href).href;
 function message(t){status.textContent=t;}
 async function call(path,body){const r=await fetch(url+path,{method:"POST",headers:{"apikey":key,"Content-Type":"application/json"},body:JSON.stringify(body)});const data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.msg||data.error_description||data.message||"Request failed");return data;}
 const hash=new URLSearchParams(location.hash.replace(/^#/,""));
+// Remove sensitive callback tokens from browser history immediately.
+if(location.hash)history.replaceState(null,"",location.pathname);
 if(hash.has("error")||hash.has("error_description")){message("This sign-in link could not be used. Please request a fresh link when ready.");history.replaceState(null,"",location.pathname);}
 else if(hash.has("access_token")&&hash.has("refresh_token")){
   (async()=>{try{
