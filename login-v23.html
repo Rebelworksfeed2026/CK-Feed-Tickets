@@ -36,7 +36,18 @@ body * {visibility:hidden!important}
 #weekTable tr {break-inside:avoid}
 #weekTotal,#weekHighlights {font-size:9pt!important;margin:6pt 0!important}
 }
-@media print {.no-print,#savedPhotoViewer{display:none!important}}
+@media print {
+  /* Keep the report compact and isolated from the mobile dashboard. */
+  @page { size: 11in 8.5in; margin: 0.3in; }
+  #scrollHint,.no-print,#savedPhotoViewer {display:none!important}
+  #printArea {position:static!important;width:100%!important;max-width:100%!important;break-after:avoid!important;page-break-after:avoid!important}
+  #weekScroll {overflow:visible!important;max-width:none!important;width:100%!important}
+  #weekTable {min-width:0!important;width:100%!important;table-layout:auto!important}
+  #weekTable th.no-print,#weekTable td.no-print {display:none!important}
+  #weekTable th,#weekTable td {font-size:8pt!important;line-height:1.15!important;padding:3pt 2pt!important}
+  #weekTotal,#weekHighlights {break-inside:avoid!important;page-break-inside:avoid!important}
+}
+
 #groupedReportResults{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 #groupedReportResults table{min-width:0;width:100%;table-layout:fixed;font-size:12px!important}
 #groupedReportResults th,#groupedReportResults td{padding:5px 3px!important;overflow-wrap:anywhere;word-break:normal}
