@@ -365,6 +365,7 @@ window.CKCloud = (() => {
     const priorSession=session;
     // Revoke the local session immediately so in-flight photo requests cannot reopen.
     remember(null);
+    try { localStorage.removeItem("ck-feed-offline-profile-v1"); } catch (_) {}
     try {
       const response=await fetch(url+"/auth/v1/logout",{
         method:"POST",
@@ -816,7 +817,7 @@ async function showSignedIn(profile) {
     $("adminTile").hidden = !profile.is_admin;
     $("farmAdmin").hidden = !profile.is_admin;
     $("managerAdmin").hidden = !profile.is_admin;
-    if(profile.is_admin) refreshManagers();
+    if(profile.is_admin && navigator.onLine!==false) refreshManagers();
     $("officeTile").hidden = !profile.is_office;
     $("cameraTile").hidden = true;
     $("quickCamera").hidden = Boolean(profile.is_office);
@@ -831,6 +832,16 @@ async function showSignedIn(profile) {
     const now = new Date();
     now.setDate(now.getDate() - ((now.getDay() + 6) % 7));
     $("cloudWeek").value = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+    if(navigator.onLine===false){
+      $("driverDirectory").textContent="Offline mode — cloud driver list unavailable.";
+      const mine=document.createElement("option");
+      mine.value=profile.id;
+      mine.textContent=profile.name+" — "+profile.company;
+      $("cloudDriver").appendChild(mine);
+      $("quickCamera").hidden=Boolean(profile.is_office);
+      $("message").textContent="Offline mode. Save ticket photos on this device; they will sync after connection returns.";
+      return;
+    }
     $("driverDirectory").textContent = "Loading driver directory…";
     try {
       const drivers = await CKCloud.listDrivers();
