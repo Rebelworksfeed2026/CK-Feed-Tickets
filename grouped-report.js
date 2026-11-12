@@ -42,7 +42,8 @@
         const key=String(ticket.id||ticket.ticket_number||"");
         if(key&&!unique.has(key))unique.set(key,ticket);
       }
-      const reportTickets=[...unique.values()];
+      const testTickets=[...unique.values()].filter(t=>t.is_test===true);
+      const reportTickets=[...unique.values()].filter(t=>t.is_test!==true);
       const groups=window.CKTankGroups;
       if(sequence!==reportSequence || !CKCloud.isSignedIn() || document.getElementById("cloudWeek").value!==monday) {
         if(sequence===reportSequence)status.textContent="Report cancelled because the session or selected week changed.";
@@ -57,6 +58,7 @@
           date>=monday&&date<endDate;
       });
       const invalidCount=reportTickets.length-validTickets.length;
+      // Test tickets remain in history but never count toward production totals.
       // Verified tank allocations, not destination-text guesses. A ticket may be split
       // across tanks, so count ticket loads only once in overall totals.
       const [allocations,directory]=await Promise.all([
