@@ -285,3 +285,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — database authorization policy recheck
 - Read-only `pg_policies` query verified `drivers` SELECT linked-member/own, INSERT and UPDATE admin only; `feed_tickets` SELECT linked members, INSERT non-office own driver only, UPDATE own non-office or admin; `ticket_tank_allocations` writes own active ticket or admin; `farms` writes admin only. This supports intended office read-only and driver edit separation at RLS policy level. Not a live session acceptance test for other users. No schema or data changes. Do not ask coworkers to test before launch.
+
+## 2026-11-12 — offline preview disconnected-sync guard
+- Preview-only adapter `offline-current-adapter.js` now refuses sync if `navigator.onLine===false`, leaving saved tickets untouched (commit `3ce42e7673d6b1422c59b9e8bd9a0506bbce7198`). Offline preview SW cache bumped to v6 (commit `10bdb038b1dd189419e3295246ee120752658233`). JS syntax checked; real end-to-end sync not re-tested. Production `login-v23.html` unchanged. User will independently log next actual feed ticket online when available; do not fabricate a test ticket.
