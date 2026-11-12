@@ -456,6 +456,13 @@ window.CKCloud = (() => {
 </script>
 <script src="offline-current-adapter.js"></script>
 <script>
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./offline-preview-sw.js").catch(error=>{
+    console.warn("Offline app-shell caching unavailable:",error);
+  });
+}
+</script>
+<script>
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
