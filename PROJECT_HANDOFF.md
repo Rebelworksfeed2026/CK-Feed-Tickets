@@ -232,3 +232,6 @@ User explicitly requests assistant finish all possible remaining work independen
 ## 2026-11-12 — read-only live ticket integrity audit
 - Supabase SQL: 13 total feed_tickets, 13 distinct ticket numbers, 2 active real tickets totaling 50.06 tons, 4 active test tickets, 7 soft-deleted/archived rows. All 6 active tickets have non-null photo_path. 2 ticket_tank_allocations rows, zero missing parent feed_tickets. No data mutated.
 - Static code review: `farm-period-report.js` filters `is_test===true` out of production totals; `grouped-report.js` filters `is_test!==true` and deduplicates IDs. These are code checks, not complete end-user report rendering tests. Do not confuse archived 7 records with new active tickets.
+
+## 2026-11-12 — database-level duplicate enforcement verified
+- Read-only `pg_indexes` query confirms `public.feed_tickets` has `feed_tickets_ticket_number_key`, a UNIQUE btree index on `ticket_number` across all rows, plus primary key on `id`. This enforces uniqueness independently of client-side checks, including concurrent uploads. No database changes made. Note: unique index also includes archived rows, consistent with historical ticket-number reuse prohibition.
