@@ -215,3 +215,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — offline sync manual retry in preview
 - Added `Retry saved ticket sync` button to preview-only `login-offline-preview.html` (`acd7a4e27b99f1cf3de2becc5727fefe86ecf613`). Visible only when online with at least one queued item not already blocked for manual review; it invokes existing guarded `syncOfflineQueue()` and its cloud duplicate checks, not a bypass. Addresses scenario where automatic reconnect sync fails due to temporary network/auth conditions and no new online event occurs. Blocked `needs_review` tickets cannot be retried through this button. All three inline scripts parse. **No actual cloud sync test yet.** Production page unchanged.
+
+## 2026-11-12 — iOS resumed-browser offline sync check
+- Preview-only `login-offline-preview.html` commit `1a4f347f8af12c34a62e5a709493785d2099c7d7`: added guarded `pageshow` and `visibilitychange` checks to call existing `syncOfflineQueue` when an authenticated iOS browser tab returns online. Complements online event and manual retry because iOS may suspend tabs during connectivity changes. Existing `offlineBusy` prevents concurrent sync. All three inline JS scripts parse. Actual end-to-end sync still unverified. Live page and data unchanged.
