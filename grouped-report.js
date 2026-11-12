@@ -57,6 +57,54 @@
           date>=monday&&date<endDate;
       });
       const invalidCount=reportTickets.length-validTickets.length;
+      // Verified tank allocations, not destination-text guesses. A ticket may be split
+      // across tanks, so count ticket loads only once in overall totals.
+      const [allocations,directory]=await Promise.all([
+        CKCloud.listReportTankAllocations(validTickets.map(t=>t.id)),
+        CKCloud.listFarmsAndTanks()
+      ]);
+      if(sequence!==reportSequence || !CKCloud.isSignedIn() || document.getElementById("cloudWeek").value!==monday)return;
+      const ticketById=new Map(validTickets.map(t=>[t.id,t]));
+      const farmById=new Map(directory.farms.map(f=>[f.id,f.name]));
+      const tankById=new Map(directory.tanks.map(t=>[t.id,t]));
+      const allocatedByTicket=new Map(),verified=new Map();
+      for(const a of allocations){
+        const ticket=ticketById.get(a.ticket_id),tank=tankById.get(a.tank_id);
+        if(!ticket||!tank)continue;
+        const cents=Math.round(Number(a.tons)*100);
+        if(!Number.isFinite(cents)||cents<=0)continue;
+        allocatedByTicket.set(ticket.id,(allocatedByTicket.get(ticket.id)||0)+cents);
+        const farm=farmById.get(tank.farm_id)||"Unknown farm";
+        const key=tank.farm_id+"|"+tank.id;
+        const entry=verified.get(key)||{farm,tank:tank.tank_label,loads:new Set(),cents:0};
+        entry.loads.add(ticket.id);entry.cents+=cents;verified.set(key,entry);
+      }
+      const allocationIssues=validTickets.filter(t=>(allocatedByTicket.get(t.id)||0)!==Math.round(Number(t.tons)*100));
+      const verifiedTitle=document.createElement("p");
+      verifiedTitle.style.fontWeight="700";
+      verifiedTitle.textContent="Verified farm and tank allocations — all drivers";
+      output.appendChild(verifiedTitle);
+      const verifiedTable=document.createElement("table");
+      verifiedTable.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+      const verifiedHead=document.createElement("tr");
+      for(const label of ["Farm","Tank","Tickets","Tons"]){
+        const th=document.createElement("th");th.textContent=label;th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";verifiedHead.appendChild(th);
+      }
+      verifiedTable.appendChild(verifiedHead);
+      for(const entry of [...verified.values()].sort((a,b)=>a.farm.localeCompare(b.farm)||a.tank.localeCompare(b.tank,undefined,{numeric:true}))){
+        const tr=document.createElement("tr");
+        for(const value of [entry.farm,entry.tank,String(entry.loads.size),(entry.cents/100).toFixed(2)]){
+          const td=document.createElement("td");td.textContent=value;td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";tr.appendChild(td);
+        }
+        verifiedTable.appendChild(tr);
+      }
+      output.appendChild(verifiedTable);
+      const verifiedNote=document.createElement("p");
+      verifiedNote.className="muted";
+      verifiedNote.textContent=allocationIssues.length
+        ?allocationIssues.length+" ticket(s) have missing, partial, or excessive tank allocations. Their full ticket tons remain in the all-driver totals; review assignments before relying on farm totals."
+        :"All "+validTickets.length+" valid ticket(s) are fully allocated to registered tanks.";
+      output.appendChild(verifiedNote);
       const rows=groups.summarize(validTickets,"Austin Farms","week");
       const allHundredths=validTickets.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
       const allLoads=validTickets.length;
@@ -428,6 +476,7 @@
       }
       // Keep the iPhone report manageable: show the overview first, with expandable tables.
       const sectionTitles=new Set([
+        "Verified farm and tank allocations — all drivers",
         "Daily Austin tank-group totals (provisional matching)",
         "Weekly totals by driver",
         "Daily totals — all drivers",
