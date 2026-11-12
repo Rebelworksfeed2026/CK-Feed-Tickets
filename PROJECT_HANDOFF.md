@@ -108,3 +108,9 @@ The previous assistant repeatedly retested completed features after changing cha
 - User explicitly identified tickets **102823, 102838, 102829, 102841** as TEST tickets, not actual feed deliveries. Their combined 100.10 tons must not be presented as real production feed totals.
 - Actual verified November deliveries are 102885 (24.94 tons Austin Farms pond 106) and 102887 (25.12 tons Gililiand EG1 309), totaling 50.06 tons.
 - The current period report includes test tickets in the 150.16-ton overall ticket total; this is a reporting correctness issue. **Do not delete or mutate test records without permission.** Before implementing exclusion, inspect whether there is an existing test/production flag or archive convention and use it rather than introducing a duplicate system. Never classify other tickets as test without confirmation.
+
+## Test ticket classification implemented — 2026-11-12
+- Added `public.feed_tickets.is_test boolean not null default false` (existing RLS retained). User-confirmed test ticket numbers 102823, 102829, 102838, 102841 set to `true`; actual 102885 and 102887 remain false. No ticket deleted; no photo changed.
+- `CKCloud.listTicketsForPeriod` now selects `is_test`; `farm-period-report.js` excludes flagged test tickets from daily/weekly/monthly/yearly production totals, with excluded test count/tons separately disclosed. GitHub commits `6fc969f`, `747636c`.
+- Database post-change verified November 2026: production 2 tickets, 50.06 tons; test 4 tickets, 100.10 tons. **Period-report frontend update not yet retested on iPhone.**
+- The existing weekly driver sheet and older grouped report may still show test tickets; do not claim all reporting screens exclude them until reviewed. Preserve test tickets for historical testing and duplicate detection.
