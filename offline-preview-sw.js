@@ -1,6 +1,6 @@
 /* Preview-only offline shell cache. Never intercept Supabase, authentication,
    ticket/photo POSTs or other remote requests. Does not affect production page. */
-const CACHE="ck-offline-preview-shell-v6";
+const CACHE="ck-offline-preview-shell-v7";
 const ASSETS=[
  "./login-offline-preview.html",
  "./offline-current-adapter.js",
