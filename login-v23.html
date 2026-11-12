@@ -539,41 +539,44 @@ $("loadFarms").addEventListener("click", async () => {
     for (const farm of farms) { const option = document.createElement("option"); option.value = farm.id; option.textContent = farm.name; $("tankFarm").appendChild(option); }
     if (farms.some(farm => farm.id === previouslySelectedFarm)) $("tankFarm").value = previouslySelectedFarm;
     $("farmMessage").textContent = farms.length ? farms.length + " farms registered." : "No farms registered yet. Existing feed tickets are unchanged.";
+    const byManager = new Map();
     for (const farm of farms) {
+      const active = managerData.assignments.find(a => a.farm_id === farm.id && a.effective_to === null);
+      const manager = active && managerData.managers.find(m => m.id === active.manager_id);
+      const name = manager?.name || "Not assigned";
+      if (!byManager.has(name)) byManager.set(name, []);
+      byManager.get(name).push(farm);
+    }
+    for (const [managerName, managedFarms] of [...byManager].sort((a,b) => a[0].localeCompare(b[0]))) {
       const section = document.createElement("section");
-      const heading = document.createElement("strong");
-      heading.textContent = farm.name;
+      section.style.marginBottom = "22px";
+      const heading = document.createElement("h3");
+      heading.textContent = "Manager: " + managerName;
+      heading.style.marginBottom = "10px";
       section.appendChild(heading);
-      const activeAssignment = managerData.assignments.find(a=>a.farm_id===farm.id && a.effective_to===null);
-      const manager = activeAssignment && managerData.managers.find(m=>m.id===activeAssignment.manager_id);
-      const managerLabel=document.createElement("p");
-      managerLabel.textContent="Manager: "+(manager?.name||"Not assigned");
-      section.appendChild(managerLabel);
-      const matches = tanks.filter(t => t.farm_id === farm.id);
-      const p = document.createElement("p");
-      p.textContent = matches.length ? matches.map(t => t.tank_label).join(" · ") : "No tanks registered";
-      section.appendChild(p);
-      if (window.CKTankGroups) {
-        const defined = window.CKTankGroups.groups.filter(g => g.farm.toLowerCase() === farm.name.trim().toLowerCase());
-        const registered = new Set(matches.map(t => String(t.tank_label).trim().toUpperCase()));
-        if (defined.length) {
-          const label = document.createElement("p");
-          label.style.fontWeight = "700";
-          label.textContent = "Reporting groups (read only)";
-          section.appendChild(label);
-          for (const group of defined) {
-            const item = document.createElement("p");
-            const missing = group.tanks.filter(t => !registered.has(t.toUpperCase()));
-            item.textContent = group.label + " — " + group.tanks.join(", ") +
-              (missing.length ? " (not yet registered: " + missing.join(", ") + ")" : "");
-            section.appendChild(item);
-          }
-          const note = document.createElement("p");
-          note.className = "muted";
-          note.textContent = "Groups are for future reporting. Original ticket destinations and totals remain unchanged.";
-          section.appendChild(note);
+      const list = document.createElement("ul");
+      list.style.paddingLeft = "22px";
+      list.style.marginTop = "6px";
+      for (const farm of managedFarms) {
+        const matches = tanks.filter(t => t.farm_id === farm.id);
+        const labels = matches.map(t => t.tank_label);
+        const item = document.createElement("li");
+        item.style.marginBottom = "8px";
+        const title = document.createElement("strong");
+        title.textContent = farm.name;
+        item.appendChild(title);
+        if (labels.length && !(labels.length === 1 && labels[0].trim().toLowerCase() === farm.name.trim().toLowerCase())) {
+          const details = document.createElement("span");
+          details.textContent = " — " + labels.join(", ");
+          item.appendChild(details);
+        } else if (!labels.length) {
+          const details = document.createElement("span");
+          details.textContent = " — No tanks registered";
+          item.appendChild(details);
         }
+        list.appendChild(item);
       }
+      section.appendChild(list);
       $("farmDirectory").appendChild(section);
     }
   } catch (error) {
