@@ -176,3 +176,7 @@ User explicitly requests assistant finish all possible remaining work independen
 ## 2026-11-12 safe offline retry milestone
 - Updated `offline-current-adapter.js` (`c285c4309d59646960beb29b4942104c98a228fe`): on existing cloud ticket number or ambiguous photo/ticket upload failure, persist `needs_review` in IndexedDB, keep original image and metadata, block subsequent automatic retries. Failed cloud duplicate lookups do not attempt uploads. This is deliberately fail-closed; administrator resolution UI and safe manual reconciliation still required.
 - Updated `login-offline-preview.html` (`82122a7dc0f08d40723b83231843279cff694cde`) to show `(needs review)` for blocked queued tickets. Live `login-v23.html` remains unchanged. No live iPhone test yet.
+
+## 2026-11-12 offline/online duplicate prevention
+- Preview `login-offline-preview.html` updated (`f90696bc89e8fb1029d835842125fa3a6ccd73c6`): online preview duplicate check and final online save both check locally queued ticket numbers before attempting cloud save. This closes a path where an offline pending ticket could otherwise be uploaded twice via online entry. No production change.
+- Important outstanding: confirm page can launch while entirely offline (service worker/cache), durable queue and storage quota behavior, app syntax/browser acceptance, offline photo capture on iPhone, manual review/reconciliation for `needs_review`, final live activation only after acceptance. Prior Beta offline success does not prove new preview integration.
