@@ -17,6 +17,9 @@ async function sync(userId,cloud){
   syncing=true;
   try{
     if(!userId||!cloud?.findTicketNumber||!cloud?.saveTicketWithPhoto)throw Error("Signed-in cloud session required.");
+    // Never start a network sync while the browser reports offline. The queue
+    // remains intact and can be retried when connectivity is restored.
+    if(navigator.onLine===false)throw Error("Device is offline. Saved tickets remain on this device.");
     const rows=(await list()).filter(x=>x.userId===userId).sort((a,b)=>a.created-b.created);
     let synced=0;
     for(const row of rows){
