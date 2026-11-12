@@ -1,6 +1,6 @@
 /* Preview-only offline shell cache. Never intercept Supabase, authentication,
    ticket/photo POSTs or other remote requests. Does not affect production page. */
-const CACHE="ck-offline-preview-shell-v1";
+const CACHE="ck-offline-preview-shell-v2";
 const ASSETS=[
  "./login-offline-preview.html",
  "./offline-current-adapter.js",
@@ -37,10 +37,17 @@ self.addEventListener("fetch",event=>{
  if(!allowed.has(path))return;
  event.respondWith((async()=>{
   const cache=await caches.open(CACHE);
-  const saved=await cache.match(req,{ignoreSearch:true});
-  if(saved)return saved;
-  const response=await fetch(req);
-  if(response.ok)await cache.put(req,response.clone());
-  return response;
+  // Prefer fresh code while connected; retain the installed shell offline.
+  // Never cache cloud requests or submitted ticket/photo data.
+  try{
+   const response=await fetch(req);
+   if(response.ok){await cache.put(req,response.clone());return response;}
+   const saved=await cache.match(req,{ignoreSearch:true});
+   return saved||response;
+  }catch(error){
+   const saved=await cache.match(req,{ignoreSearch:true});
+   if(saved)return saved;
+   throw error;
+  }
  })());
 });
