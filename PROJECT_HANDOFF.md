@@ -190,3 +190,7 @@ User explicitly requests assistant finish all possible remaining work independen
 - Offline adapter photo validation now matches production private photo helper: JPEG/PNG/WebP only, 0 < size <= 10 MB (`99c4f00f1dabe823b2874d8f45d50679aadab145`).
 - Offline preview service worker updated to `ck-offline-preview-shell-v2`: network-first for allowlisted local preview shell files, cached fallback when disconnected; no cloud/API or non-GET interception (`9b2f7fa9119cf812a72612879204def93479dd8b`). Avoids serving indefinitely stale app code after updates.
 - JavaScript parse checks via JS Function constructor passed for adapter, SW, and all three inline preview scripts. This is syntax-only; no browser or iPhone functional test has been performed. Production unchanged.
+
+## 2026-11-12 offline-only UI finalization
+- Preview `login-offline-preview.html` commit `481f6432f2cdacd34a6bc69ed43f2bffc0eca0a8`: hide cloud-only admin/manager controls offline, re-enable on online event. All three inline preview scripts passed JavaScript parse checks after change. No production modifications.
+- Next gate is human iPhone preview acceptance (existing Beta test already passed historically, but current preview differs); do not silently promote preview or assume iPhone test has passed. Test on nonproduction example ticket and avoid uploading a fake ticket to live cloud unless clearly marked as test.
