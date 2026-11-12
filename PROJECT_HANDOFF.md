@@ -164,3 +164,6 @@ The previous assistant repeatedly retested completed features after changing cha
 - Confirmed current CKCloud exports `myProfile`, `findTicketNumber`, `saveTicketWithPhoto` required by staged adapter.
 - Corrected escaping in staged adapter validation regexes (date and image MIME), commit `dfa59df3640d931075ac577240f6ad6baa6bc3e0`. The previous staged version would have rejected valid dates/photos. Live HTML remains unchanged.
 - Staged adapter still NOT activated. Remaining critical integration: signed-in user ID from `CKCloud.myProfile().user_id`, offline confirm-save UI and pending counter, sync on reconnect, photo upload partial-failure reconciliation and safe duplicate resolution. No claim of current Home Screen offline readiness.
+
+## User instruction (2026-11-12)
+User explicitly requests assistant finish all possible remaining work independently and contact user only when action is required. Do not repeat previously passed Beta offline test. Do not claim staged code is live. Current `login-v23.html` confirmation preview requires cloud lookup and save explicitly blocks offline, so merely loading the staged adapter is insufficient. Need code integration with careful testing and safe retry semantics before deployment. Pending human sign-ins for Ricky/Jakeleg/Cody/Brenda and visual PDF approval remain external dependencies.
