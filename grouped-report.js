@@ -66,6 +66,9 @@
       const summary=document.createElement("p");
       summary.style.fontWeight="700";
       summary.textContent="All drivers: "+allLoads+" loads · "+(allHundredths/100).toFixed(2)+" tons";
+      const scopeNote=document.createElement("p");
+      scopeNote.textContent="All-driver totals include every farm. Austin tank groups below include only destinations provisionally matched to Austin; unmatched loads remain in all-driver totals. A tank assignment is not counted as Austin without confirmed farm ownership.";
+      output.appendChild(scopeNote);
       output.appendChild(summary);
       const table=document.createElement("table");
       table.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
