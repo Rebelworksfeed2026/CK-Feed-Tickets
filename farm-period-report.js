@@ -10,13 +10,14 @@ dateInput.value=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0
 let sequence=0;
 function table(title,headers,rows){
  const p=document.createElement("p");p.textContent=title;p.style.fontWeight="700";output.appendChild(p);
- const t=document.createElement("table");t.style.cssText="width:100%;border-collapse:collapse;font-size:14px";
+ const scroller=document.createElement("div");scroller.style.cssText="max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch";scroller.setAttribute("role","region");scroller.setAttribute("aria-label",title+" — swipe sideways to view all columns");
+ const t=document.createElement("table");t.style.cssText="width:100%;min-width:"+(headers.length>=5?"650px":headers.length===4?"540px":"420px")+";border-collapse:collapse;font-size:14px";
  const head=document.createElement("tr");
- for(const h of headers){const th=document.createElement("th");th.textContent=h;th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1";head.appendChild(th);}
+ for(const h of headers){const th=document.createElement("th");th.textContent=h;th.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #b5c5d1;white-space:nowrap";head.appendChild(th);}
  t.appendChild(head);
- for(const values of rows){const tr=document.createElement("tr");for(const v of values){const td=document.createElement("td");td.textContent=String(v);td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9";tr.appendChild(td);}t.appendChild(tr);}
+ for(const values of rows){const tr=document.createElement("tr");for(const v of values){const td=document.createElement("td");td.textContent=String(v);td.style.cssText="padding:7px;border-bottom:1px solid #d8e3e9;white-space:nowrap";tr.appendChild(td);}t.appendChild(tr);}
  if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=headers.length;td.textContent="No matching records";tr.appendChild(td);t.appendChild(tr);}
- output.appendChild(t);
+ scroller.appendChild(t);output.appendChild(scroller);
 }
 for(const control of [$("farmPeriod"),dateInput,$("cloudWeek")])control.addEventListener("change",()=>{sequence++;button.disabled=false;output.replaceChildren();status.textContent="Selection changed. Calculate again.";});
 $("logout").addEventListener("click",()=>{sequence++;button.disabled=false;output.replaceChildren();status.textContent="Sign in to view reports.";});
