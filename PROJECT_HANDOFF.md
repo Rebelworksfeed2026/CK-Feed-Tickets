@@ -238,3 +238,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — read-only account linkage check
 - Queried `public.drivers` for name, company, `is_admin`, `is_office`, and whether `user_id` is populated. All five configured accounts (Sean, Ricky, Jakeleg, Cody, Brenda) have non-null linked user IDs. Sean is sole admin; Brenda office-only; others ordinary drivers. Cody company Next Page, others C&K Farms. This does NOT prove login/password/invite success, user confirmation, or permission behavior in a live browser. Brenda's prior `otp_expired` remains unresolved. No accounts modified.
+
+## 2026-11-12 — auth activation status audit
+- Read-only join of `public.drivers.user_id` to `auth.users`: Sean `email_confirmed=true`, `ever_signed_in=true`. Brenda, Ricky, Jakeleg, Cody each `email_confirmed=false`, `ever_signed_in=false`. All five profile links exist, but only Sean has completed activation. This explains why a profile link alone does not mean Brenda can log in and is consistent with her observed expired OTP invitation. Need a deliberate new invitation/password setup workflow, not duplicate profiles; coordinate to avoid interrupting Brenda repeatedly. No user/auth settings modified.
