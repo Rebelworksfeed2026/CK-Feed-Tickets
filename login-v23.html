@@ -18,36 +18,23 @@ button{background:#17628e;color:white;border:0;margin-top:18px;font-weight:700;c
 button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#183449}
 #message{min-height:22px;font-size:14px}#profile{display:none}.muted{font-size:13px}.dashboard{border-top:1px solid #d8e3e9;padding-top:12px}.tile{min-width:0;overflow-wrap:anywhere;padding:14px;background:#eef3f6;border-radius:9px;margin:10px 0}.tile strong{display:block;margin-bottom:4px}.tile span{font-size:13px;color:#526778}
 @media print {
-@page { size: letter landscape; margin: 0.35in; }
-html,body {width:100%!important;height:auto!important;margin:0!important;padding:0!important;overflow:visible!important;background:white!important;color:#172b3b!important}
-body {display:block!important}
-body > main {display:none!important}
-#printArea {position:fixed!important;top:0!important;left:0!important;width:100%!important;max-width:100%!important;min-height:0!important;height:auto!important;margin:0!important;padding:0!important;overflow:visible!important;background:white!important;font-family:Arial,sans-serif;color:#172b3b}
-body * {visibility:hidden!important}
-#printArea,#printArea * {visibility:visible!important}
-#printArea {position:absolute!important}
-#printArea > div {overflow:visible!important}
-#printTitle {display:block!important;text-align:center;font-size:17pt;margin:0 0 6pt;font-weight:800}
-#sheetHeading {text-align:center;font-size:10pt;font-weight:700;margin:0 0 9pt}
-#weekTable {display:table!important;min-width:0!important;width:100%!important;border-collapse:collapse!important;font-size:8pt!important}
-#weekTable th {background:#dbeaf5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:1px solid #a6b8c6;padding:5pt 3pt}
-#weekTable td {border:1px solid #b7c4cc!important;padding:4pt 3pt!important;white-space:normal!important}
-#weekTable tfoot td {font-weight:700!important;background:#e3edf3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-#weekTable tr {break-inside:avoid}
-#weekTotal,#weekHighlights {font-size:9pt!important;margin:6pt 0!important}
+  @page { size: landscape; margin: 0.35in; }
+  html,body { margin:0!important;padding:0!important;width:auto!important;height:auto!important;overflow:visible!important;background:#fff!important; }
+  body > :not(#printArea) { display:none!important; }
+  body > #printArea { display:block!important;position:static!important;visibility:visible!important;box-sizing:border-box!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;background:#fff!important;color:#172b3b!important;font-family:Arial,sans-serif!important;break-before:auto!important;break-after:auto!important; }
+  #printArea * {visibility:visible!important;}
+  #printTitle {display:block!important;text-align:center;font-size:16pt!important;margin:0 0 5pt!important;font-weight:800!important;}
+  #sheetHeading {text-align:center;font-size:9pt!important;margin:0 0 8pt!important;}
+  #scrollHint,.no-print,#savedPhotoViewer {display:none!important;}
+  #weekScroll {display:block!important;width:100%!important;max-width:none!important;overflow:visible!important;}
+  #weekTable {display:table!important;width:100%!important;min-width:0!important;max-width:none!important;table-layout:auto!important;border-collapse:collapse!important;font-size:8pt!important;}
+  #weekTable thead {display:table-header-group!important;}
+  #weekTable th,#weekTable td {font-size:8pt!important;line-height:1.15!important;padding:3pt 2pt!important;white-space:normal!important;border:1px solid #b7c4cc!important;}
+  #weekTable th {background:#dbeaf5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #weekTable tfoot td {font-weight:700!important;background:#e3edf3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #weekTable tr {break-inside:avoid!important;page-break-inside:avoid!important;}
+  #weekTotal,#weekHighlights {font-size:9pt!important;margin:5pt 0!important;break-inside:avoid!important;}
 }
-@media print {
-  /* Keep the report compact and isolated from the mobile dashboard. */
-  @page { size: 11in 8.5in; margin: 0.3in; }
-  #scrollHint,.no-print,#savedPhotoViewer {display:none!important}
-  #printArea {position:static!important;width:100%!important;max-width:100%!important;break-after:avoid!important;page-break-after:avoid!important}
-  #weekScroll {overflow:visible!important;max-width:none!important;width:100%!important}
-  #weekTable {min-width:0!important;width:100%!important;table-layout:auto!important}
-  #weekTable th.no-print,#weekTable td.no-print {display:none!important}
-  #weekTable th,#weekTable td {font-size:8pt!important;line-height:1.15!important;padding:3pt 2pt!important}
-  #weekTotal,#weekHighlights {break-inside:avoid!important;page-break-inside:avoid!important}
-}
-
 #groupedReportResults{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 #groupedReportResults table{min-width:0;width:100%;table-layout:fixed;font-size:12px!important}
 #groupedReportResults th,#groupedReportResults td{padding:5px 3px!important;overflow-wrap:anywhere;word-break:normal}
