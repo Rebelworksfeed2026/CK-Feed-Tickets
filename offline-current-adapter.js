@@ -28,7 +28,9 @@ async function sync(userId,cloud){
       catch(error){throw Error("Cannot verify ticket "+row.ticket.ticket_number+" against cloud. Offline copy retained: "+error.message);}
       if(existing){
         await markBlocked(row,"A matching ticket number exists in cloud; compare details and photo before resolving.");
-        throw Error("Ticket "+row.ticket.ticket_number+" exists in cloud. Offline copy retained for review.");
+        // Keep this conflicting ticket and its original photo for review,
+        // but let independent later tickets continue to sync.
+        continue;
       }
       const file=new File([row.photo],row.photoName,{type:row.photoType});
       try{await cloud.saveTicketWithPhoto(row.ticket,file);}
