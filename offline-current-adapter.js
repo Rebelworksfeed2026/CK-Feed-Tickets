@@ -20,7 +20,9 @@ async function sync(userId,cloud){
     const rows=(await list()).filter(x=>x.userId===userId).sort((a,b)=>a.created-b.created);
     let synced=0;
     for(const row of rows){
-      if(row.state==="needs_review")throw Error("Ticket "+row.ticket.ticket_number+" requires review before another upload attempt. Original photo is still on this device.");
+      // A previously blocked ticket must not prevent later independent tickets
+      // from syncing. Never retry or delete the blocked original.
+      if(row.state==="needs_review")continue;
       let existing;
       try{existing=await cloud.findTicketNumber(row.ticket.ticket_number);}
       catch(error){throw Error("Cannot verify ticket "+row.ticket.ticket_number+" against cloud. Offline copy retained: "+error.message);}
