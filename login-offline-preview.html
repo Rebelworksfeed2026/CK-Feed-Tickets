@@ -715,6 +715,9 @@ async function syncOfflineQueue(){
   finally{offlineBusy=false;await updateOfflineStatus();}
 }
 retryOfflineSync.addEventListener("click",()=>syncOfflineQueue());
+// iOS can suspend a browser tab while connectivity changes; check again on return.
+window.addEventListener("pageshow",()=>{if(activeProfile&&navigator.onLine!==false)syncOfflineQueue();});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&activeProfile&&navigator.onLine!==false)syncOfflineQueue();});
 window.addEventListener("online",()=>{
   if(activeProfile){
     $("adminTile").hidden=!activeProfile.is_admin;
