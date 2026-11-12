@@ -25,15 +25,20 @@ button.addEventListener("click",async()=>{
  try{
   if(!CKCloud.isSignedIn())throw Error("Sign in first.");
   const date=dateInput.value,period=$("farmPeriod").value;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!["day","month","year"].includes(period))throw Error("Choose a valid date and period.");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!["day","week","month","year"].includes(period))throw Error("Choose a valid date and period.");
   const parsed=new Date(date+"T12:00:00");
   if(Number.isNaN(parsed.getTime())||parsed.getFullYear()!==Number(date.slice(0,4))||parsed.getMonth()+1!==Number(date.slice(5,7))||parsed.getDate()!==Number(date.slice(8,10)))throw Error("Choose a real calendar date.");
-  const start=period==="day"?date:period==="year"?date.slice(0,4)+"-01-01":date.slice(0,7)+"-01";
+  const monday=new Date(parsed);monday.setDate(monday.getDate()-(monday.getDay()+6)%7);
+  const weekStart=monday.getFullYear()+"-"+String(monday.getMonth()+1).padStart(2,"0")+"-"+String(monday.getDate()).padStart(2,"0");
+  const start=period==="day"?date:period==="week"?weekStart:period==="year"?date.slice(0,4)+"-01-01":date.slice(0,7)+"-01";
   const y=Number(date.slice(0,4)),m=Number(date.slice(5,7));
   const nextDay=new Date(date+"T12:00:00");nextDay.setDate(nextDay.getDate()+1);
   const dayEnd=nextDay.getFullYear()+"-"+String(nextDay.getMonth()+1).padStart(2,"0")+"-"+String(nextDay.getDate()).padStart(2,"0");
-  const end=period==="day"?dayEnd:period==="year"?(y+1)+"-01-01":(m===12?(y+1)+"-01-01":y+"-"+String(m+1).padStart(2,"0")+"-01");
-  const [tickets,drivers,directory]=await Promise.all([CKCloud.listTicketsForPeriod(start,end),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks()]);
+  const nextWeek=new Date(monday);nextWeek.setDate(nextWeek.getDate()+7);
+  const weekEnd=nextWeek.getFullYear()+"-"+String(nextWeek.getMonth()+1).padStart(2,"0")+"-"+String(nextWeek.getDate()).padStart(2,"0");
+  const end=period==="day"?dayEnd:period==="week"?weekEnd:period==="year"?(y+1)+"-01-01":(m===12?(y+1)+"-01-01":y+"-"+String(m+1).padStart(2,"0")+"-01");
+  const [allTickets,drivers,directory]=await Promise.all([CKCloud.listTicketsForPeriod(start,end),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks()]);
+  const tickets=period==="week"?allTickets.filter(t=>new Date(t.delivery_date+"T12:00:00").getDay()!==0):allTickets;
   if(token!==sequence||!CKCloud.isSignedIn())return;
   const allocations=await CKCloud.listReportTankAllocations(tickets.map(t=>t.id));
   if(token!==sequence||!CKCloud.isSignedIn())return;
@@ -59,7 +64,7 @@ button.addEventListener("click",async()=>{
   const ticketCents=tickets.reduce((n,t)=>n+Math.round(Number(t.tons)*100),0);
   const allocatedCents=[...allocated.values()].reduce((a,b)=>a+b,0);
   const problems=tickets.filter(t=>allocated.get(t.id)!==Math.round(Number(t.tons)*100));
-  const p=document.createElement("p");p.textContent=(period==="year"?"Year":period==="month"?"Month":"Day")+" starting "+start+": "+tickets.length+" tickets, "+(ticketCents/100).toFixed(2)+" total tons; "+(allocatedCents/100).toFixed(2)+" assigned tons.";output.appendChild(p);
+  const p=document.createElement("p");p.textContent=(period==="year"?"Year":period==="month"?"Month":period==="week"?"Week":"Day")+" starting "+start+": "+tickets.length+" tickets, "+(ticketCents/100).toFixed(2)+" total tons; "+(allocatedCents/100).toFixed(2)+" assigned tons.";output.appendChild(p);
   const farmTotals=new Map();
   for(const entry of totals.values()){
    const farm=farmTotals.get(entry.farm)||{farm:entry.farm,cents:0,tickets:new Set()};
