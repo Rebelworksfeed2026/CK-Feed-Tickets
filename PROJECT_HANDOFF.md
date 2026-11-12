@@ -241,3 +241,6 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — auth activation status audit
 - Read-only join of `public.drivers.user_id` to `auth.users`: Sean `email_confirmed=true`, `ever_signed_in=true`. Brenda, Ricky, Jakeleg, Cody each `email_confirmed=false`, `ever_signed_in=false`. All five profile links exist, but only Sean has completed activation. This explains why a profile link alone does not mean Brenda can log in and is consistent with her observed expired OTP invitation. Need a deliberate new invitation/password setup workflow, not duplicate profiles; coordinate to avoid interrupting Brenda repeatedly. No user/auth settings modified.
+
+## 2026-11-12 — read-only farm/tank allocation reconciliation
+- SQL compared `feed_tickets.tons` to summed `ticket_tank_allocations.tons` for all six active tickets. Production ticket 102885 24.94/24.94 tons, 102887 25.12/25.12 tons, combined 50.06/50.06. No real ticket allocation mismatch. Four active test tickets 102823, 102829, 102838, 102841 have zero allocation; report code filters `is_test=true` out of production totals. No data changed. This verifies stored allocation arithmetic, not browser-rendered reports or all future data.
