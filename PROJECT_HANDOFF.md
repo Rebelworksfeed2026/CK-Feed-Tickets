@@ -228,3 +228,7 @@ User explicitly requests assistant finish all possible remaining work independen
 
 ## 2026-11-12 — offline blocked ticket diagnostic visibility
 - Preview-only `login-offline-preview.html` commit `c3f176020635d9e25efa9363eb1d9f8e790e5c5c` displays `needs_review` reason from existing IndexedDB queue metadata, including possible duplicate/ambiguous cloud upload, beside the ticket number. This helps sole admin distinguish why a ticket is blocked without resubmitting or deleting its original photo. No data changes, all three inline scripts parsed. Still needs live iPhone acceptance.
+
+## 2026-11-12 — read-only live ticket integrity audit
+- Supabase SQL: 13 total feed_tickets, 13 distinct ticket numbers, 2 active real tickets totaling 50.06 tons, 4 active test tickets, 7 soft-deleted/archived rows. All 6 active tickets have non-null photo_path. 2 ticket_tank_allocations rows, zero missing parent feed_tickets. No data mutated.
+- Static code review: `farm-period-report.js` filters `is_test===true` out of production totals; `grouped-report.js` filters `is_test!==true` and deduplicates IDs. These are code checks, not complete end-user report rendering tests. Do not confuse archived 7 records with new active tickets.
