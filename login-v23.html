@@ -54,12 +54,15 @@ button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#1834
 <h1>C&K Feed Tickets</h1>
 <p>Secure account sign-in setup</p>
 <form id="login">
+<p><strong>Sign in using your one-time email link.</strong> Request the link in Safari, then open the link in Safari too. Yahoo’s in-app browser does not share Safari’s saved session.</p>
+<p><a style="display:block;background:#17628e;color:white;text-align:center;padding:15px;border-radius:8px" href="./account-setup-preview.html">Sign in with email link</a></p>
+<details><summary>Use a password instead</summary>
 <label for="email">Email address</label>
 <input id="email" type="email" autocomplete="username" required>
 <label for="password">Password</label>
 <input id="password" type="password" autocomplete="current-password" required>
 <button id="submit" type="submit">Sign in</button>
-<p id="emailSignInOption"><a href="./account-setup-preview.html">Sign in with a one-time email link instead</a></p>
+</details>
 </form>
 <section id="profile" aria-live="polite">
 <h2 id="welcome"></h2><p id="role"></p><div id="quickCamera" class="tile" style="margin:12px 0"><strong>New delivery</strong><button id="quickCameraButton" type="button" style="font-size:19px;min-height:70px;margin-top:8px">📷 Take Photo / Choose Ticket Photo</button><span style="display:block;margin-top:8px">Tap to scan a ticket. Check the details before saving.</span></div>
