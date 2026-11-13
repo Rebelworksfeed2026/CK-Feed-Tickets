@@ -1307,6 +1307,10 @@ $("logout").addEventListener("click", async () => {
  document.getElementById("logout").addEventListener("click",()=>{directory=null;output.replaceChildren();status.textContent="Sign in to view totals.";});
  // Directory loads after login when the preview panel is opened.
  tile.addEventListener("click",()=>{if(!directory&&CKCloud.isSignedIn())load();},{once:false});
+ // On the dedicated preview page, jump straight to the manager selector.
+ const focusManager=()=>{const section=document.getElementById("mgManager");if(!section)return;section.scrollIntoView({block:"start",behavior:"instant"});if(CKCloud.isSignedIn()&&!directory)load();};
+ window.addEventListener("load",()=>{setTimeout(focusManager,250);setTimeout(focusManager,1000);},{once:true});
+ 
 })();
 </script>
 </body>
