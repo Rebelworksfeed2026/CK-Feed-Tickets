@@ -799,7 +799,8 @@ async function showSignedIn(profile) {
     $("adminTile").hidden = !profile.is_admin;
     $("farmAdmin").hidden = !profile.is_admin;
     $("managerAdmin").hidden = !profile.is_admin;
-    if(profile.is_admin) refreshManagers();\n    loadTotalsOptions();
+    if(profile.is_admin) refreshManagers();
+    loadTotalsOptions();
     $("officeTile").hidden = !profile.is_office;
     $("cameraTile").hidden = true;
     $("quickCamera").hidden = Boolean(profile.is_office);
