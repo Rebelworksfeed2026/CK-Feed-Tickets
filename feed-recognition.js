@@ -2,17 +2,17 @@
    This stage identifies ticket wording for review; it does not save feed data. */
 (()=>{'use strict';
   const labels=['Mini Pellets','FRY 2','28 Special','Dust/Fines'];
-  function normalize(s){return String(s||'').toUpperCase().replace(/[–—]/g,'-').replace(/\\s+/g,' ').trim();}
+  function normalize(s){return String(s||'').toUpperCase().replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();}
   function inspect(ocrText){
     const raw=String(ocrText||'');
     const text=normalize(raw);
     let type=null;
-    if(/\\b(?:DW\\s*)?28\\s*(?:SPEC(?:IAL)?|SPE?C)\\s*(?:IRON|FEED)?\\b/.test(text))type='28 Special';
-    else if(/\\bFRY\\s*[- ]?2\\b/.test(text))type='FRY 2';
-    else if(/\\b(?:MINI\\s*PELLETS?|PELLETS?\\s*MINI)\\b/.test(text))type='Mini Pellets';
-    else if(/\\b(?:DUST\\s*[\\/ &-]?\\s*FINE?S?|FINES?\\s*DUST)\\b/.test(text))type='Dust/Fines';
-    const lines=raw.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
-    const productLines=lines.filter(x=>/\\b(?:product|feed|description|DW|delta western|mini|pellet|fry|dust|fine|spec|iron)\\b/i.test(x));
+    if(/\b(?:DW\s*)?28\s*(?:SPEC(?:IAL)?|SPE?C)\s*(?:IRON|FEED)?\b/.test(text))type='28 Special';
+    else if(/\bFRY\s*[- ]?2\b/.test(text))type='FRY 2';
+    else if(/\b(?:MINI\s*PELLETS?|PELLETS?\s*MINI)\b/.test(text))type='Mini Pellets';
+    else if(/\b(?:DUST\s*[\/ &-]?\s*FINE?S?|FINES?\s*DUST)\b/.test(text))type='Dust/Fines';
+    const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    const productLines=lines.filter(x=>/\b(?:product|feed|description|DW|delta western|mini|pellet|fry|dust|fine|spec|iron)\b/i.test(x));
     return Object.freeze({type,known:Boolean(type),recognizedText:productLines.slice(0,5).join(' | '),raw:raw.slice(0,12000)});
   }
   function render(result){
