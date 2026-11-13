@@ -1308,8 +1308,8 @@ $("logout").addEventListener("click", async () => {
  // Directory loads after login when the preview panel is opened.
  tile.addEventListener("click",()=>{if(!directory&&CKCloud.isSignedIn())load();},{once:false});
  // On the dedicated preview page, jump straight to the manager selector.
- const focusManager=()=>{const section=document.getElementById("mgManager");if(!section)return;section.scrollIntoView({block:"start",behavior:"instant"});if(CKCloud.isSignedIn()&&!directory)load();};
- window.addEventListener("load",()=>{setTimeout(focusManager,250);setTimeout(focusManager,1000);},{once:true});
+ const focusManager=()=>{const section=document.getElementById("mgManager");if(!section)return;for(let node=section.parentElement;node;node=node.parentElement){if(node.tagName==="DETAILS")node.open=true;if(node.hidden)node.hidden=false;}section.scrollIntoView({block:"start",behavior:"auto"});if(CKCloud.isSignedIn()&&!directory)load();};
+ window.addEventListener("load",()=>{setTimeout(focusManager,300);setTimeout(focusManager,1300);setTimeout(focusManager,2600);},{once:true});
  
 })();
 </script>
