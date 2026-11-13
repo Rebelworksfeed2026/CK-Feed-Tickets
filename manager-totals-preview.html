@@ -1292,8 +1292,8 @@ $("logout").addEventListener("click", async () => {
     const item=buckets.get(t.driver_id)||{name:names.get(t.driver_id)||"Unknown driver",cents:0,ids:new Set()};
     item.cents+=c;item.ids.add(t.id);buckets.set(t.driver_id,item);
    }
-   const title=document.createElement("h3");title.textContent="All drivers combined: "+(cents/100).toFixed(2)+" tons";output.appendChild(title);
-   const sub=document.createElement("p");sub.textContent=ids.size+" unique tickets · "+start+" through "+end+" (end exclusive) · verified assignments only";output.appendChild(sub);
+   const title=document.createElement("h3");title.textContent=ids.size?"All drivers combined: "+(cents/100).toFixed(2)+" tons":"All drivers combined: — tons (not verified)";output.appendChild(title);
+   const sub=document.createElement("p");sub.textContent=(ids.size?ids.size+" unique tickets":"No verified ticket totals available")+" · "+start+" through "+end+" (end exclusive) · verified assignments only";output.appendChild(sub);
    const entries=[...buckets.values()].sort((a,b)=>a.name.localeCompare(b.name));
    rowTable("Tap a driver for their tank and farm totals",entries);
    const list=output.querySelector("table");
