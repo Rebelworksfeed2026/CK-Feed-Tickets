@@ -116,17 +116,26 @@ window.CKCloud = (() => {
       const saved = localStorage.getItem(sessionKey);
       if (!saved) return null;
       const value = JSON.parse(saved);
-      if (!value?.refresh_token || !value?.user?.id) { remember(null); return null; }
+      if (!value?.refresh_token) { remember(null); return null; }
+      // Some older saved sessions omit the user object; recover it from Auth.
+      if (!value?.user?.id && value.access_token) {
+        const userResponse = await fetch(url + "/auth/v1/user", {headers:{apikey:key,Authorization:"Bearer " + value.access_token}});
+        if (userResponse.ok) {
+          value.user = await userResponse.json();
+          localStorage.setItem(sessionKey, JSON.stringify(value));
+        }
+      }
       session = value;
       // A valid email-link session can be used immediately. Refresh only near expiry.
       if (!value.access_token || !value.expires_at || Date.now() >= (value.expires_at - 90) * 1000) {
         await refreshSession();
       }
       const profile = await myProfile();
-      if (!profile) { remember(null); return null; }
+      if (!profile) return null;
       return profile;
     } catch (e) {
-      if (navigator.onLine !== false && !session) remember(null);
+      // Preserve stored credentials on network errors rather than silently deleting them.
+      console.warn("Could not restore saved session:", e);
       return null;
     }
   }
