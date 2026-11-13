@@ -855,9 +855,28 @@ $("login").addEventListener("submit", async e => {
     $("submit").disabled = false;
   }
 });
-CKCloud.restoreSession().then(profile => {
-  if (profile) return showSignedIn(profile);
-}).catch(() => { $("message").textContent = "Please sign in."; });
+// Accept one-time email callbacks even when the provider redirects to this page.
+(async()=>{
+ const hash=new URLSearchParams(location.hash.slice(1)),query=new URLSearchParams(location.search);
+ const hasTokens=hash.has("access_token")&&hash.has("refresh_token");
+ if(hasTokens){
+  history.replaceState(null,"",location.pathname);
+  $("message").textContent="Completing your email sign-in…";
+  try{
+   const expires=Number(hash.get("expires_in")||3600);
+   const session={access_token:hash.get("access_token"),refresh_token:hash.get("refresh_token"),token_type:"bearer",expires_in:expires,expires_at:Math.floor(Date.now()/1000)+expires};
+   const response=await fetch(window.SUPABASE_URL+"/auth/v1/user",{headers:{apikey:window.SUPABASE_KEY,Authorization:"Bearer "+session.access_token}});
+   if(!response.ok)throw Error("The email sign-in link could not be verified.");
+   session.user=await response.json();
+   localStorage.setItem("ck-feed-auth-v1",JSON.stringify(session));
+  }catch(err){$("message").textContent="Email sign-in failed: "+err.message;return;}
+ }else if(hash.has("error")||query.has("error_description")){
+  $("message").textContent="The email sign-in link expired or was rejected. Request a new link.";
+  history.replaceState(null,"",location.pathname);return;
+ }
+ try{const profile=await CKCloud.restoreSession();if(profile)await showSignedIn(profile);else if(hasTokens)$("message").textContent="Account verification failed. Please request a fresh sign-in link.";}
+ catch(err){$("message").textContent="Unable to open account: "+err.message;}
+})();
 $("printWeek").addEventListener("click", () => {
   if ($("printWeek").disabled) return;
   const area = $("printArea");
