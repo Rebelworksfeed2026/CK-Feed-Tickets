@@ -500,7 +500,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   ticketEntryTile.hidden=true;
   // Keep one prominent camera shortcut above the dashboard, not a duplicate.
   const otherTiles=[...dashboard.querySelectorAll(":scope > .tile")].filter(t=>
-    t!==cameraTile && t!==ticketEntryTile && t!==weekTile);
+    t!==cameraTile && t!==ticketEntryTile && t!==weekTile && t.id!=="savedPhotoViewer");
   const extras=document.createElement("details");
   extras.id="dashboardExtras";
   extras.style.cssText="margin-top:14px;border:1px solid #cbd9e2;border-radius:10px;padding:12px";
