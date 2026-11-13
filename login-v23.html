@@ -470,7 +470,7 @@ window.CKCloud = (() => {
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
-$("annualYear").value=String(new Date().getFullYear());
+if ($("annualYear")) $("annualYear").value=String(new Date().getFullYear());
 // Consolidated read-only delivery totals. Existing ticket and allocation data are unchanged.
 const totalsEl=id=>document.getElementById(id);
 const totalsDate=totalsEl("totalsDate");
