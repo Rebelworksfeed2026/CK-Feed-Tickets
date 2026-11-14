@@ -15,25 +15,36 @@ if(!scannedFeed){
  const m=text.match(/\b(?:DW\s*)?(?:FRY\s*[- ]?\s*2|28\s+(?:SPEC(?:IAL)?|IRON|PELLETS?)(?:\s+(?:IRON|PELLETS?))?|MINI\s*PELLETS?|DUST\s*(?:\/|&|AND)?\s*FINES)\b(?:\s+(?:SPEC(?:IAL)?|IRON|PELLETS?))?/i);
  if(m)scannedFeed=feedClean(m[0]);
 }
-// Scan several product-description regions, independently of the main OCR pass.
-// Accept a candidate only when a known feed pattern is present; never guess from a bare "28".
-const feedPattern=/\b(?:DW\s*)?(?:FRY\s*[- ]?\s*2|28\s+(?:SPEC(?:IAL)?|PELLETS?|IRON)(?:\s+(?:IRON|PELLETS?))?|MINI\s*PELLETS?|DUST\s*(?:\/|&|AND)?\s*FINES)\b/i;
+// Product descriptions are open-ended: recognize any legible product name, not a fixed feed list.
+// Read the printed product-description area as separate lines with layout-aware OCR.
 if(!scannedFeed){
  try{
   const pic=await createImageBitmap(input.files[0]);
   const detail=await Tesseract.createWorker('eng');
+  const bad=/^(?:product|description|delivery|instructions|shipped|dispatched|scale|gross|tare|net|ticket|tons|date|driver|truck|trailer|customer|order|destination|lbs|weight|total)\\b/i;
+  const candidate=line=>{
+   const x=String(line||'').replace(/[|_~]+/g,' ').replace(/\\s+/g,' ').trim();
+   if(x.length<4||x.length>85||bad.test(x)||/\\d{5,}/.test(x)||!/[a-z]{2,}/i.test(x))return '';
+   if(!/[a-z]{2,}.*[a-z0-9]{2,}/i.test(x))return '';
+   return x;
+  };
   try{
-   const regions=[[.18,.39,.39,.18],[.18,.43,.39,.17],[.18,.46,.39,.15],[.15,.36,.49,.26]];
+   await detail.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
+   const regions=[[.15,.35,.50,.30],[.18,.40,.42,.23],[.12,.29,.60,.38]];
    for(const [x,y,w,h] of regions){
-    const crop=document.createElement('canvas');crop.width=1800;crop.height=700;
-    const cx=crop.getContext('2d',{willReadFrequently:true});cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);
+    const crop=document.createElement('canvas');crop.width=1800;crop.height=1100;
+    const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);
     cx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,crop.width,crop.height);
     const raw=(await detail.recognize(crop)).data.text||'';
-    const match=raw.match(feedPattern);
-    if(match){scannedFeed=feedClean(match[0]);break;}
+    const rows=raw.split(/\\r?\\n/).map(v=>v.trim()).filter(Boolean);
+    const label=rows.findIndex(v=>/product\\s*(?:description|desc)|feed\\s*(?:type|description)/i.test(v));
+    if(label<0)continue;
+    const onLabel=rows[label].replace(/^.*?(?:product\\s*(?:description|desc)|feed\\s*(?:type|description))\\s*[:#-]?/i,'');
+    const found=[onLabel,...rows.slice(label+1,label+3)].map(candidate).find(Boolean);
+    if(found){scannedFeed=found;break;}
    }
   }finally{await detail.terminate();pic.close();}
- }catch(e){/* Keep feed blank if OCR cannot identify it reliably. */}
+ }catch(e){/* Never invent feed descriptions. Driver confirms manually. */}
 }
 const number=(text.match(/(?:ticket|load|order)\s*(?:no\.?|number|#|:)?\s*([0-9]{5,8})/i)||text.match(/\b(10[0-9]{4})\b/))?.[1];const shipped=text.match(/\bshipped\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})\s*(?:tons?|ton\b)/i);const stated=text.match(/(?:net\s*tons?|tons?|tonnage)\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})/i);const netPounds=text.match(/\bnet\s*[:#-]?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:lbs?|pounds?)?/i);let tons=(shipped||stated)?.[1]?.replace(',','.');if(!tons&&netPounds){const pounds=Number(netPounds[1].replace(/,/g,''));if(pounds>=10000&&pounds<=100000)tons=(pounds/2000).toFixed(2)}const instructionIndex=lines.findIndex(x=>/delivery\s*instructions?/i.test(x));const nearby=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):lines;// Delta Western instructions may read "304, D Tank" (tank suffix after the number).
 // Prefer the full instruction over numeric-only OCR fallbacks; do not infer missing letters.
