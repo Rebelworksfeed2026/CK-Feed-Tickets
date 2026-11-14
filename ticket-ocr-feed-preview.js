@@ -12,7 +12,7 @@ for(let i=0;i<lines.length;i++){
 // Delta Western photos can combine left and right columns in OCR.
 // Look for a recognizable feed designation only if the label-based scan failed.
 if(!scannedFeed){
- const m=text.match(/\b(?:DW\s*)?(?:FRY\s*[- ]?\s*2|28\s*(?:SPEC(?:IAL)?\s*)?(?:IRON)?|MINI\s*PELLETS?|DUST\s*(?:\/|&|AND)?\s*FINES)\b(?:\s+(?:SPEC(?:IAL)?|IRON|PELLETS?))?/i);
+ const m=text.match(/\b(?:DW\s*)?(?:FRY\s*[- ]?\s*2|28\s+(?:SPEC(?:IAL)?|IRON|PELLETS?)(?:\s+(?:IRON|PELLETS?))?|MINI\s*PELLETS?|DUST\s*(?:\/|&|AND)?\s*FINES)\b(?:\s+(?:SPEC(?:IAL)?|IRON|PELLETS?))?/i);
  if(m)scannedFeed=feedClean(m[0]);
 }
 // Scan several product-description regions, independently of the main OCR pass.
