@@ -94,17 +94,44 @@ window.CKCloud = (() => {
     } catch (_) { /* Private browsing may block storage. */ }
   }
   async function refreshSession() {
-    if (!session?.refresh_token) throw Error("Sign in again.");
     if (refreshPending) return refreshPending;
     refreshPending = (async () => {
+      // Another open app page may already have rotated the refresh token.
+      let current = session;
+      try {
+        const latest = JSON.parse(localStorage.getItem(sessionKey) || "null");
+        if (latest?.refresh_token && latest.refresh_token !== current?.refresh_token) {
+          current = latest;
+          session = latest;
+          if (latest.access_token && latest.expires_at &&
+              Date.now() < (latest.expires_at - 90) * 1000) return latest;
+        }
+      } catch (_) {}
+      if (!current?.refresh_token) throw Error("No saved login session is available.");
       const response = await fetch(url + "/auth/v1/token?grant_type=refresh_token", {
         method: "POST", headers: {apikey:key,"Content-Type":"application/json"},
-        body: JSON.stringify({refresh_token:session.refresh_token})
+        body: JSON.stringify({refresh_token:current.refresh_token})
       });
       const value = await response.json().catch(() => ({}));
       if (!response.ok || !value.access_token || !value.refresh_token) {
-        remember(null);
-        throw Error("Your login expired. Please sign in again.");
+        // A second page may have completed the refresh while this request was in flight.
+        try {
+          const latest = JSON.parse(localStorage.getItem(sessionKey) || "null");
+          if (latest?.refresh_token && latest.refresh_token !== current.refresh_token &&
+              latest.access_token && latest.expires_at &&
+              Date.now() < (latest.expires_at - 90) * 1000) {
+            session = latest;
+            return latest;
+          }
+          // Clear only the exact stale token that failed; never erase a newer session.
+          if (latest?.refresh_token === current.refresh_token &&
+              /invalid_grant|refresh token.*(invalid|expired|not found)/i.test(
+                String(value.error_description || value.msg || value.message || "")
+              )) remember(null);
+        } catch (_) {}
+        throw Error(response.status >= 500
+          ? "Login service is temporarily unavailable. Your saved session was kept."
+          : "Your login could not be refreshed. Your saved session was kept.");
       }
       remember(value);
       return value;
