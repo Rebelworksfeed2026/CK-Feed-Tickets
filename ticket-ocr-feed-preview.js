@@ -70,7 +70,7 @@ if(!fullInstructionDestination){
     const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);
     cx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,crop.width,crop.height);
     const raw=(await detail.recognize(crop)).data.text||'';
-    const m=raw.match(/\\b(\\d{2,4})\\s*[,;.]?\\s*([A-Z]{1,3})\\s*(?:Tank|Tnk)\\b/i);
+    const m=raw.match(/\b(\d{2,4})\s*[,;.]?\s*([A-Z]{1,3})\s*(?:Tank|Tnk)\b/i);
     if(m){dest=m[1]+', '+m[2].toUpperCase()+' Tank';break}
    }
   }finally{await detail.terminate();pic.close()}
