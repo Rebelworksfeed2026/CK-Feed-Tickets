@@ -315,7 +315,7 @@ window.CKCloud = (() => {
       headers: { Prefer: "return=representation" },
       body: JSON.stringify({
         driver_id: profile.id, delivery_date: date,
-        ticket_number: number, tons, destination, ...(ticket.photo_path ? {photo_path:ticket.photo_path} : {})
+        ticket_number: number, tons, destination, ...(ticket.feed_type ? {feed_type:String(ticket.feed_type).trim()} : {}), ...(ticket.photo_path ? {photo_path:ticket.photo_path} : {})
       })
       });
     } catch (error) {
@@ -813,7 +813,7 @@ $("ticketDraft").addEventListener("submit", async e => {
     if (!photo) { $("draftResult").textContent = "Ticket number available, but a ticket photo is required before saving. Select the original photo above. Nothing was saved."; return; }
     try { CKTicketPhotos.validate(photo); } catch(photoError) { $("draftResult").textContent = photoError.message + " Nothing was saved."; return; }
     $("draftResult").textContent = "Ticket number available and photo validated. Review the confirmation below. Nothing has been saved.";
-    verifiedTicket = Object.freeze({delivery_date:date,ticket_number:number,tons,destination});
+    verifiedTicket = Object.freeze({delivery_date:date,ticket_number:number,tons,destination,feed_type:feedType});
     $("confirmDetails").textContent = "Date: " + date + " | Ticket: " + number +
       " | Tons: " + tons.toFixed(2) + " | Feed: " + feedType + " | Destination: " + destination + " | Photo: " + photo.name;
     $("confirmPanel").hidden = false;
