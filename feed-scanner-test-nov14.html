@@ -627,6 +627,14 @@ $("ticketPhoto").addEventListener("change", () => {
     $("cameraMessage").textContent = "Photo is too large. Choose an image under 10 MB.";
     return;
   }
+  // Test-only: each newly selected photograph starts a fresh unsaved draft.
+  // This prevents repeated replace-field dialogs from the previous scan.
+  for (const id of ["draftDate","draftNumber","draftTons","draftDestination","draftFeedType"]) {
+    const field = document.getElementById(id);
+    if (field) field.value = "";
+  }
+  $("confirmPanel").hidden = true;
+  $("draftResult").textContent = "New photo selected. Scanning a fresh ticket; nothing saved.";
   cameraTile.hidden=false;
   ticketEntryTile.hidden=false;
   cameraPreviewUrl = URL.createObjectURL(file);
@@ -1232,7 +1240,7 @@ $("logout").addEventListener("click", async () => {
 <script src="grouped-report.js"></script>
 <script src="farm-period-report.js"></script>
 <script src="ticket-photo-storage.js"></script>
-<script src="ticket-ocr-feed-preview.js?v=20261114autostatus"></script>
+<script src="ticket-ocr-feed-preview.js?v=20261114freshdraft2"></script>
 
 <script>
 /* Read-only manager / farm / tank preview. Does not modify authentication or saved records. */
