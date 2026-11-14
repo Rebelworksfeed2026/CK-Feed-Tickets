@@ -73,7 +73,6 @@ if(!scannedFeed){
   }finally{await worker.terminate();pic.close()}
  }catch(e){/* Keep manual verification available. */}
 }
-}
 // Recover the complete printed product name from any OCR pass, including screenshots
 // of saved photographs. Do not use a partial label or infer a product.
 if(!scannedFeed){
