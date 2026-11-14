@@ -738,6 +738,8 @@ async function loadConfirmedReportTanks(){
 }
 let verifiedTicket = null;
 $("confirmSave").addEventListener("click", async () => {
+  $("draftResult").textContent="TEST MODE: Saving is blocked until feed type, tank assignment, and reporting are verified. No ticket was saved.";
+  return;
   if (!verifiedTicket) { $("draftResult").textContent="Check and preview the ticket again before saving."; return; }
   const file=$("ticketPhoto").files?.[0];
   if (!file) { $("draftResult").textContent="Select the original ticket photo before saving."; return; }
