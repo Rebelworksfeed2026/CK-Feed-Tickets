@@ -72,6 +72,19 @@ if(!scannedFeed){
  }catch(e){/* Keep manual verification available. */}
 }
 }
+// Recover the complete printed product name from any OCR pass, including screenshots
+// of saved photographs. Do not use a partial label or infer a product.
+if(!scannedFeed){
+ const allFeedText=[result.data.text||'',extra,instructionCrop,...feedCropReadings].join('\n');
+ const productLines=allFeedText.split(/\r?\n/);
+ const validProduct=/\b(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\s+[A-Za-z][A-Za-z0-9]*(?:\s+[A-Za-z][A-Za-z0-9]*){0,6}/i;
+ for(const line of productLines){
+  const match=line.match(validProduct);
+  if(!match)continue;
+  const cleaned=match[0].replace(/\s+(?:Gross|Tare|Net|Scale|Weights?|Shipped|Dispatched|Lbs?|Pounds?)\b.*$/i,'').trim();
+  if(cleaned.length>10){scannedFeed=cleaned;break;}
+ }
+}
 if(feedCropReadings.length){diagnostic.textContent+='\n\n'+feedCropReadings.join('\n\n').slice(0,2800)}
 const number=(text.match(/(?:ticket|load|order)\s*(?:no\.?|number|#|:)?\s*([0-9]{5,8})/i)||text.match(/\b(10[0-9]{4})\b/))?.[1];const shipped=text.match(/\bshipped\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})\s*(?:tons?|ton\b)/i);const stated=text.match(/(?:net\s*tons?|tons?|tonnage)\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})/i);const netPounds=text.match(/\bnet\s*[:#-]?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:lbs?|pounds?)?/i);let tons=(shipped||stated)?.[1]?.replace(',','.');if(!tons&&netPounds){const pounds=Number(netPounds[1].replace(/,/g,''));if(pounds>=10000&&pounds<=100000)tons=(pounds/2000).toFixed(2)}const instructionIndex=lines.findIndex(x=>/delivery\s*instructions?/i.test(x));const nearby=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):lines;// Delta Western instructions may read "304, D Tank" (tank suffix after the number).
 // Prefer the full instruction over numeric-only OCR fallbacks; do not infer missing letters.
