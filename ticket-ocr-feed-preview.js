@@ -46,6 +46,32 @@ if(!scannedFeed || /^(?:DW\\s+)?28\\s+Spec$/i.test(scannedFeed)){
   }finally{await detail.terminate();pic.close();}
  }catch(e){/* Never invent feed descriptions. Driver confirms manually. */}
 }
+// Fallback for photos with extra margins: the product label can be outside
+// a tight crop. Read horizontal bands and accept a product line even when
+// the label was missed, but only if it resembles a feed description.
+if(!scannedFeed){
+ try{
+  const pic=await createImageBitmap(input.files[0]);
+  const worker=await Tesseract.createWorker('eng');
+  try{
+   await worker.setParameters({tessedit_pageseg_mode:'6'});
+   for(const [x,y,w,h] of [[.08,.38,.55,.13],[.08,.44,.55,.13],[.08,.49,.55,.13],[.08,.54,.55,.13],[.08,.60,.55,.13]]){
+    const canvas=document.createElement('canvas');canvas.width=1600;canvas.height=340;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,1600,340);
+    ctx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,1600,340);
+    const raw=(await worker.recognize(canvas)).data.text||'';
+    feedCropReadings.push('FALLBACK BAND '+y+': '+(raw.trim()||'[no text detected]'));
+    const rows=raw.split(/\\r?\\n/).map(v=>v.replace(/\\s+/g,' ').trim()).filter(Boolean);
+    const product=rows.find(v=>/\\b(?:DW|DWV|DWVV)\\s*\\d{1,2}\\s*(?:Spec|Special)\\b/i.test(v));
+    if(product){
+      scannedFeed=product.replace(/^.*?\\b(?=DWV?V?\\s*\\d{1,2}\\s*(?:Spec|Special)\\b)/i,'').replace(/\\s{2,}.*$/,'').trim();
+      break;
+    }
+   }
+  }finally{await worker.terminate();pic.close()}
+ }catch(e){/* Keep manual verification available. */}
+}
+}
 if(feedCropReadings.length){diagnostic.textContent+='\n\n'+feedCropReadings.join('\n\n').slice(0,2800)}
 const number=(text.match(/(?:ticket|load|order)\s*(?:no\.?|number|#|:)?\s*([0-9]{5,8})/i)||text.match(/\b(10[0-9]{4})\b/))?.[1];const shipped=text.match(/\bshipped\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})\s*(?:tons?|ton\b)/i);const stated=text.match(/(?:net\s*tons?|tons?|tonnage)\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})/i);const netPounds=text.match(/\bnet\s*[:#-]?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:lbs?|pounds?)?/i);let tons=(shipped||stated)?.[1]?.replace(',','.');if(!tons&&netPounds){const pounds=Number(netPounds[1].replace(/,/g,''));if(pounds>=10000&&pounds<=100000)tons=(pounds/2000).toFixed(2)}const instructionIndex=lines.findIndex(x=>/delivery\s*instructions?/i.test(x));const nearby=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):lines;// Delta Western instructions may read "304, D Tank" (tank suffix after the number).
 // Prefer the full instruction over numeric-only OCR fallbacks; do not infer missing letters.
