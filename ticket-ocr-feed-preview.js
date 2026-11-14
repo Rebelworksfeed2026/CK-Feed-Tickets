@@ -100,7 +100,7 @@ if(dateSource||fallbackDate){
 }
 let filled=[];function fill(id,value,label){if(!value)return;const el=document.getElementById(id);if(el.value.trim()&&!confirm('Replace '+label+' with scanned value: '+value+'?'))return;el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',number,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',dest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
-scannedFeed=scannedFeed.replace(/\\bFr[v y]\\s*(?:11|ll|II|2)\\b/gi,'Fry II');
+scannedFeed=scannedFeed.replace(/\bFr[vy]\s*(?:11|ll|II|2)\b/gi,'Fry II');
 fill('draftFeedType',scannedFeed,'feed type');
 const feedField=document.getElementById('draftFeedType');
 status.textContent=filled.length?'Scan complete: '+filled.join(', ')+'. Verify every field, especially the date printed on the ticket. Nothing was saved.':'Scan finished, but no reliable fields were found. Enter ticket details manually.';if(!filled.length)status.textContent='Scanner could not confidently identify ticket fields. Try a closer, well-lit picture with the ticket filling the frame.'}catch(e){status.textContent='Scanning unavailable: '+e.message+'. You can still enter the ticket manually.'}finally{busy=false;btn.disabled=false}}})();
