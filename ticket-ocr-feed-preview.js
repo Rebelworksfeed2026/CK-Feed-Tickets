@@ -17,6 +17,7 @@ if(!scannedFeed){
 }
 // Product descriptions are open-ended: recognize any legible product name, not a fixed feed list.
 // Read the printed product-description area as separate lines with layout-aware OCR.
+let feedCropReadings=[];
 if(!scannedFeed){
  try{
   const pic=await createImageBitmap(input.files[0]);
@@ -36,6 +37,7 @@ if(!scannedFeed){
     const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);
     cx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,crop.width,crop.height);
     const raw=(await detail.recognize(crop)).data.text||'';
+    feedCropReadings.push('PRODUCT AREA '+(feedCropReadings.length+1)+': '+(raw.trim()||'[no text detected]'));
     const rows=raw.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
     const label=rows.findIndex(v=>/product\s*(?:description|desc)|feed\s*(?:type|description)/i.test(v));
     if(label<0)continue;
@@ -46,6 +48,7 @@ if(!scannedFeed){
   }finally{await detail.terminate();pic.close();}
  }catch(e){/* Never invent feed descriptions. Driver confirms manually. */}
 }
+if(feedCropReadings.length){diagnostic.textContent+='\n\n'+feedCropReadings.join('\n\n').slice(0,2800)}
 const number=(text.match(/(?:ticket|load|order)\s*(?:no\.?|number|#|:)?\s*([0-9]{5,8})/i)||text.match(/\b(10[0-9]{4})\b/))?.[1];const shipped=text.match(/\bshipped\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})\s*(?:tons?|ton\b)/i);const stated=text.match(/(?:net\s*tons?|tons?|tonnage)\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})/i);const netPounds=text.match(/\bnet\s*[:#-]?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:lbs?|pounds?)?/i);let tons=(shipped||stated)?.[1]?.replace(',','.');if(!tons&&netPounds){const pounds=Number(netPounds[1].replace(/,/g,''));if(pounds>=10000&&pounds<=100000)tons=(pounds/2000).toFixed(2)}const instructionIndex=lines.findIndex(x=>/delivery\s*instructions?/i.test(x));const nearby=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):lines;// Delta Western instructions may read "304, D Tank" (tank suffix after the number).
 // Prefer the full instruction over numeric-only OCR fallbacks; do not infer missing letters.
 const deliveryInstructionLines=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):[];
