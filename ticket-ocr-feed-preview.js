@@ -31,9 +31,9 @@ if(!scannedFeed){
   };
   try{
    await detail.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
-   const regions=[[.15,.35,.50,.30],[.18,.40,.42,.23],[.12,.29,.60,.38]];
+   const regions=[[.10,.285,.40,.145],[.10,.315,.40,.115],[.10,.27,.46,.18]];
    for(const [x,y,w,h] of regions){
-    const crop=document.createElement('canvas');crop.width=1800;crop.height=1100;
+    const crop=document.createElement('canvas');crop.width=1800;crop.height=480;
     const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);
     cx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,crop.width,crop.height);
     const raw=(await detail.recognize(crop)).data.text||'';
