@@ -1,0 +1,1339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C&K Feed Tickets — Sign In</title>
+<link rel="icon" type="image/png" href="apple-touch-icon-catfish.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-catfish.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="C&K Feed Tickets">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#183449;background:#eef3f6}
+*[hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:16px}
+main{width:100%;min-width:0;overflow-x:hidden;max-width:420px;background:#fff;border-radius:14px;padding:25px;box-shadow:0 4px 24px #1234}
+h1{font-size:24px;margin:0 0 8px}p{line-height:1.5;color:#526778}label{display:block;margin:15px 0 6px;font-weight:650}
+input,button,select{font:inherit;width:100%;padding:12px;border-radius:8px}input{border:1px solid #b5c5d1}
+button{background:#17628e;color:white;border:0;margin-top:18px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#183449}
+#message{min-height:22px;font-size:14px}#profile{display:none}.muted{font-size:13px}.dashboard{border-top:1px solid #d8e3e9;padding-top:12px}.tile{min-width:0;overflow-wrap:anywhere;padding:14px;background:#eef3f6;border-radius:9px;margin:10px 0}.tile strong{display:block;margin-bottom:4px}.tile span{font-size:13px;color:#526778}
+@media print {
+  @page { size: landscape; margin: 0.35in; }
+  html,body { margin:0!important;padding:0!important;width:auto!important;height:auto!important;overflow:visible!important;background:#fff!important; }
+  body > :not(#printArea) { display:none!important; }
+  body > #printArea { display:block!important;position:static!important;visibility:visible!important;box-sizing:border-box!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;background:#fff!important;color:#172b3b!important;font-family:Arial,sans-serif!important;break-before:auto!important;break-after:auto!important; }
+  #printArea * {visibility:visible!important;}
+  #printTitle {display:block!important;text-align:center;font-size:16pt!important;margin:0 0 5pt!important;font-weight:800!important;}
+  #sheetHeading {text-align:center;font-size:9pt!important;margin:0 0 8pt!important;}
+  #scrollHint,.no-print,#savedPhotoViewer {display:none!important;}
+  #weekScroll {display:block!important;width:100%!important;max-width:none!important;overflow:visible!important;}
+  #weekTable {display:table!important;width:100%!important;min-width:0!important;max-width:none!important;table-layout:auto!important;border-collapse:collapse!important;font-size:8pt!important;}
+  #weekTable thead {display:table-header-group!important;}
+  #weekTable th,#weekTable td {font-size:8pt!important;line-height:1.15!important;padding:3pt 2pt!important;white-space:normal!important;border:1px solid #b7c4cc!important;}
+  #weekTable th {background:#dbeaf5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #weekTable tfoot td {font-weight:700!important;background:#e3edf3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #weekTable tr {break-inside:avoid!important;page-break-inside:avoid!important;}
+  #weekTotal,#weekHighlights {font-size:9pt!important;margin:5pt 0!important;break-inside:avoid!important;}
+}
+#groupedReportResults{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+#groupedReportResults table{min-width:0;width:100%;table-layout:fixed;font-size:12px!important}
+#groupedReportResults th,#groupedReportResults td{padding:5px 3px!important;overflow-wrap:anywhere;word-break:normal}
+#groupedReportResults details{max-width:100%;min-width:0}
+#groupedReportResults details table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
+#groupedReportResults table th,#groupedReportResults table td{box-sizing:border-box!important;min-width:0!important;max-width:none!important;white-space:normal!important}
+#groupedReportResults table th:last-child,#groupedReportResults table td:last-child{text-align:right!important}
+#groupedReportResults details{box-sizing:border-box!important;width:100%!important;overflow:hidden!important}
+#groupedReportResults details table th:first-child,#groupedReportResults details table td:first-child{width:44%!important}
+#groupedReportResults details table th:not(:first-child),#groupedReportResults details table td:not(:first-child){width:auto!important}
+@media(max-width:420px){#groupedReportResults table{font-size:11px!important}#groupedReportResults th,#groupedReportResults td{padding:4px 2px!important}}
+#groupedReportResults td,#groupedReportResults th{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<main>
+<h1>C&K Feed Tickets</h1>
+<p>Secure account sign-in setup</p>
+<form id="login">
+<p><strong>Sign in using your one-time email link.</strong> Request the link in Safari, then open the link in Safari too. Yahoo’s in-app browser does not share Safari’s saved session.</p>
+<p><a style="display:block;background:#17628e;color:white;text-align:center;padding:15px;border-radius:8px" href="./account-setup-preview.html">Sign in with email link</a></p>
+<details><summary>Use a password instead</summary>
+<label for="email">Email address</label>
+<input id="email" type="email" autocomplete="username" required>
+<label for="password">Password</label>
+<input id="password" type="password" autocomplete="current-password" required>
+<button id="submit" type="submit">Sign in</button>
+</details>
+</form>
+<section id="profile" aria-live="polite">
+<h2 id="welcome"></h2><p id="role"></p><div id="quickCamera" class="tile" style="margin:12px 0"><strong>New delivery</strong><button id="quickCameraButton" type="button" style="font-size:19px;min-height:70px;margin-top:8px">📷 Take Photo / Choose Ticket Photo</button><span style="display:block;margin-top:8px">Tap to scan a ticket. Check the details before saving.</span></div>
+<div class="dashboard"><h3>My dashboard</h3><div class="tile"><strong>Driver directory</strong><div id="driverDirectory" role="status">Sign in to load the driver directory.</div></div><div class="tile"><strong>Feed delivery sheets — read only</strong><span style="display:block;margin-top:4px">Viewer version 23 · 11 Nov 2026</span><span>Choose a driver and Monday-start week. Only the selected week is requested; no ticket data is changed.</span><label for="cloudDriver">Driver</label><select id="cloudDriver" style="width:100%;padding:12px;border:1px solid #b5c5d1;border-radius:8px"></select><label for="cloudWeek">Week starting Monday</label><input id="cloudWeek" type="date"><button type="button" id="loadWeek">View selected week</button><label style="display:block;margin-top:10px"><input id="showTestTickets" type="checkbox"> Include test tickets in this weekly sheet (testing only)</label><p id="weekMessage" role="status" class="muted">Select a week to view tickets.</p><button id="printWeek" type="button" disabled class="secondary">Print / Save PDF</button><section id="printArea"><h2 id="printTitle" hidden>C&K FARMS — FEED DELIVERY SHEET</h2><div id="sheetHeading" class="muted"></div><p id="scrollHint" class="muted" hidden>Swipe left or right to see the seven report columns plus photo and correction controls. The printed PDF includes the seven report columns.</p><div id="weekScroll" style="overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch"><table id="weekTable" hidden style="width:100%;min-width:690px;border-collapse:collapse;font-size:13px"><thead><tr><th>Day</th><th>Load</th><th>Ticket #</th><th>Tons</th><th>Destination</th><th>Daily Tons</th><th>Weekly Tons</th><th class="no-print">Photo</th><th class="no-print">Correct</th></tr></thead><tbody id="weekRows"></tbody><tfoot id="weekFoot"></tfoot></table></div><p id="weekTotal" class="muted"></p><div id="weekHighlights" class="muted"></div></section><span>Cloud ticket entry and authorized ticket corrections are available. Always verify scanned ticket details before saving.</span></div><div class="tile" id="annualTotalsTile"><strong>Feed totals — daily, weekly, monthly & yearly</strong><span>Choose a period and view totals by driver, farm, or tank. Test tickets are excluded. Farm and tank totals use verified assignments only.</span><label for="totalsPeriod">Time period</label><select id="totalsPeriod"><option value="day">Daily</option><option value="week" selected>Weekly (Monday–Saturday)</option><option value="month">Monthly</option><option value="year">Yearly</option></select><label for="totalsDate">Choose date</label><input id="totalsDate" type="date"><label for="totalsView">Report type</label><select id="totalsView"><option value="driver">By driver</option><option value="farm">By farm</option><option value="tank">By tank</option><option value="combined">All drivers combined</option></select><label for="totalsDriver">Driver</label><select id="totalsDriver"><option value="">All drivers</option></select><label for="totalsFarm">Farm</label><select id="totalsFarm"><option value="">All farms</option></select><label for="totalsTank">Tank</label><select id="totalsTank"><option value="">All tanks</option></select><button type="button" id="calculateTotals">Show totals</button><p id="totalsStatus" role="status" class="muted">Choose your report options, then tap Show totals.</p><div id="totalsResult" style="overflow-x:auto"></div></div><section id="correctionPanel" class="tile" hidden role="dialog" aria-modal="true" aria-label="Correct feed ticket" style="position:fixed;inset:0;z-index:9998;margin:0;padding:18px;background:white;overflow:auto"><h3>Correct saved ticket</h3><p id="correctionStatus" role="status">Only changed fields will be updated. Original photograph stays attached.</p><form id="correctionForm"><label>Delivery date<input id="correctionDate" type="date" required></label><label>Ticket number<input id="correctionNumber" maxlength="24" required></label><label>Tons<input id="correctionTons" type="number" step="0.01" min="0.01" max="100" required></label><label>Destination<input id="correctionDestination" maxlength="120" required></label><button type="submit">Save correction</button><button id="cancelCorrection" type="button" class="secondary">Cancel</button></form></section><section id="savedPhotoViewer" class="tile" hidden role="dialog" aria-modal="true" aria-label="Saved ticket photograph" style="position:fixed;inset:0;z-index:9999;margin:0;padding:16px;background:#fff;overflow-y:auto;box-shadow:0 0 0 999px #0008"><strong>Saved ticket photograph</strong><p id="savedPhotoStatus" role="status"></p><img id="savedPhotoImage" hidden alt="Original saved feed ticket" style="display:block;width:100%;max-height:75vh;object-fit:contain"><button type="button" id="closeSavedPhoto" class="secondary">Close photograph</button></section><div class="tile" id="farmTile"><strong>Farm &amp; tank directory — read only</strong><span>Farms and their tanks will be listed here as they are registered. Farm and tank totals are being built; no existing ticket is changed.</span><button type="button" id="loadFarms">View farms and tanks</button><p id="farmMessage" class="muted" role="status">No farm directory loaded.</p><div id="farmDirectory"></div><section id="farmAdmin" hidden><h3>Register farms and tanks — administrator only</h3><form id="addFarmForm"><label for="newFarmName">Farm name</label><input id="newFarmName" type="text" maxlength="120" required><button type="submit">Add farm</button></form><p id="addFarmMessage" role="status" class="muted"></p><form id="addTankForm"><label for="tankFarm">Select farm</label><select id="tankFarm" required></select><label for="newTankLabel">Existing tank name or number</label><input id="newTankLabel" type="text" maxlength="80" required><button type="submit">Add tank to farm</button></form><p id="addTankMessage" role="status" class="muted"></p></section><section id="managerAdmin" hidden><h3>Farm managers — administrator only</h3><form id="managerCreate"><label for="managerName">New manager name</label><input id="managerName" maxlength="120" required><button type="submit">Add manager</button></form><form id="managerAssign"><label for="managerFarm">Farm</label><select id="managerFarm" required></select><label for="managerSelect">Manager</label><select id="managerSelect" required></select><label for="managerDate">Effective date</label><input id="managerDate" type="date" required><button type="submit">Assign / transfer farm</button></form><button id="managerRefresh" type="button" class="secondary">Refresh manager assignments</button><p id="managerStatus" role="status"></p><div id="managerList"></div></section></div><div class="tile" id="cameraTile"><strong>Scan feed ticket — automatic reading test</strong><span>Choose Take Photo or Photo Library when prompted. The existing scanner will attempt to read the ticket number, tons, destination, and printed dispatch date when legible. Verify every field. Nothing is uploaded or saved.</span><label for="ticketPhoto">Ticket photo</label><input id="ticketPhoto" type="file" accept="image/*"><p id="cameraMessage" role="status" class="muted">No photo selected. Nothing will be saved.</p><img id="ticketPhotoPreview" alt="Selected feed ticket photo" hidden style="width:100%;height:auto;max-height:450px;object-fit:contain;border-radius:8px;margin-top:10px"><button type="button" id="clearTicketPhoto" class="secondary" hidden>Clear photo</button></div><div class="tile" id="ticketEntryTile"><strong>New feed ticket — secure cloud save</strong><span>Scanned details flow into duplicate checking and final confirmation. Review the scanned details, check for duplicates, then save the ticket and its original photo.</span><form id="ticketDraft"><label for="draftDate">Delivery date</label><input id="draftDate" type="date" required><label for="draftNumber">Ticket number</label><input id="draftNumber" type="text" autocapitalize="characters" spellcheck="false" maxlength="24" required><label for="draftTons">Tons</label><input id="draftTons" type="number" min="0.01" max="100" step="0.01" required><label for="draftFeedType">Feed type (test preview — confirm from printed ticket)</label><input id="draftFeedType" type="text" maxlength="120" placeholder="e.g., FRY 2 or DW 28 Spec Iron" required><p class="muted">Feed type is not yet stored in the cloud. Saving is disabled in this test until storage and reporting are verified.</p><label for="draftDestination">Destination</label><input id="draftDestination" type="text" maxlength="120" required><button type="submit">Check ticket number / preview</button></form><p id="draftResult" role="status" class="muted">Check the ticket and photo carefully before saving.</p><div id="confirmPanel" hidden style="margin-top:14px;padding:14px;border:2px solid #17628e;border-radius:10px"><strong>Confirm ticket details</strong><p id="confirmDetails"></p><p class="muted">Photo and duplicate checks are active. Nothing is saved until you tap Save Ticket & Photo and receive confirmation.</p><label for="confirmedReportTank">Confirmed reporting tank (full ticket weight)</label><select id="confirmedReportTank"><option value="">Choose actual delivery tank</option></select><p id="confirmedReportTankStatus" class="muted">Choose one registered reporting destination before saving. The full ticket weight will count once.</p><button id="confirmSave" type="button">Save Ticket &amp; Photo</button><button id="cancelSave" type="button" class="secondary">Cancel / change details</button></div></div><div class="tile" id="tankAllocationTile"><strong>Assign delivery to tanks</strong><span>Choose a saved ticket from the selected driver and Monday-start week. Split tons across tanks; the sum must match the ticket exactly. Existing ticket details are never edited.</span><button type="button" id="allocationLoad">Load tickets for tank assignment</button><label for="allocationTicket">Saved ticket</label><select id="allocationTicket"></select><div id="allocationRows"></div><button type="button" id="allocationAdd">Add another tank</button><p id="allocationTotal" role="status"></p><button type="button" id="allocationSave">Save tank assignments</button><p id="allocationStatus" role="status" class="muted">Load a week to begin.</p></div><div class="tile"><strong>Austin Farms — grouped weekly feed totals (read only)</strong><span>Uses the selected Monday-start week and all available drivers. Original ticket destinations stay unchanged. Unmatched destinations are excluded, not guessed.</span><button type="button" id="groupedReportButton">Calculate grouped totals for selected week</button><p class="muted" id="groupedReportStatus" role="status">No report loaded.</p><div id="groupedReportResults"></div></div><div class="tile"><strong>Farm and pond daily / weekly / monthly / yearly reports</strong><span>Verified tank assignments across every driver. Missing or incomplete assignments are flagged.</span><label for="farmPeriod">Report period</label><select id="farmPeriod"><option value="day">Day</option><option value="week">Week (Monday–Saturday)</option><option value="month">Month</option><option value="year">Year</option></select><label for="farmPeriodDate">Choose a date for the report</label><input type="date" id="farmPeriodDate"><button type="button" id="farmPeriodButton">Calculate farm and pond totals</button><p class="muted" id="farmPeriodStatus" role="status">No report loaded.</p><div id="farmPeriodResults"></div></div><div id="adminTile" class="tile" hidden><strong>Administrator controls</strong><span>Manage users and permissions after security testing.</span></div><div id="officeTile" class="tile" hidden><strong>Office tools</strong><span>Office access is view-only. Ticket entry and corrections are not available to office accounts.</span></div></div>
+<button id="logout" class="secondary" type="button">Sign out</button>
+</section>
+<p id="connectionNotice" role="status" aria-live="polite" hidden style="padding:12px;border:1px solid #a15d1a;border-radius:8px;background:#fff5e8;color:#65370e">Internet connection required. Ticket saving and reports are unavailable until you reconnect.</p>
+<p id="message" role="status" aria-live="polite"></p>
+<p class="muted">Only invited, assigned accounts can access this screen. Check every scanned field before saving.</p>
+</main>
+<script>
+(()=>{const notice=document.getElementById("connectionNotice");function update(){notice.hidden=navigator.onLine!==false;}window.addEventListener("online",update);window.addEventListener("offline",update);update();})();
+</script>
+<script src="supabase-config.js"></script><script>
+/* Cloud connection and authenticated account helpers.
+   No feed tickets are uploaded by this module. */
+window.CKCloud = (() => {
+  const url = window.SUPABASE_URL;
+  const key = window.SUPABASE_KEY;
+  const configured = Boolean(url && key);
+  let session = null;
+  const sessionKey = "ck-feed-auth-v1";
+  let refreshPending = null;
+  function remember(value) {
+    session = value;
+    try {
+      if (value) localStorage.setItem(sessionKey, JSON.stringify(value));
+      else localStorage.removeItem(sessionKey);
+    } catch (_) { /* Private browsing may block storage. */ }
+  }
+  async function refreshSession() {
+    if (!session?.refresh_token) throw Error("Sign in again.");
+    if (refreshPending) return refreshPending;
+    refreshPending = (async () => {
+      const response = await fetch(url + "/auth/v1/token?grant_type=refresh_token", {
+        method: "POST", headers: {apikey:key,"Content-Type":"application/json"},
+        body: JSON.stringify({refresh_token:session.refresh_token})
+      });
+      const value = await response.json().catch(() => ({}));
+      if (!response.ok || !value.access_token || !value.refresh_token) {
+        remember(null);
+        throw Error("Your login expired. Please sign in again.");
+      }
+      remember(value);
+      return value;
+    })();
+    try { return await refreshPending; } finally { refreshPending = null; }
+  }
+  async function restoreSession() {
+    try {
+      const saved = localStorage.getItem(sessionKey);
+      if (!saved) return null;
+      const value = JSON.parse(saved);
+      if (!value?.refresh_token) { remember(null); return null; }
+      // Some older saved sessions omit the user object; recover it from Auth.
+      if (!value?.user?.id && value.access_token) {
+        const userResponse = await fetch(url + "/auth/v1/user", {headers:{apikey:key,Authorization:"Bearer " + value.access_token}});
+        if (userResponse.ok) {
+          value.user = await userResponse.json();
+          localStorage.setItem(sessionKey, JSON.stringify(value));
+        }
+      }
+      session = value;
+      // A valid email-link session can be used immediately. Refresh only near expiry.
+      if (!value.access_token || !value.expires_at || Date.now() >= (value.expires_at - 90) * 1000) {
+        await refreshSession();
+      }
+      const profile = await myProfile();
+      if (!profile) return null;
+      return profile;
+    } catch (e) {
+      // Preserve stored credentials on network errors rather than silently deleting them.
+      console.warn("Could not restore saved session:", e);
+      return null;
+    }
+  }
+
+  async function request(path, options = {}) {
+    if (!configured) throw Error("Supabase is not configured.");
+    if (session?.expires_at && Date.now() >= (session.expires_at - 90) * 1000) await refreshSession();
+    const response = await fetch(url + path, {
+      ...options,
+      headers: {
+        apikey: key,
+        "Content-Type": "application/json",
+        ...(session ? { Authorization: "Bearer " + session.access_token } : {}),
+        ...(options.headers || {})
+      }
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw Error(body.msg || body.message || body.error_description || "Cloud request failed.");
+    return body;
+  }
+
+  async function health() {
+    if (!configured) return { ok: false, message: "Cloud settings missing" };
+    try {
+      await request("/auth/v1/health");
+      return { ok: true, message: "Supabase server reachable; sign-in and sync not yet enabled" };
+    } catch (e) {
+      return { ok: false, message: "Cloud connection check failed: " + e.message };
+    }
+  }
+
+  async function signIn(email, password) {
+    if (!email || !password) throw Error("Enter email and password.");
+    const result = await request("/auth/v1/token?grant_type=password", {
+      method: "POST", body: JSON.stringify({ email, password })
+    });
+    if (!result.access_token || !result.user?.id) throw Error("Sign-in response was incomplete.");
+    remember(result);
+    try {
+      const profile = await myProfile();
+      if (!profile) throw Error("This account has not been assigned to a feed-ticket user.");
+      return profile;
+    } catch (e) {
+      remember(null);
+      throw e;
+    }
+  }
+
+  async function myProfile() {
+    if (!session?.user?.id) return null;
+    const id = encodeURIComponent(session.user.id);
+    const rows = await request("/rest/v1/drivers?select=id,name,company,is_admin,is_office,user_id&user_id=eq." + id + "&limit=1");
+    return Array.isArray(rows) ? rows[0] || null : null;
+  }
+
+  async function listDrivers() {
+    if (!session?.access_token) throw Error("Sign in before viewing drivers.");
+    const rows = await request("/rest/v1/drivers?select=id,name,company,is_admin,is_office&order=name.asc");
+    if (!Array.isArray(rows)) throw Error("Driver directory response was invalid.");
+    return rows;
+  }
+
+  async function listWeeklyTickets(driverId, monday) {
+    if (!session?.access_token) throw Error("Sign in before viewing tickets.");
+    if (!/^[0-9a-f-]{36}$/i.test(driverId)) throw Error("Invalid driver.");
+    if (typeof monday !== "string" || monday.length !== 10 || monday[4] !== "-" || monday[7] !== "-") throw Error("Invalid week value. Please reselect the Monday date.");
+    const first = new Date(monday + "T12:00:00");
+    if (Number.isNaN(first.getTime()) || first.getDay() !== 1 ||
+        first.getFullYear() + "-" + String(first.getMonth()+1).padStart(2,"0") + "-" + String(first.getDate()).padStart(2,"0") !== monday)
+      throw Error("Choose a Monday as the week start.");
+    const end = new Date(first);
+    end.setDate(end.getDate() + 7);
+    const next = end.getFullYear() + "-" + String(end.getMonth()+1).padStart(2,"0") + "-" + String(end.getDate()).padStart(2,"0");
+    const query = "/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination,driver_id,photo_path,is_test" +
+      "&driver_id=eq." + encodeURIComponent(driverId) +
+      "&delivery_date=gte." + monday + "&delivery_date=lt." + next +
+      "&deleted_at=is.null&order=delivery_date.asc,ticket_number.asc&limit=500";
+    const rows = await request(query);
+    if (!Array.isArray(rows)) throw Error("Invalid weekly ticket response.");
+    if (rows.length === 500) throw Error("This week has reached the 500-ticket display limit. Contact the administrator before using its totals; the report may be incomplete.");
+    return rows;
+  }
+
+  async function correctTicket(id, fields) {
+    const profile=await myProfile();
+    if(!profile || profile.is_office) throw Error("This account cannot correct tickets.");
+    if(!/^[0-9a-f-]{36}$/i.test(id)) throw Error("Invalid ticket.");
+    const targetRows=await request("/rest/v1/feed_tickets?select=id,driver_id&id=eq."+encodeURIComponent(id)+"&deleted_at=is.null&limit=1");
+    if(!Array.isArray(targetRows) || targetRows.length!==1) throw Error("Ticket not found.");
+    if(!profile.is_admin && targetRows[0].driver_id!==profile.id) throw Error("You may correct only your own tickets.");
+    const date=String(fields.delivery_date||"");
+    const parsed=new Date(date+"T12:00:00");
+    const number=String(fields.ticket_number||"").trim();
+    const tons=Number(fields.tons);
+    const destination=String(fields.destination||"").trim();
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(parsed.getTime()) ||
+       parsed.getDay()===0 || parsed.toISOString().slice(0,10)!==date ||
+       !/^[A-Za-z0-9][A-Za-z0-9-]{0,23}$/.test(number) ||
+       !Number.isFinite(tons) || tons<=0 || tons>100 ||
+       !destination || destination.length>120) throw Error("Check the date, number, tons, and destination.");
+    const duplicate=await request("/rest/v1/feed_tickets?select=id&id=neq."+encodeURIComponent(id)+
+      "&ticket_number=eq."+encodeURIComponent(number)+"&limit=1");
+    // Ticket numbers are globally unique, including archived or soft-deleted records.
+    if(!Array.isArray(duplicate)) throw Error("Could not verify ticket number uniqueness.");
+    if(duplicate.length) throw Error("Another ticket already uses this number.");
+    let result;
+    try {
+      result=await request("/rest/v1/feed_tickets?id=eq."+encodeURIComponent(id)+"&deleted_at=is.null",{
+        method:"PATCH",headers:{Prefer:"return=representation"},
+        body:JSON.stringify({delivery_date:date,ticket_number:number,tons,destination})
+      });
+    } catch(error) {
+      if(/duplicate key|23505|unique constraint/i.test(error.message))
+        throw Error("This ticket number already exists. No correction was saved.");
+      throw error;
+    }
+    if(!Array.isArray(result) || result.length!==1) throw Error("Correction was not saved. Check account permissions.");
+    return result[0];
+  }
+  async function listFarmsAndTanks() {
+    if (!session?.access_token) throw Error("Sign in to view farms.");
+    const [farms,tanks] = await Promise.all([
+      request("/rest/v1/farms?select=id,name&order=name.asc&limit=1000"),
+      request("/rest/v1/farm_tanks?select=id,farm_id,tank_label&order=tank_label.asc&limit=2000")
+    ]);
+    if (!Array.isArray(farms) || !Array.isArray(tanks)) throw Error("Invalid farm directory response.");
+    return {farms,tanks};
+  }
+
+  async function registerFarm(name) {
+    const profile = await myProfile();
+    if (!profile?.is_admin) throw Error("Only the administrator can register farms.");
+    const value = String(name || "").trim();
+    if (!value || value.length > 120) throw Error("Enter a farm name (up to 120 characters).");
+    return request("/rest/v1/farms", {method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({name:value})});
+  }
+  async function registerTank(farmId,tankLabel) {
+    const profile = await myProfile();
+    if (!profile?.is_admin) throw Error("Only the administrator can register tanks.");
+    if (!/^[0-9a-f-]{36}$/i.test(String(farmId))) throw Error("Choose a valid farm.");
+    const label = String(tankLabel || "").trim();
+    if (!label || label.length > 80) throw Error("Enter a tank name or number (up to 80 characters).");
+    return request("/rest/v1/farm_tanks", {method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({farm_id:farmId,tank_label:label})});
+  }
+  async function findTicketNumber(ticketNumber) {
+    if (!session?.access_token) throw Error("Sign in before checking ticket numbers.");
+    const number = String(ticketNumber || "").trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9-]{0,23}$/.test(number)) throw Error("Enter a ticket number using letters, numbers, or hyphens (up to 24 characters).");
+    const rows = await request("/rest/v1/feed_tickets?select=ticket_number,delivery_date,driver_id&ticket_number=eq." +
+      encodeURIComponent(number) + "&limit=1");
+    if (!Array.isArray(rows)) throw Error("Ticket lookup failed.");
+    return rows[0] || null;
+  }
+
+  // Authorized cloud ticket insert. Database row-level security enforces driver ownership.
+  async function saveOwnTicket(ticket) {
+    if (!session?.access_token) throw Error("Sign in before saving tickets.");
+    const profile = await myProfile();
+    if (!profile || profile.is_office) throw Error("Office accounts cannot enter feed tickets.");
+    if (!ticket || typeof ticket !== "object") throw Error("Ticket details are missing.");
+    const date = String(ticket.delivery_date || "");
+    const parsed = new Date(date + "T12:00:00");
+    const dateValid = /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      !Number.isNaN(parsed.getTime()) && parsed.getDay() !== 0 &&
+      parsed.getFullYear() + "-" + String(parsed.getMonth()+1).padStart(2,"0") + "-" + String(parsed.getDate()).padStart(2,"0") === date;
+    const number = String(ticket.ticket_number || "").trim();
+    const tons = Number(ticket.tons);
+    const destination = String(ticket.destination || "").trim();
+    if (!dateValid || !/^[A-Za-z0-9][A-Za-z0-9-]{0,23}$/.test(number) ||
+        !Number.isFinite(tons) || tons <= 0 || tons > 100 ||
+        !destination || destination.length > 120)
+      throw Error("Check the delivery date, ticket number, tons, and destination.");
+    let rows;
+    try {
+      rows = await request("/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination&limit=1", {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        driver_id: profile.id, delivery_date: date,
+        ticket_number: number, tons, destination, ...(ticket.photo_path ? {photo_path:ticket.photo_path} : {})
+      })
+      });
+    } catch (error) {
+      if (/duplicate key|23505|unique constraint/i.test(error.message)) throw Error("This ticket number already exists. Check the ticket history before trying again.");
+      throw error;
+    }
+    if (!Array.isArray(rows) || rows.length !== 1) throw Error("Ticket save could not be verified.");
+    return rows[0];
+  }
+
+  // Secure photo upload and cloud ticket save pipeline.
+  // Upload the private photo first, then insert a ticket referencing it.
+  // Read a stored private ticket photo with the current signed-in account.
+  // Returns a Blob; the caller can create and later revoke a local object URL.
+  async function readTicketPhoto(photoPath) {
+    if (!session?.access_token || !(await myProfile())) throw Error("Sign in to view ticket photos.");
+    const path=String(photoPath||"");
+    if (!/^[0-9a-f-]{36}\/[A-Za-z0-9_.\/-]+$/i.test(path) || path.includes(".."))
+      throw Error("Invalid ticket photo path.");
+    const response=await fetch(url+"/storage/v1/object/authenticated/ticket-photos/"+path,{
+      headers:{apikey:key,Authorization:"Bearer "+session.access_token}
+    });
+    if(!response.ok) throw Error("This ticket photo could not be opened ("+response.status+").");
+    return await response.blob();
+  }
+  async function saveTicketWithPhoto(ticket,file) {
+    if (!session?.access_token) throw Error("Sign in before saving.");
+    const profile=await myProfile();
+    if (!profile || profile.is_office) throw Error("Only assigned drivers may save tickets.");
+    CKTicketPhotos.validate(file);
+    // Validate every field BEFORE uploading any private photo.
+    const date=String(ticket?.delivery_date||"");
+    const parsed=new Date(date+"T12:00:00");
+    const number=String(ticket?.ticket_number||"").trim();
+    const tons=Number(ticket?.tons);
+    const destination=String(ticket?.destination||"").trim();
+    const validDate=/^\d{4}-\d{2}-\d{2}$/.test(date) &&
+      !Number.isNaN(parsed.getTime()) && parsed.getDay()!==0 &&
+      parsed.getFullYear()+"-"+String(parsed.getMonth()+1).padStart(2,"0")+"-"+String(parsed.getDate()).padStart(2,"0")===date;
+    if(!validDate || !/^[A-Za-z0-9][A-Za-z0-9-]{0,23}$/.test(number) ||
+       !Number.isFinite(tons) || tons<=0 || tons>100 ||
+       !destination || destination.length>120)
+      throw Error("Correct the date, ticket number, tons, or destination before saving.");
+    if (await findTicketNumber(number)) throw Error("Duplicate ticket number. Nothing was saved.");
+    const ticketId=crypto.randomUUID();
+    const path=await CKTicketPhotos.upload({
+      file,ticketId,userId:session.user.id,accessToken:session.access_token
+    });
+    try {
+      const saved=await saveOwnTicket({...ticket,photo_path:path});
+      return {...saved,photo_path:path};
+    } catch(error) {
+      // Photo may be orphaned if the insert fails; retain it privately for recovery.
+      throw Error("Photo uploaded privately, but ticket was NOT saved: "+error.message+
+        ". Contact administrator before retrying; photo reference: "+path);
+    }
+  }
+  async function signOut() {
+    if (!session) return;
+    const priorSession=session;
+    // Revoke the local session immediately so in-flight photo requests cannot reopen.
+    remember(null);
+    try {
+      const response=await fetch(url+"/auth/v1/logout",{
+        method:"POST",
+        headers:{apikey:key,Authorization:"Bearer "+priorSession.access_token}
+      });
+      if(!response.ok) throw Error("Local sign-out completed, but the server could not confirm revocation.");
+    } catch(error) {
+      throw Error("Signed out on this device. Server sign-out could not be confirmed: "+error.message);
+    }
+  }
+
+  function isSignedIn() { return Boolean(session?.access_token); }
+  async function listManagersAndAssignments() {
+    if (!(await myProfile())) throw Error("Sign in first.");
+    const [managers, assignments, farms] = await Promise.all([
+      request("/rest/v1/feed_managers?select=id,name,active&order=name.asc"),
+      request("/rest/v1/farm_manager_assignments?select=id,farm_id,manager_id,effective_from,effective_to&order=effective_from.desc"),
+      request("/rest/v1/farms?select=id,name&order=name.asc")
+    ]);
+    return {managers,assignments,farms};
+  }
+  async function addManager(name) {
+    if (!(await myProfile())?.is_admin) throw Error("Administrator only.");
+    const clean=String(name||"").trim();
+    if (!clean || clean.length>120) throw Error("Enter a manager name.");
+    return request("/rest/v1/feed_managers",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({name:clean})});
+  }
+  async function transferFarm(farmId,managerId,effectiveDate) {
+    if (!(await myProfile())?.is_admin) throw Error("Administrator only.");
+    if (!/^[0-9a-f-]{36}$/i.test(farmId)||!/^[0-9a-f-]{36}$/i.test(managerId)) throw Error("Invalid selection.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(effectiveDate)) throw Error("Choose an effective date.");
+    const current=await request("/rest/v1/farm_manager_assignments?select=id,effective_from,effective_to&farm_id=eq."+encodeURIComponent(farmId)+"&effective_to=is.null");
+    if (current.length>1) throw Error("Multiple active assignments found. Contact administrator.");
+    if (current.length && current[0].effective_from>=effectiveDate) throw Error("New date must follow the current assignment start.");
+    if (current.length) {
+      const prior=new Date(effectiveDate+"T12:00:00");prior.setDate(prior.getDate()-1);
+      const end=prior.getFullYear()+"-"+String(prior.getMonth()+1).padStart(2,"0")+"-"+String(prior.getDate()).padStart(2,"0");
+      await request("/rest/v1/farm_manager_assignments?id=eq."+encodeURIComponent(current[0].id),{method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify({effective_to:end})});
+    }
+    return request("/rest/v1/farm_manager_assignments",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({farm_id:farmId,manager_id:managerId,effective_from:effectiveDate})});
+  }
+
+  async function listTicketsForPeriod(start,end){
+    if(!session?.access_token)throw Error("Sign in first.");
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||start>=end)throw Error("Invalid report dates.");
+    const result=[];
+    for(let offset=0;;offset+=500){
+      const rows=await request("/rest/v1/feed_tickets?select=id,ticket_number,delivery_date,tons,destination,driver_id,is_test&delivery_date=gte."+start+"&delivery_date=lt."+end+"&deleted_at=is.null&order=delivery_date.asc,id.asc&limit=500&offset="+offset);
+      if(!Array.isArray(rows))throw Error("Invalid report response.");
+      result.push(...rows);
+      if(rows.length<500)break;
+      if(offset>=99500)throw Error("Report exceeds safe ticket limit.");
+    }
+    return result;
+  }
+  async function listReportTankAllocations(ticketIds) {
+    if (!session?.access_token) throw Error("Sign in first.");
+    if (!Array.isArray(ticketIds) || !ticketIds.length) return [];
+    const ids=[...new Set(ticketIds)];
+    if(ids.some(id=>!/^[0-9a-f-]{36}$/i.test(id)))throw Error("Invalid report ticket ID.");
+    const result=[];
+    for(let i=0;i<ids.length;i+=100){
+      const part=ids.slice(i,i+100);
+      const rows=await request("/rest/v1/ticket_tank_allocations?select=ticket_id,tank_id,tons&ticket_id=in.("+part.join(",")+")&limit=2000");
+      if(!Array.isArray(rows)||rows.length===2000)throw Error("Tank allocation report incomplete.");
+      result.push(...rows);
+    }
+    return result;
+  }
+  async function listTankAllocations(ticketId) {
+    if (!session?.access_token) throw Error("Sign in first.");
+    if (!/^[0-9a-f-]{36}$/i.test(ticketId)) throw Error("Invalid ticket.");
+    return request("/rest/v1/ticket_tank_allocations?select=id,ticket_id,tank_id,tons&ticket_id=eq."+encodeURIComponent(ticketId));
+  }
+  async function createTankAllocations(ticketId,items) {
+    if (!session?.access_token) throw Error("Sign in first.");
+    const profile=await myProfile();
+    if (!profile || profile.is_office) throw Error("Only drivers and administrator may assign tanks.");
+    if (!/^[0-9a-f-]{36}$/i.test(ticketId) || !Array.isArray(items) || !items.length) throw Error("Invalid assignment.");
+    const current=await listTankAllocations(ticketId);
+    if (current.length) throw Error("This ticket already has tank assignments. No changes saved.");
+    const records=items.map(x=>({ticket_id:ticketId,tank_id:x.tank_id,tons:x.tons}));
+    return request("/rest/v1/ticket_tank_allocations",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify(records)});
+  }
+  return { listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, restoreSession, myProfile, listDrivers, listWeeklyTickets, listTicketsForPeriod, listTankAllocations, listReportTankAllocations, createTankAllocations, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, saveOwnTicket, saveTicketWithPhoto, readTicketPhoto, correctTicket, isSignedIn };
+})();
+
+</script>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+if ($("annualYear")) $("annualYear").value=String(new Date().getFullYear());
+// Consolidated read-only delivery totals. Existing ticket and allocation data are unchanged.
+const totalsEl=id=>document.getElementById(id);
+const totalsDate=totalsEl("totalsDate");
+totalsDate.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+let totalsDirectory={farms:[],tanks:[]};
+function fillTotalsSelect(id,rows,first){const el=totalsEl(id);el.replaceChildren();const o=document.createElement("option");o.value="";o.textContent=first;el.appendChild(o);for(const row of rows){const opt=document.createElement("option");opt.value=row.id;opt.textContent=row.name;el.appendChild(opt);}}
+function updateTotalsTanks(){const farm=totalsEl("totalsFarm").value;fillTotalsSelect("totalsTank",totalsDirectory.tanks.filter(t=>!farm||t.farm_id===farm).map(t=>({id:t.id,name:t.tank_label})),"All tanks");}
+totalsEl("totalsFarm").addEventListener("change",updateTotalsTanks);
+async function loadTotalsOptions(){try{const [drivers,directory]=await Promise.all([CKCloud.listDrivers(),CKCloud.listFarmsAndTanks()]);totalsDirectory=directory;fillTotalsSelect("totalsDriver",drivers.filter(d=>!d.is_office),"All drivers");fillTotalsSelect("totalsFarm",directory.farms,"All farms");updateTotalsTanks();}catch(e){totalsEl("totalsStatus").textContent="Unable to load report choices: "+e.message;}}
+totalsEl("calculateTotals").addEventListener("click",async()=>{
+ const button=totalsEl("calculateTotals"),status=totalsEl("totalsStatus"),out=totalsEl("totalsResult");
+ const date=totalsDate.value,period=totalsEl("totalsPeriod").value,view=totalsEl("totalsView").value;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){status.textContent="Choose a valid date.";return;}
+ const dt=new Date(date+"T12:00:00");if(!Number.isFinite(dt.getTime())){status.textContent="Choose a valid date.";return;}
+ const iso=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+ const from=new Date(dt),to=new Date(dt);
+ if(period==="week"){from.setDate(from.getDate()-(from.getDay()+6)%7);to.setTime(from.getTime());to.setDate(to.getDate()+7);}
+ else if(period==="month"){from.setDate(1);to.setFullYear(from.getFullYear(),from.getMonth()+1,1);}
+ else if(period==="year"){from.setMonth(0,1);to.setFullYear(from.getFullYear()+1,0,1);}
+ else to.setDate(to.getDate()+1);
+ const driverId=totalsEl("totalsDriver").value,farmId=totalsEl("totalsFarm").value,tankId=totalsEl("totalsTank").value;
+ button.disabled=true;out.replaceChildren();status.textContent="Calculating totals…";
+ try{
+  const [tickets,drivers,directory]=await Promise.all([CKCloud.listTicketsForPeriod(iso(from),iso(to)),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks()]);
+  totalsDirectory=directory;
+  const active=tickets.filter(t=>t.is_test!==true&&(!driverId||t.driver_id===driverId));
+  const driverMap=new Map(drivers.map(d=>[d.id,d.name])),tankMap=new Map(directory.tanks.map(t=>[t.id,t])),farmMap=new Map(directory.farms.map(f=>[f.id,f.name]));
+  const buckets=new Map();const add=(key,label,tons,loadKey)=>{if(!buckets.has(key))buckets.set(key,{label,tons:0,ids:new Set()});const b=buckets.get(key);b.tons+=Number(tons)||0;b.ids.add(loadKey);};
+  if(view==="driver"||view==="combined"){for(const t of active)add(view==="combined"?"all":t.driver_id,view==="combined"?"All drivers":(driverMap.get(t.driver_id)||"Unknown driver"),t.tons,t.id);}
+  else{
+   const allocations=await CKCloud.listReportTankAllocations(active.map(t=>t.id));const byTicket=new Map(active.map(t=>[t.id,t]));let assigned=0;
+   for(const row of allocations){const ticket=byTicket.get(row.ticket_id),tank=tankMap.get(row.tank_id);if(!ticket||!tank)continue;if(farmId&&tank.farm_id!==farmId)continue;if(tankId&&tank.id!==tankId)continue;assigned+=Number(row.tons)||0;const farmName=farmMap.get(tank.farm_id)||"Unknown farm";const key=view==="farm"?tank.farm_id:tank.id;add(key,view==="farm"?farmName:farmName+" — "+tank.tank_label,row.tons,ticket.id);}
+   status.textContent=iso(from)+" to "+iso(new Date(to.getTime()-86400000))+" · verified assigned tons only · unassigned deliveries excluded.";
+  }
+  const table=document.createElement("table");table.style.cssText="width:100%;border-collapse:collapse;min-width:300px";
+  const header=document.createElement("tr");for(const label of [view==="driver"?"Driver":view==="farm"?"Farm":view==="tank"?"Farm — tank":"Report","Loads","Tons"]){const th=document.createElement("th");th.textContent=label;th.style.cssText="text-align:left;padding:8px;border-bottom:1px solid #b5c5d1";header.appendChild(th);}table.appendChild(header);
+  let loads=0,tons=0;const rows=[...buckets.values()].sort((a,b)=>a.label.localeCompare(b.label));
+  for(const b of rows){loads+=b.ids.size;tons+=b.tons;const tr=document.createElement("tr");for(const val of [b.label,b.ids.size,b.tons.toFixed(2)]){const td=document.createElement("td");td.textContent=String(val);td.style.cssText="padding:8px;border-bottom:1px solid #dce5eb";tr.appendChild(td);}table.appendChild(tr);}
+  out.appendChild(table);
+  if(!rows.length)status.textContent="No matching "+(view==="farm"||view==="tank"?"verified tank assignments":"deliveries")+" for this selection.";
+  else if(view==="driver"||view==="combined")status.textContent=iso(from)+" to "+iso(new Date(to.getTime()-86400000))+" · "+loads+" loads · "+tons.toFixed(2)+" tons · test tickets excluded.";
+ }catch(e){status.textContent="Unable to calculate totals: "+e.message;}
+ finally{button.disabled=false;}
+});
+// Daily driver work stays visible; secondary tools start collapsed.
+const dashboard=document.querySelector("#profile .dashboard");
+const cameraTile=$("cameraTile");
+const ticketEntryTile=$("ticketEntryTile");
+const weekTile=$("cloudDriver")?.closest(".tile");
+if(dashboard && cameraTile && ticketEntryTile && weekTile) {
+  const heading=dashboard.querySelector("h3");
+  if(heading) heading.textContent="Today's feed deliveries";
+  const firstTile=dashboard.querySelector(".tile");
+  dashboard.insertBefore(cameraTile,firstTile);
+  dashboard.insertBefore(ticketEntryTile,firstTile);
+  dashboard.insertBefore(weekTile,firstTile);
+  weekTile.querySelector("strong").textContent="My feed delivery tickets — this week";
+  const photoInput=$("ticketPhoto");
+  cameraTile.querySelector("strong").textContent="Ticket photo and scan status";
+  // The large top button is the sole camera entry point.
+  const duplicateCameraButton=$("openTicketCamera");
+  if(duplicateCameraButton) duplicateCameraButton.remove();
+  // Keep the scanner and entry form out of the way until a photo is chosen.
+  cameraTile.hidden=true;
+  ticketEntryTile.hidden=true;
+  // Keep one prominent camera shortcut above the dashboard, not a duplicate.
+  const otherTiles=[...dashboard.querySelectorAll(":scope > .tile")].filter(t=>
+    t!==cameraTile && t!==ticketEntryTile && t!==weekTile && t.id!=="savedPhotoViewer" && t.id!=="adminTile");
+  const extras=document.createElement("details");
+  extras.id="dashboardExtras";
+  extras.style.cssText="margin-top:14px;border:1px solid #cbd9e2;border-radius:10px;padding:12px";
+  const summary=document.createElement("summary");
+  summary.textContent="More options — drivers, farms, managers & reports";
+  summary.style.cssText="font-weight:700;font-size:17px;cursor:pointer;padding:8px";
+  extras.appendChild(summary);
+  for(const tile of otherTiles) {
+    const inner=document.createElement("details");
+    inner.style.cssText="margin-top:10px";
+    const title=document.createElement("summary");
+    title.textContent=tile.querySelector("strong")?.textContent || "More options";
+    title.style.cssText="font-weight:650;cursor:pointer;padding:10px";
+    inner.appendChild(title);
+    inner.appendChild(tile);
+    extras.appendChild(inner);
+  }
+  dashboard.appendChild(extras);
+}
+document.body.appendChild($("correctionPanel"));
+// Keep the photo viewer outside collapsed dashboard sections so it can display.
+document.body.appendChild($("savedPhotoViewer"));
+$("quickCameraButton").addEventListener("click", () => $("ticketPhoto").click());
+const CKCloud = window.CKCloud;
+if (!CKCloud) {
+  const message = $("message");
+  if (message) message.textContent = "App connection code did not load. Refresh this page once; if it continues, report this message.";
+  return;
+}
+async function refreshManagers() {
+  const status=$("managerStatus");status.textContent="Loading managers…";
+  try {
+    const {managers,assignments,farms}=await CKCloud.listManagersAndAssignments();
+    const fill=(id,items)=>{const el=$(id);el.replaceChildren();for(const item of items){const o=document.createElement("option");o.value=item.id;o.textContent=item.name;el.appendChild(o);}};
+    fill("managerFarm",farms);fill("managerSelect",managers.filter(m=>m.active));
+    const list=$("managerList");list.replaceChildren();
+    for(const farm of farms) {
+      const history=assignments.filter(a=>a.farm_id===farm.id).sort((a,b)=>b.effective_from.localeCompare(a.effective_from));
+      const p=document.createElement("p");
+      p.textContent=farm.name+": "+(history.length?history.map(a=>(managers.find(m=>m.id===a.manager_id)?.name||"Unknown")+" ("+a.effective_from+" to "+(a.effective_to||"present")+")").join("; "):"Manager not assigned");
+      list.appendChild(p);
+    }
+    status.textContent=farms.length+" farms · "+managers.length+" managers. Historical assignments retained.";
+  }catch(e){status.textContent="Unable to load managers: "+e.message;}
+}
+$("managerRefresh").addEventListener("click",refreshManagers);
+$("managerCreate").addEventListener("submit",async e=>{
+  e.preventDefault();const b=e.target.querySelector("button");b.disabled=true;
+  try{await CKCloud.addManager($("managerName").value);$("managerName").value="";await refreshManagers();}
+  catch(err){$("managerStatus").textContent="Manager not added: "+err.message;}
+  finally{b.disabled=false;}
+});
+$("managerAssign").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!confirm("Change this farm's manager effective "+$("managerDate").value+"? Existing delivery tickets will remain unchanged."))return;
+  const b=e.target.querySelector("button");b.disabled=true;
+  try{await CKCloud.transferFarm($("managerFarm").value,$("managerSelect").value,$("managerDate").value);await refreshManagers();}
+  catch(err){$("managerStatus").textContent="Assignment not completed: "+err.message+" — refresh before retrying.";}
+  finally{b.disabled=false;}
+});
+let cameraPreviewUrl = null;
+function clearCameraPreview() {
+  if (cameraPreviewUrl) URL.revokeObjectURL(cameraPreviewUrl);
+  cameraPreviewUrl = null;
+  $("ticketPhoto").value = "";
+  $("ticketPhotoPreview").removeAttribute("src");
+  $("ticketPhotoPreview").hidden = true;
+  $("clearTicketPhoto").hidden = true;
+  $("cameraMessage").textContent = "Photo cleared. Nothing was saved.";
+  cameraTile.hidden=true;
+  ticketEntryTile.hidden=true;
+}
+$("clearTicketPhoto").addEventListener("click", clearCameraPreview);
+$("ticketPhoto").addEventListener("change", () => {
+  if (cameraPreviewUrl) URL.revokeObjectURL(cameraPreviewUrl);
+  cameraPreviewUrl = null;
+  const file = $("ticketPhoto").files?.[0];
+  if (!file) { clearCameraPreview(); return; }
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    clearCameraPreview();
+    $("cameraMessage").textContent = "Choose a JPEG, PNG, or WebP image. Other formats are not supported by ticket storage.";
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    clearCameraPreview();
+    $("cameraMessage").textContent = "Photo is too large. Choose an image under 10 MB.";
+    return;
+  }
+  cameraTile.hidden=false;
+  ticketEntryTile.hidden=false;
+  cameraPreviewUrl = URL.createObjectURL(file);
+  $("ticketPhotoPreview").src = cameraPreviewUrl;
+  $("ticketPhotoPreview").hidden = false;
+  $("clearTicketPhoto").hidden = false;
+  $("cameraMessage").textContent = "Photo selected: " + file.name + ". Photo selected. Automatic reading will start. Not uploaded or saved.";
+});
+$("loadFarms").addEventListener("click", async () => {
+  const button = $("loadFarms");
+  button.disabled = true;
+  $("farmMessage").textContent = "Loading farm directory…";
+  $("farmDirectory").replaceChildren();
+  try {
+    const [{farms,tanks},managerData] = await Promise.all([CKCloud.listFarmsAndTanks(),CKCloud.listManagersAndAssignments()]);
+    const previouslySelectedFarm = $("tankFarm").value;
+    $("tankFarm").replaceChildren();
+    for (const farm of farms) { const option = document.createElement("option"); option.value = farm.id; option.textContent = farm.name; $("tankFarm").appendChild(option); }
+    if (farms.some(farm => farm.id === previouslySelectedFarm)) $("tankFarm").value = previouslySelectedFarm;
+    $("farmMessage").textContent = farms.length ? farms.length + " farms registered." : "No farms registered yet. Existing feed tickets are unchanged.";
+    const byManager = new Map();
+    for (const farm of farms) {
+      const active = managerData.assignments.find(a => a.farm_id === farm.id && a.effective_to === null);
+      const manager = active && managerData.managers.find(m => m.id === active.manager_id);
+      const name = manager?.name || "Not assigned";
+      if (!byManager.has(name)) byManager.set(name, []);
+      byManager.get(name).push(farm);
+    }
+    for (const [managerName, managedFarms] of [...byManager].sort((a,b) => a[0].localeCompare(b[0]))) {
+      const section = document.createElement("section");
+      section.style.marginBottom = "22px";
+      const heading = document.createElement("h3");
+      heading.textContent = "Manager: " + managerName;
+      heading.style.marginBottom = "10px";
+      section.appendChild(heading);
+      const list = document.createElement("ul");
+      list.style.paddingLeft = "22px";
+      list.style.marginTop = "6px";
+      for (const farm of managedFarms) {
+        const matches = tanks.filter(t => t.farm_id === farm.id);
+        const labels = matches.map(t => t.tank_label);
+        const item = document.createElement("li");
+        item.style.marginBottom = "8px";
+        const title = document.createElement("strong");
+        title.textContent = farm.name;
+        item.appendChild(title);
+        if (labels.length && !(labels.length === 1 && labels[0].trim().toLowerCase() === farm.name.trim().toLowerCase())) {
+          const details = document.createElement("span");
+          details.textContent = " — " + labels.join(", ");
+          item.appendChild(details);
+        } else if (!labels.length) {
+          const details = document.createElement("span");
+          details.textContent = " — No tanks registered";
+          item.appendChild(details);
+        }
+        list.appendChild(item);
+      }
+      section.appendChild(list);
+      $("farmDirectory").appendChild(section);
+    }
+  } catch (error) {
+    $("farmMessage").textContent = "Could not load farms: " + error.message;
+  } finally { button.disabled = false; }
+});
+$("addFarmForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("addFarmForm").querySelector('button[type="submit"]');
+  button.disabled = true;
+  $("addFarmMessage").textContent = "Registering farm…";
+  try {
+    await CKCloud.registerFarm($("newFarmName").value);
+    $("newFarmName").value = "";
+    $("addFarmMessage").textContent = "Farm registered. Refreshing directory…";
+    $("loadFarms").click();
+  } catch (error) { $("addFarmMessage").textContent = "Farm not added: " + error.message; }
+  finally { button.disabled = false; }
+});
+$("addTankForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("addTankForm").querySelector('button[type="submit"]');
+  button.disabled = true;
+  $("addTankMessage").textContent = "Registering tank…";
+  try {
+    const tankLabel = $("newTankLabel").value.trim();
+    const farmName = $("tankFarm").selectedOptions[0]?.textContent || "selected farm";
+    await CKCloud.registerTank($("tankFarm").value,tankLabel);
+    $("newTankLabel").value = "";
+    $("addTankMessage").textContent = "Tank " + tankLabel + " added successfully to " + farmName + ".";
+    $("addTankMessage").style.color = "#155d39";
+    $("loadFarms").click();
+  } catch (error) {
+    const duplicate = /duplicate key|23505|unique constraint/i.test(error.message);
+    $("addTankMessage").textContent = duplicate ? "This tank is already registered to this farm." : "Tank not added: " + error.message;
+    $("addTankMessage").style.color = duplicate ? "#8a4b00" : "#a72d32";
+  }
+  finally { button.disabled = false; }
+});
+let confirmedReportDirectory=null;
+async function loadConfirmedReportTanks(){
+ const sel=$("confirmedReportTank");sel.replaceChildren();
+ const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="Choose actual delivery tank";sel.appendChild(placeholder);
+ try{
+  confirmedReportDirectory=await CKCloud.listFarmsAndTanks();
+  const byFarm=new Map(confirmedReportDirectory.farms.map(f=>[f.id,f.name]));
+  const tanks=confirmedReportDirectory.tanks.map(t=>({...t,farmName:byFarm.get(t.farm_id)||"Unknown farm"})).sort((a,b)=>(a.farmName+" "+a.tank_label).localeCompare(b.farmName+" "+b.tank_label));
+  for(const t of tanks){const o=document.createElement("option");o.value=t.id;o.textContent=t.farmName+" — "+t.tank_label;sel.appendChild(o);}
+  $("confirmedReportTankStatus").textContent="Select the actual tank or registered grouped destination. The full ticket weight counts once; no splitting.";
+ }catch(e){$("confirmedReportTankStatus").textContent="Tank directory unavailable: "+e.message+". Ticket not ready to save.";}
+}
+let verifiedTicket = null;
+$("confirmSave").addEventListener("click", async () => {
+  $("draftResult").textContent="TEST MODE: Saving is blocked until feed type, tank assignment, and reporting are verified. No ticket was saved.";
+  return;
+  if (!verifiedTicket) { $("draftResult").textContent="Check and preview the ticket again before saving."; return; }
+  const file=$("ticketPhoto").files?.[0];
+  if (!file) { $("draftResult").textContent="Select the original ticket photo before saving."; return; }
+  if (navigator.onLine === false) {
+    $("draftResult").textContent="No internet connection. Ticket NOT saved. Keep this page open and do not clear the photo. Retry when service returns. Offline storage and sync are not enabled yet.";
+    return;
+  }
+  const selectedTank=$("confirmedReportTank").value;
+  if(!selectedTank || !confirmedReportDirectory?.tanks.some(t=>t.id===selectedTank)){$("draftResult").textContent="Select one confirmed registered reporting tank before saving.";return;}
+  const button=$("confirmSave");
+  button.disabled=true;
+  $("draftResult").textContent="Saving ticket and private photo to the cloud…";
+  try {
+    const result=await CKCloud.saveTicketWithPhoto(verifiedTicket,file);
+    let assignmentMessage="";
+    try {const allocations=await CKCloud.createTankAllocations(result.id,[{tank_id:selectedTank,tons:Number(result.tons)}]);if(!Array.isArray(allocations)||allocations.length!==1)throw Error("Assignment could not be verified.");assignmentMessage=" Tank assignment saved and verified.";}catch(err){assignmentMessage=" IMPORTANT: Ticket and photo saved, but tank assignment NOT confirmed: "+err.message+". Do not reenter the ticket; assign it from the existing ticket allocation section.";}
+    $("draftResult").textContent="Saved to cloud: ticket "+result.ticket_number+". Photo attached."+assignmentMessage;
+    verifiedTicket=null;
+    $("confirmPanel").hidden=true;
+    $("ticketDraft").reset();
+    $("ticketPhoto").value="";
+    cameraTile.hidden=true;
+    ticketEntryTile.hidden=true;
+    $("ticketPhotoPreview").hidden=true;
+    $("clearTicketPhoto").hidden=true;
+    $("cameraMessage").textContent="Ticket saved. Choose a new photo for the next ticket.";
+    $("loadWeek").click();
+  } catch(error) {
+    $("draftResult").textContent="Save unsuccessful: "+error.message;
+  } finally { button.disabled=false; }
+});
+const ticketFields = ["draftDate","draftNumber","draftTons","draftDestination","draftFeedType"];
+for (const id of ticketFields) {
+  $(id).addEventListener("input", () => {
+    verifiedTicket = null;
+    $("confirmPanel").hidden = true;
+    $("draftResult").textContent = "Details changed. Check ticket number again.";
+  });
+}
+$("cancelSave").addEventListener("click", () => {
+  verifiedTicket = null;
+  $("confirmPanel").hidden = true;
+  $("draftResult").textContent = "Confirmation canceled. Nothing was saved.";
+});
+$("ticketDraft").addEventListener("submit", async e => {
+  e.preventDefault();
+  const date = $("draftDate").value;
+  const number = $("draftNumber").value.trim();
+  const tons = Number($("draftTons").value);
+  const destination = $("draftDestination").value.trim();
+  const feedType = $("draftFeedType").value.trim();
+  const day = new Date(date + "T12:00:00");
+  if (!date || Number.isNaN(day.getTime()) || day.getDay() === 0 ||
+      !/^[A-Za-z0-9][A-Za-z0-9-]{0,23}$/.test(number) || !Number.isFinite(tons) ||
+      tons <= 0 || tons > 100 || !destination || !feedType) {
+    $("draftResult").textContent = "Check the fields. Deliveries are Monday through Saturday; ticket numbers may contain letters, numbers, and hyphens.";
+    return;
+  }
+  const button = $("ticketDraft").querySelector('button[type="submit"]');
+  button.disabled = true;
+  verifiedTicket = null;
+  $("confirmPanel").hidden = true;
+  $("draftResult").textContent = "Checking ticket number against cloud history…";
+  try {
+    const duplicate = await CKCloud.findTicketNumber(number);
+    if (duplicate) {
+      $("draftResult").textContent = "Duplicate ticket " + number + " already exists in cloud history (" + duplicate.delivery_date + "). Nothing was saved.";
+      return;
+    }
+    const photo = $("ticketPhoto").files?.[0];
+    if (!photo) { $("draftResult").textContent = "Ticket number available, but a ticket photo is required before saving. Select the original photo above. Nothing was saved."; return; }
+    try { CKTicketPhotos.validate(photo); } catch(photoError) { $("draftResult").textContent = photoError.message + " Nothing was saved."; return; }
+    $("draftResult").textContent = "Ticket number available and photo validated. Review the confirmation below. Nothing has been saved.";
+    verifiedTicket = Object.freeze({delivery_date:date,ticket_number:number,tons,destination});
+    $("confirmDetails").textContent = "Date: " + date + " | Ticket: " + number +
+      " | Tons: " + tons.toFixed(2) + " | Feed: " + feedType + " | Destination: " + destination + " | Photo: " + photo.name;
+    $("confirmPanel").hidden = false;
+    $("confirmSave").disabled = true;
+    $("draftResult").textContent = "TEST PREVIEW ONLY: Feed type can be reviewed but cannot yet be saved. No ticket has been created.";
+    await loadConfirmedReportTanks();
+  } catch (error) {
+    $("draftResult").textContent = "Could not check cloud history: " + error.message + ". Nothing was saved.";
+  } finally {
+    button.disabled = false;
+  }
+});
+async function showSignedIn(profile) {
+    activeProfile=profile;
+    $("password").value = "";
+    $("login").style.display = "none";
+    $("profile").style.display = "block";
+    $("welcome").textContent = "Welcome, " + profile.name;
+    $("role").textContent = "Access: " + (profile.is_admin ? "Administrator" : profile.is_office ? "Office" : "Driver") + " · " + profile.company;
+    $("adminTile").hidden = !profile.is_admin;
+    $("farmAdmin").hidden = !profile.is_admin;
+    $("managerAdmin").hidden = !profile.is_admin;
+    if(profile.is_admin) refreshManagers();
+    loadTotalsOptions();
+    $("officeTile").hidden = !profile.is_office;
+    $("cameraTile").hidden = true;
+    $("quickCamera").hidden = Boolean(profile.is_office);
+    $("ticketEntryTile").hidden = true;
+    $("cloudDriver").replaceChildren();
+    $("weekTable").hidden = true;
+    $("scrollHint").hidden = true;
+    $("weekTotal").textContent = "";
+    $("weekHighlights").textContent = "";
+    $("sheetHeading").textContent = "";
+    $("weekFoot").replaceChildren();
+    const now = new Date();
+    now.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    $("cloudWeek").value = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+    $("driverDirectory").textContent = "Loading driver directory…";
+    try {
+      const drivers = await CKCloud.listDrivers();
+      $("driverDirectory").replaceChildren();
+      if (!drivers.length) $("driverDirectory").textContent = "No driver profiles available.";
+      for (const d of drivers) {
+        if (!d.is_office) {
+          const option = document.createElement("option");
+          option.value = d.id;
+          option.textContent = d.name + " — " + d.company;
+          $("cloudDriver").appendChild(option);
+        }
+        const item = document.createElement("p");
+        item.textContent = d.name + " — " + d.company + (d.is_admin ? " (Administrator)" : d.is_office ? " (Office)" : "");
+        $("driverDirectory").appendChild(item);
+      }
+      if (!profile.is_office) {
+        const mine = drivers.find(d => d.id === profile.id);
+        if (mine) $("cloudDriver").value = mine.id;
+      }
+      $("loadWeek").click();
+    } catch (err) {
+      $("driverDirectory").textContent = "Could not load driver directory: " + err.message;
+    }
+    $("message").textContent = "Signed in. Driver directory is read-only. Ticket entry and private photo saving are enabled for authorized drivers.";
+}
+$("login").addEventListener("submit", async e => {
+  e.preventDefault();
+  $("submit").disabled = true;
+  $("message").textContent = "Checking account…";
+  try {
+    const profile = await CKCloud.signIn($("email").value.trim(), $("password").value);
+    await showSignedIn(profile);
+  } catch (err) {
+    $("password").value = "";
+    $("message").textContent = err.message || "Sign-in failed.";
+  } finally {
+    $("submit").disabled = false;
+  }
+});
+// Accept one-time email callbacks even when the provider redirects to this page.
+(async()=>{
+ const hash=new URLSearchParams(location.hash.slice(1)),query=new URLSearchParams(location.search);
+ const hasTokens=hash.has("access_token")&&hash.has("refresh_token");
+ if(hasTokens){
+  history.replaceState(null,"",location.pathname);
+  $("message").textContent="Completing your email sign-in…";
+  try{
+   const expires=Number(hash.get("expires_in")||3600);
+   const session={access_token:hash.get("access_token"),refresh_token:hash.get("refresh_token"),token_type:"bearer",expires_in:expires,expires_at:Math.floor(Date.now()/1000)+expires};
+   const response=await fetch(window.SUPABASE_URL+"/auth/v1/user",{headers:{apikey:window.SUPABASE_KEY,Authorization:"Bearer "+session.access_token}});
+   if(!response.ok)throw Error("The email sign-in link could not be verified.");
+   session.user=await response.json();
+   localStorage.setItem("ck-feed-auth-v1",JSON.stringify(session));
+  }catch(err){$("message").textContent="Email sign-in failed: "+err.message;return;}
+ }else if(hash.has("error")||query.has("error_description")){
+  $("message").textContent="The email sign-in link expired or was rejected. Request a new link.";
+  history.replaceState(null,"",location.pathname);return;
+ }
+ try{const profile=await CKCloud.restoreSession();if(profile)await showSignedIn(profile);else if(hasTokens)$("message").textContent="Account verification failed. Please request a fresh sign-in link.";}
+ catch(err){$("message").textContent="Unable to open account: "+err.message;}
+})();
+$("printWeek").addEventListener("click", () => {
+  if ($("printWeek").disabled) return;
+  const area = $("printArea");
+  const parent = area.parentNode;
+  const next = area.nextSibling;
+  document.body.appendChild(area);
+  const restore = () => {
+    if (next && next.parentNode === parent) parent.insertBefore(area,next);
+    else parent.appendChild(area);
+    window.removeEventListener("afterprint",restore);
+  };
+  window.addEventListener("afterprint",restore);
+  window.print();
+});
+
+const allocationState={tickets:[],tanks:[],rows:[],saved:false};
+function allocationMoney(n){return (Math.round(Number(n)*100)/100).toFixed(2);}
+function allocationStatus(message){$("allocationStatus").textContent=message;}
+function allocationRecalc(){
+  const ticket=allocationState.tickets.find(t=>t.id===$("allocationTicket").value);
+  const cents=allocationState.rows.reduce((sum,r)=>sum+Math.round(Number(r.amount.value||0)*100),0);
+  const expected=ticket?Math.round(Number(ticket.tons)*100):0;
+  $("allocationTotal").textContent=ticket?"Assigned "+(cents/100).toFixed(2)+" / "+(expected/100).toFixed(2)+" tons"+(cents===expected?" — matches":" — difference "+((expected-cents)/100).toFixed(2)):"Choose a ticket.";
+  $("allocationSave").disabled=!ticket||allocationState.saved||cents!==expected||!allocationState.rows.length;
+}
+function allocationAddRow(){
+  if(!allocationState.tanks.length)return;
+  const line=document.createElement("div");line.style.cssText="display:flex;gap:6px;align-items:end;margin:8px 0;flex-wrap:wrap";
+  const tank=document.createElement("select");tank.style.flex="2 1 150px";
+  const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="Select a tank";tank.appendChild(placeholder);
+  const byFarm=new Map();
+  for(const t of allocationState.tanks){
+    if(!byFarm.has(t.farm))byFarm.set(t.farm,[]);
+    byFarm.get(t.farm).push(t);
+  }
+  for(const [farm,items] of byFarm){
+    const group=document.createElement("optgroup");group.label=farm;
+    for(const t of items){const o=document.createElement("option");o.value=t.id;o.textContent=t.tank;group.appendChild(o);}
+    tank.appendChild(group);
+  }
+  tank.value="";
+  const amount=document.createElement("input");amount.type="number";amount.min="0.01";amount.max="100";amount.step="0.01";amount.placeholder="Tons";amount.style.flex="1 1 90px";
+  const remove=document.createElement("button");remove.type="button";remove.className="secondary";remove.textContent="Remove";remove.style.flex="0 0 auto";
+  line.append(tank,amount,remove);$("allocationRows").appendChild(line);
+  const record={line,tank,amount};allocationState.rows.push(record);
+  amount.addEventListener("input",allocationRecalc);tank.addEventListener("change",allocationRecalc);
+  remove.addEventListener("click",()=>{line.remove();allocationState.rows=allocationState.rows.filter(x=>x!==record);allocationRecalc();});
+  allocationRecalc();
+}
+async function allocationChoose(){
+  allocationState.rows=[];$("allocationRows").replaceChildren();allocationState.saved=false;
+  const ticket=allocationState.tickets.find(t=>t.id===$("allocationTicket").value);
+  if(!ticket){allocationRecalc();return;}
+  try{
+    const existing=await CKCloud.listTankAllocations(ticket.id);
+    if($("allocationTicket").value!==ticket.id)return;
+    allocationState.saved=existing.length>0;
+    if(existing.length){allocationStatus("Already assigned: "+existing.map(x=>allocationState.tanks.find(t=>t.id===x.tank_id)?.label+" "+allocationMoney(x.tons)+" tons").join("; ")+". Existing allocations are read-only here.");}
+    else {allocationStatus("No tank assignments saved for this ticket.");allocationAddRow();}
+  }catch(e){allocationState.saved=true;allocationStatus("Cannot check existing assignments: "+e.message);}
+  allocationRecalc();
+}
+$("allocationLoad").addEventListener("click",async()=>{
+  $("allocationLoad").disabled=true;allocationStatus("Loading tickets and tanks…");
+  try{
+    const [tickets,directory]=await Promise.all([CKCloud.listWeeklyTickets($("cloudDriver").value,$("cloudWeek").value),CKCloud.listFarmsAndTanks()]);
+    allocationState.tickets=tickets;
+    allocationState.tanks=directory.tanks.map(t=>({id:t.id,farm:(directory.farms.find(f=>f.id===t.farm_id)?.name||"Farm"),tank:t.tank_label,label:(directory.farms.find(f=>f.id===t.farm_id)?.name||"Farm")+" — "+t.tank_label})).sort((a,b)=>a.label.localeCompare(b.label));
+    $("allocationTicket").replaceChildren();
+    for(const t of tickets){const o=document.createElement("option");o.value=t.id;o.textContent=t.ticket_number+" | "+t.destination+" | "+allocationMoney(t.tons)+" tons";$("allocationTicket").appendChild(o);}
+    allocationStatus(tickets.length?tickets.length+" tickets loaded. Select a ticket and assign its tanks.":"No tickets for this driver and week.");
+    await allocationChoose();
+  }catch(e){allocationStatus("Unable to load: "+e.message);}
+  finally{$("allocationLoad").disabled=false;}
+});
+$("allocationTicket").addEventListener("change",allocationChoose);
+$("allocationAdd").addEventListener("click",allocationAddRow);
+$("allocationSave").addEventListener("click",async()=>{
+  const ticket=allocationState.tickets.find(t=>t.id===$("allocationTicket").value);
+  if(!ticket||allocationState.saved)return;
+  const items=allocationState.rows.map(r=>({tank_id:r.tank.value,tons:Number(r.amount.value)}));
+  const cents=items.reduce((sum,x)=>sum+Math.round(x.tons*100),0);
+  if(!items.length||items.some(x=>!x.tank_id)||items.some(x=>!Number.isFinite(x.tons)||x.tons<=0||Math.round(x.tons*100)!==x.tons*100)||new Set(items.map(x=>x.tank_id)).size!==items.length||cents!==Math.round(Number(ticket.tons)*100)){
+    allocationStatus("Each tank must be different, amounts must be positive with two decimals, and the total must match the ticket. Nothing saved.");return;
+  }
+  if(!window.confirm("Assign "+allocationMoney(ticket.tons)+" tons across "+items.length+" tank(s) for ticket "+ticket.ticket_number+"?"))return;
+  $("allocationSave").disabled=true;allocationStatus("Saving assignments…");
+  try{
+    const result=await CKCloud.createTankAllocations(ticket.id,items);
+    if(!Array.isArray(result)||result.length!==items.length)throw Error("Could not verify every assignment. Reload before retrying.");
+    allocationState.saved=true;allocationStatus("Saved and verified "+result.length+" tank assignment(s) for ticket "+ticket.ticket_number+".");
+  }catch(e){allocationStatus("Not confirmed: "+e.message+". Reload ticket to check before retrying.");}
+  allocationRecalc();
+});
+$("cloudDriver").addEventListener("change",()=>{allocationState.tickets=[];$("allocationTicket").replaceChildren();$("allocationRows").replaceChildren();allocationState.rows=[];allocationState.saved=true;allocationStatus("Driver changed. Load tickets again.");allocationRecalc();});
+$("cloudWeek").addEventListener("change",()=>{allocationState.tickets=[];$("allocationTicket").replaceChildren();$("allocationRows").replaceChildren();allocationState.rows=[];allocationState.saved=true;allocationStatus("Week changed. Load tickets again.");allocationRecalc();});
+
+let activeProfile=null;
+let correctionTarget=null;
+function openTicketCorrection(t) {
+  correctionTarget=t.id;
+  $("correctionDate").value=t.delivery_date;
+  $("correctionNumber").value=t.ticket_number;
+  $("correctionTons").value=Number(t.tons).toFixed(2);
+  $("correctionDestination").value=t.destination;
+  $("correctionStatus").textContent="Editing ticket "+t.ticket_number+". Original photo will remain unchanged.";
+  $("correctionPanel").hidden=false;
+}
+$("cancelCorrection").addEventListener("click",()=>{$("correctionPanel").hidden=true;correctionTarget=null;});
+$("correctionForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!correctionTarget || !CKCloud.isSignedIn())return;
+  const editingTicketId=correctionTarget;
+  const editingDriver=$("cloudDriver").value;
+  const editingWeek=$("cloudWeek").value;
+  const button=$("correctionForm").querySelector('button[type="submit"]');
+  button.disabled=true;
+  $("correctionStatus").textContent="Saving correction…";
+  try {
+    await CKCloud.correctTicket(editingTicketId,{
+      delivery_date:$("correctionDate").value,ticket_number:$("correctionNumber").value.trim(),
+      tons:Number($("correctionTons").value),destination:$("correctionDestination").value.trim()
+    });
+    if(correctionTarget===editingTicketId) {
+      $("correctionPanel").hidden=true;
+      correctionTarget=null;
+    }
+    if(CKCloud.isSignedIn() && $("cloudDriver").value===editingDriver && $("cloudWeek").value===editingWeek)
+      $("loadWeek").click();
+  } catch(err) {if(correctionTarget===editingTicketId) $("correctionStatus").textContent="Not saved: "+err.message;}
+  finally {button.disabled=false;}
+});
+let activePhotoUrl=null;
+let photoRequestSequence=0;
+async function showSavedPhoto(ticket) {
+  const requestSequence=++photoRequestSequence;
+  const viewer=$("savedPhotoViewer"),message=$("savedPhotoStatus"),img=$("savedPhotoImage");
+  viewer.hidden=false;
+  // Fixed overlay keeps the photograph visible instead of jumping within the wide table.
+  img.hidden=true;
+  message.textContent="Loading private photo for ticket "+ticket.ticket_number+"…";
+  if(activePhotoUrl) { URL.revokeObjectURL(activePhotoUrl); activePhotoUrl=null; }
+  try {
+    const blob=await CKCloud.readTicketPhoto(ticket.photo_path);
+    // The viewer may have been closed or the user may have signed out while the request ran.
+    if(requestSequence!==photoRequestSequence || viewer.hidden || !CKCloud.isSignedIn()) return;
+    activePhotoUrl=URL.createObjectURL(blob);
+    img.onload=()=>{if(!viewer.hidden)message.textContent="Ticket "+ticket.ticket_number+" — original saved photo";};
+    img.onerror=()=>{if(!viewer.hidden)message.textContent="Photo downloaded but could not be displayed.";};
+    img.src=activePhotoUrl;
+    img.hidden=false;
+    message.textContent="Ticket "+ticket.ticket_number+" — original saved photo";
+  } catch(error) { if(requestSequence===photoRequestSequence && !viewer.hidden) message.textContent="Unable to open photo: "+error.message; }
+}
+$("closeSavedPhoto").addEventListener("click",()=>{
+  ++photoRequestSequence;
+  $("savedPhotoViewer").hidden=true;
+  $("savedPhotoImage").removeAttribute("src");
+  if(activePhotoUrl) URL.revokeObjectURL(activePhotoUrl);
+  activePhotoUrl=null;
+});
+let weekRequestSequence=0;
+function clearStaleWeekReport() {
+  ++weekRequestSequence;
+  $("weekTable").hidden=true;
+  $("printWeek").disabled=true;
+  $("scrollHint").hidden=true;
+  $("correctionPanel").hidden=true;
+  correctionTarget=null;
+  $("weekRows").replaceChildren();
+  $("weekFoot").replaceChildren();
+  $("weekTotal").textContent="";
+  $("weekHighlights").textContent="";
+  $("sheetHeading").textContent="";
+  $("weekMessage").textContent="Selection changed. Load the selected week to view its tickets.";
+  $("loadWeek").disabled=false;
+}
+$("cloudDriver").addEventListener("change",clearStaleWeekReport);
+$("cloudWeek").addEventListener("change",clearStaleWeekReport);
+$("loadWeek").addEventListener("click", async () => {
+  const requestSequence=++weekRequestSequence;
+  $("printWeek").disabled = true;
+  $("loadWeek").disabled = true;
+  $("weekTable").hidden = true;
+  $("scrollHint").hidden = true;
+  $("weekRows").replaceChildren();
+  $("weekFoot").replaceChildren();
+  $("weekHighlights").textContent = "";
+  $("sheetHeading").textContent = "";
+  $("weekTotal").textContent = "";
+  $("weekMessage").textContent = "Loading selected week…";
+  try {
+    const allRows = await CKCloud.listWeeklyTickets($("cloudDriver").value, $("cloudWeek").value);
+    const testCount=allRows.filter(t=>t.is_test===true).length;
+    const rows=$("showTestTickets").checked?allRows:allRows.filter(t=>t.is_test!==true);
+    if(requestSequence!==weekRequestSequence || !CKCloud.isSignedIn()) return;
+    const chosen = $("cloudDriver").selectedOptions[0]?.textContent || "Driver";
+    const weekStart = $("cloudWeek").value;
+    const startDate = new Date(weekStart + "T12:00:00");
+    const lastDate = new Date(startDate);
+    lastDate.setDate(lastDate.getDate() + 5);
+    const endText = lastDate.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    $("sheetHeading").textContent = chosen + " · Week " + weekStart + " through " + endText;
+    if(testCount && !$("showTestTickets").checked) $("sheetHeading").textContent+=" · "+testCount+" test tickets excluded";
+    if(testCount && $("showTestTickets").checked) $("sheetHeading").textContent+=" · TEST DATA INCLUDED";
+    // Calculate in hundredths of a ton so daily/weekly totals and ties are exact.
+    const cents = t => Math.round(Number(t.tons) * 100);
+    const totalsByDay = {};
+    for (const t of rows) totalsByDay[t.delivery_date] = (totalsByDay[t.delivery_date] || 0) + cents(t);
+    const values = rows.map(cents);
+    const heaviest = values.length ? Math.max(...values) : null;
+    const lightest = values.length ? Math.min(...values) : null;
+    const biggest = Math.max(0,...Object.values(totalsByDay));
+    const biggestDays = Object.keys(totalsByDay).filter(d => totalsByDay[d] === biggest);
+    let weekly = 0, daily = 0, load = 0, lastDay = "";
+    for (const t of rows) {
+      if (t.delivery_date !== lastDay) { lastDay = t.delivery_date; load = 0; daily = 0; }
+      load++;
+      daily += cents(t);
+      weekly += cents(t);
+      const dayName = new Date(t.delivery_date + "T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+      const dayMarker = load === 1 && biggestDays.includes(t.delivery_date) ? "🟦 " : "";
+      const tonMarkers = (cents(t) === heaviest ? "🟥 " : "") + (cents(t) === lightest ? "🟩 " : "");
+      const tr = document.createElement("tr");
+      for (const value of [dayMarker + dayName,load,t.ticket_number,tonMarkers + Number(t.tons).toFixed(2),t.destination,(daily/100).toFixed(2),(weekly/100).toFixed(2)]) {
+        const td = document.createElement("td");
+        td.textContent = value;
+        td.style.cssText = "padding:8px 4px;border-bottom:1px solid #d8e3e9;white-space:nowrap";
+        tr.appendChild(td);
+      }
+      const photoCell=document.createElement("td");
+      photoCell.className="no-print";
+      if(t.photo_path) {
+        const open=document.createElement("button");
+        open.type="button";
+        open.textContent="View photo";
+        open.style.cssText="padding:8px;min-height:40px;font-size:13px;white-space:nowrap";
+        open.addEventListener("click",()=>showSavedPhoto(t));
+        photoCell.appendChild(open);
+      } else photoCell.textContent="—";
+      tr.appendChild(photoCell);
+      const editCell=document.createElement("td");
+      editCell.className="no-print";
+      if(!activeProfile?.is_office && (activeProfile?.is_admin || activeProfile?.id===t.driver_id)) {
+        const edit=document.createElement("button");
+        edit.type="button";edit.textContent="Correct";
+        edit.style.cssText="padding:8px;min-height:40px;font-size:13px";
+        edit.addEventListener("click",()=>openTicketCorrection(t));
+        editCell.appendChild(edit);
+      }
+      tr.appendChild(editCell);
+      $("weekRows").appendChild(tr);
+    }
+    const foot = document.createElement("tr");
+    for (const [i,value] of ["TOTAL",rows.length,"",(weekly/100).toFixed(2),"","",(weekly/100).toFixed(2),"",""].entries()) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      cell.style.cssText = "padding:9px 4px;font-weight:700;background:#e3edf3";
+      foot.appendChild(cell);
+    }
+    $("weekFoot").appendChild(foot);
+    $("weekTable").hidden = false;
+    $("scrollHint").hidden = rows.length === 0;
+    $("weekScroll").scrollLeft = 0;
+    $("printTitle").textContent = chosen.includes("Next Page") ? "NEXT PAGE — FEED DELIVERY SHEET" : "C&K FARMS — FEED DELIVERY SHEET";
+    $("printWeek").disabled = false;
+    $("weekMessage").textContent = rows.length ? (!activeProfile?.is_office && (activeProfile?.is_admin || activeProfile?.id===$("cloudDriver").value) ? "Selected week loaded. You can correct authorized tickets." : "Selected week loaded (read only).") : "No tickets recorded for the selected week.";
+    $("weekTotal").textContent = rows.length + " loads · " + (weekly/100).toFixed(2) + " tons";
+    $("weekHighlights").textContent = rows.length ? "🟥 Heaviest: " + (heaviest/100).toFixed(2) + " tons · 🟩 Lightest: " + (lightest/100).toFixed(2) + " tons · 🟦 Biggest day: " + biggestDays.map(d => new Date(d + "T12:00:00").toLocaleDateString("en-US",{weekday:"long"})).join(", ") + " (" + (biggest/100).toFixed(2) + " tons)" : "";
+  } catch (err) {
+    if(requestSequence===weekRequestSequence) $("weekMessage").textContent = "Could not load selected week: " + (err.message || err);
+  } finally { if(requestSequence===weekRequestSequence) $("loadWeek").disabled = false; }
+});
+$("logout").addEventListener("click", async () => {
+  $("logout").disabled = true;
+  // Clear private UI immediately, even if the logout network request is slow.
+  ++weekRequestSequence;
+  ++photoRequestSequence;
+  $("savedPhotoViewer").hidden=true;
+  $("savedPhotoImage").removeAttribute("src");
+  if(activePhotoUrl) { URL.revokeObjectURL(activePhotoUrl); activePhotoUrl=null; }
+  try { await CKCloud.signOut(); $("message").textContent = "Signed out."; }
+  catch (err) { $("message").textContent = "Sign-out warning: " + err.message; }
+  finally {
+    $("logout").disabled = false;
+    activeProfile=null;
+    correctionTarget=null;
+    $("correctionPanel").hidden=true;
+    $("savedPhotoViewer").hidden=true;
+    $("savedPhotoImage").removeAttribute("src");
+    if(activePhotoUrl) { URL.revokeObjectURL(activePhotoUrl); activePhotoUrl=null; }
+    $("weekRows").replaceChildren();
+    $("weekFoot").replaceChildren();
+    $("weekTable").hidden=true;
+    $("printWeek").disabled=true;
+    $("loadWeek").disabled=false;
+    $("scrollHint").hidden=true;
+    $("weekMessage").textContent="Sign in to view a weekly report.";
+    $("weekTotal").textContent="";
+    $("weekHighlights").textContent="";
+    $("sheetHeading").textContent="";
+    $("profile").style.display = "none";
+    $("driverDirectory").textContent = "Sign in to load the driver directory.";
+    $("adminTile").hidden = true;
+    $("officeTile").hidden = true;
+    $("farmAdmin").hidden = true;
+    $("managerAdmin").hidden = true;
+    $("cameraTile").hidden = true;
+    $("ticketEntryTile").hidden = true;
+    $("login").style.display = "block";
+  }
+});
+})();
+</script>
+<script src="tank-groups.js"></script>
+<script src="grouped-report.js"></script>
+<script src="farm-period-report.js"></script>
+<script src="ticket-photo-storage.js"></script>
+<script src="ticket-ocr-feed-preview.js?v=20261114g"></script>
+
+<script>
+/* Read-only manager / farm / tank preview. Does not modify authentication or saved records. */
+(()=>{
+ const original=document.getElementById("totalsResult");
+ if(!original)return;
+ const tile=original.parentElement;
+ const controls=[...tile.querySelectorAll("label,select,input,button,p,#totalsResult")];
+ controls.forEach(el=>{el.style.display="none";});
+ const panel=document.createElement("div");
+ panel.innerHTML='<p style="font-weight:700">Manager, farm & tank report — test version</p><label for="mgManager">Select Manager</label><select id="mgManager"><option value="">Select Manager</option><option>Mark</option><option>Francisco</option><option>McNeil</option><option>David</option></select><label for="mgFarm">Select Farm</label><select id="mgFarm" disabled><option value="">Select manager first</option></select><label for="mgTank">Select Tank</label><select id="mgTank" disabled><option value="">All tanks</option></select><label for="mgPeriod">Period</label><select id="mgPeriod"><option value="day">Daily</option><option value="week" selected>Weekly (Monday–Saturday)</option><option value="month">Monthly</option><option value="year">Yearly</option></select><label for="mgDate">Choose date</label><input id="mgDate" type="date"><button id="mgShow" type="button">Show actual feed totals</button><p id="mgStatus" role="status">Select a manager to begin.</p><div id="mgOutput" style="overflow-x:auto"></div>';
+ tile.appendChild(panel);
+ const el=id=>document.getElementById(id), mgr=el("mgManager"),farm=el("mgFarm"),tank=el("mgTank"),status=el("mgStatus"),output=el("mgOutput");
+ el("mgDate").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+ const groups={
+  Mark:["P Ponds","B 701","B 702","B 703 Brooder E","G Tank 704","CTR 705","CTR 706","O Tank 707","F Tank 708"],
+  Francisco:["PD"],McNeil:["Austin Farms","Q Ponds","Maclewell Farm"],
+  David:["Fisackerly","Gililiand","Lee Watts"]
+ };
+ let directory=null;
+ function choices(select,items,first){select.replaceChildren();const opt=document.createElement("option");opt.value="";opt.textContent=first;select.appendChild(opt);for(const item of items){const o=document.createElement("option");o.value=item.id;o.textContent=item.name;select.appendChild(o);}}
+ async function load(){
+  if(!CKCloud.isSignedIn()){status.textContent="Sign in to load registered farms.";return;}
+  try{directory=await CKCloud.listFarmsAndTanks();syncFarms();}
+  catch(e){status.textContent="Unable to load farms: "+e.message;}
+ }
+ function syncFarms(){
+  if(!directory)return;
+  const group=groups[mgr.value]||[];
+  choices(farm,directory.farms.filter(f=>group.includes(f.name)),"All "+(mgr.value||"manager")+" farms");
+  farm.disabled=!mgr.value;syncTanks();
+ }
+ function syncTanks(){
+  if(!directory)return;
+  choices(tank,directory.tanks.filter(t=>t.farm_id===farm.value).map(t=>({id:t.id,name:t.tank_label})),"All tanks");
+  tank.disabled=!farm.value;output.replaceChildren();
+  status.textContent=mgr.value?"Select a farm or show all "+mgr.value+"'s farms.":"Select Manager.";
+ }
+ mgr.addEventListener("change",syncFarms);farm.addEventListener("change",syncTanks);
+ for(const id of ["mgTank","mgPeriod","mgDate"])el(id).addEventListener("change",()=>{output.replaceChildren();status.textContent="Tap Show actual feed totals.";});
+ function rowTable(title,rows){
+  const heading=document.createElement("h4");heading.textContent=title;output.appendChild(heading);
+  const t=document.createElement("table");t.style.cssText="width:100%;border-collapse:collapse;min-width:280px";
+  const add=(values,bold)=>{const tr=document.createElement("tr");values.forEach(v=>{const c=document.createElement(bold?"th":"td");c.textContent=String(v);c.style.cssText="padding:8px;border-bottom:1px solid #dce5eb;text-align:left";tr.appendChild(c);});t.appendChild(tr);};
+  add(["Driver","Tons","Tickets"],true);
+  for(const r of rows)add([r.name,(r.cents/100).toFixed(2),r.ids.size],false);
+  output.appendChild(t);
+ }
+ function dateRange(value,period){
+  const d=new Date(value+"T12:00:00");if(!Number.isFinite(d.getTime()))throw Error("Choose a valid date.");
+  const from=new Date(d),to=new Date(d);
+  if(period==="week"){from.setDate(from.getDate()-(from.getDay()+6)%7);to.setTime(from.getTime());to.setDate(to.getDate()+7);}
+  else if(period==="month"){from.setDate(1);to.setFullYear(from.getFullYear(),from.getMonth()+1,1);}
+  else if(period==="year"){from.setMonth(0,1);to.setFullYear(from.getFullYear()+1,0,1);}
+  else to.setDate(to.getDate()+1);
+  const iso=x=>x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");
+  return [iso(from),iso(to)];
+ }
+ el("mgShow").addEventListener("click",async()=>{
+  if(!mgr.value){status.textContent="Select Manager first.";return;}
+  if(!directory){await load();if(!directory)return;}
+  const button=el("mgShow");button.disabled=true;output.replaceChildren();status.textContent="Reading verified feed allocations…";
+  try{
+   const [start,end]=dateRange(el("mgDate").value,el("mgPeriod").value);
+   const [tickets,drivers]=await Promise.all([CKCloud.listTicketsForPeriod(start,end),CKCloud.listDrivers()]);
+   const valid=tickets.filter(t=>t.is_test!==true&&(el("mgPeriod").value!=="week"||new Date(t.delivery_date+"T12:00:00").getDay()!==0));
+   const allocations=await CKCloud.listReportTankAllocations(valid.map(t=>t.id));
+   const byTicket=new Map(valid.map(t=>[t.id,t])),byTank=new Map(directory.tanks.map(t=>[t.id,t]));
+   const names=new Map(drivers.map(d=>[d.id,d.name]));
+   const allowed=new Set(directory.farms.filter(f=>(groups[mgr.value]||[]).includes(f.name)).map(f=>f.id));
+   const buckets=new Map();let cents=0;const ids=new Set();
+   for(const a of allocations){
+    const t=byTicket.get(a.ticket_id),target=byTank.get(a.tank_id);
+    if(!t||!target||!allowed.has(target.farm_id))continue;
+    if(farm.value&&target.farm_id!==farm.value)continue;
+    if(tank.value&&target.id!==tank.value)continue;
+    const c=Math.round(Number(a.tons)*100);if(!Number.isFinite(c)||c<=0)continue;
+    cents+=c;ids.add(t.id);
+    const item=buckets.get(t.driver_id)||{name:names.get(t.driver_id)||"Unknown driver",cents:0,ids:new Set()};
+    item.cents+=c;item.ids.add(t.id);buckets.set(t.driver_id,item);
+   }
+   const title=document.createElement("h3");title.textContent=ids.size?"All drivers combined: "+(cents/100).toFixed(2)+" tons":"All drivers combined: — tons (not verified)";output.appendChild(title);
+   const sub=document.createElement("p");sub.textContent=(ids.size?ids.size+" unique tickets":"No verified ticket totals available")+" · "+start+" through "+end+" (end exclusive) · verified assignments only";output.appendChild(sub);
+   const entries=[...buckets.values()].sort((a,b)=>a.name.localeCompare(b.name));
+   rowTable("Tap a driver for their tank and farm totals",entries);
+   const list=output.querySelector("table");
+   [...list.rows].slice(1).forEach((tr,i)=>{tr.style.cursor="pointer";tr.title="Show this driver's totals";tr.addEventListener("click",()=>{
+    const d=entries[i],notice=el("mgDriverDetail")||document.createElement("p");notice.id="mgDriverDetail";notice.textContent=d.name+": "+(d.cents/100).toFixed(2)+" tons to this selection ("+d.ids.size+" tickets). Select All tanks or All farms above to see that driver's wider totals.";output.appendChild(notice);
+   });});
+   status.textContent=entries.length?"Actual saved-ticket allocations loaded.":"No verified tank assignments found for this selection.";
+  }catch(e){status.textContent="Unable to calculate report: "+e.message;}
+  finally{button.disabled=false;}
+ });
+ document.getElementById("logout").addEventListener("click",()=>{directory=null;output.replaceChildren();status.textContent="Sign in to view totals.";});
+ // Directory loads after login when the preview panel is opened.
+ tile.addEventListener("click",()=>{if(!directory&&CKCloud.isSignedIn())load();},{once:false});
+ // On the dedicated preview page, jump straight to the manager selector.
+ const focusManager=()=>{const section=document.getElementById("mgManager");if(!section)return;for(let node=section.parentElement;node;node=node.parentElement){if(node.tagName==="DETAILS")node.open=true;if(node.hidden)node.hidden=false;}section.scrollIntoView({block:"start",behavior:"auto"});if(CKCloud.isSignedIn()&&!directory)load();};
+ window.addEventListener("load",()=>{setTimeout(focusManager,300);setTimeout(focusManager,1300);setTimeout(focusManager,2600);},{once:true});
+ 
+})();
+</script>
+</body>
+</html>
