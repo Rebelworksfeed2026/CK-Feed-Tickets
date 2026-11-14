@@ -9,16 +9,13 @@ for(let i=0;i<lines.length;i++){
  scannedFeed=candidates.find(feedLooksValid)||'';
  if(scannedFeed)break;
 }
-// Delta Western photos can combine left and right columns in OCR.
-// Look for a recognizable feed designation only if the label-based scan failed.
-if(!scannedFeed){
- const m=text.match(/\b(?:DW\s*)?(?:FRY\s*[- ]?\s*2|28\s+(?:SPEC(?:IAL)?|IRON|PELLETS?)(?:\s+(?:IRON|PELLETS?))?|MINI\s*PELLETS?|DUST\s*(?:\/|&|AND)?\s*FINES)\b(?:\s+(?:SPEC(?:IAL)?|IRON|PELLETS?))?/i);
- if(m)scannedFeed=feedClean(m[0]);
-}
+// Do not accept short feed-name pattern matches (e.g. "DW 28 Spec").
+// Full printed product descriptions are needed to keep different feeds separate.
 // Product descriptions are open-ended: recognize any legible product name, not a fixed feed list.
 // Read the printed product-description area as separate lines with layout-aware OCR.
 let feedCropReadings=[];
-if(!scannedFeed){
+if(!scannedFeed || /^(?:DW\\s+)?28\\s+Spec$/i.test(scannedFeed)){
+ scannedFeed='';
  try{
   const pic=await createImageBitmap(input.files[0]);
   const detail=await Tesseract.createWorker('eng');
@@ -42,8 +39,9 @@ if(!scannedFeed){
     const label=rows.findIndex(v=>/product\s*(?:description|desc)|feed\s*(?:type|description)/i.test(v));
     if(label<0)continue;
     const onLabel=rows[label].replace(/^.*?(?:product\s*(?:description|desc)|feed\s*(?:type|description))\s*[:#-]?/i,'');
-    const found=[onLabel,...rows.slice(label+1,label+3)].map(candidate).find(Boolean);
-    if(found){scannedFeed=found;break;}
+    const found=[onLabel,...rows.slice(label+1,label+3)].map(candidate).filter(Boolean);
+    const best=found.sort((a,b)=>b.length-a.length)[0];
+    if(best && best.length>(scannedFeed||'').length)scannedFeed=best;
    }
   }finally{await detail.terminate();pic.close();}
  }catch(e){/* Never invent feed descriptions. Driver confirms manually. */}
