@@ -15,6 +15,31 @@ if(!scannedFeed){
  const m=text.match(/\b(?:DW\s*)?(?:FRY\s*[- ]?\s*2|28\s*(?:SPEC(?:IAL)?\s*)?(?:IRON)?|MINI\s*PELLETS?|DUST\s*(?:\/|&|AND)?\s*FINES)\b(?:\s+(?:SPEC(?:IAL)?|IRON|PELLETS?))?/i);
  if(m)scannedFeed=feedClean(m[0]);
 }
+// Read the product-description area independently; general OCR may omit its small print.
+if(!scannedFeed){
+ try{
+  const pic=await createImageBitmap(input.files[0]);
+  const crop=document.createElement('canvas');crop.width=1600;crop.height=750;
+  const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);
+  cx.drawImage(pic,pic.width*.17,pic.height*.30,pic.width*.53,pic.height*.25,0,0,crop.width,crop.height);
+  const worker=await Tesseract.createWorker('eng');
+  try{
+   const raw=(await worker.recognize(crop)).data.text||'';
+   const candidates=raw.split(/\r?\n/).map(feedClean).filter(Boolean);
+   for(let i=0;i<candidates.length;i++){
+    if(/product\s*description/i.test(candidates[i])){
+     const inline=feedClean(candidates[i].replace(/^.*?product\s*description\s*[:#-]?\s*/i,''));
+     scannedFeed=[inline,candidates[i+1],candidates[i+2]].filter(Boolean).find(x=>feedLooksValid(x)&&!/^scale\s*weights?/i.test(x))||'';
+     if(scannedFeed)break;
+    }
+   }
+   if(!scannedFeed){
+    const m=raw.match(/\b(?:DW\s*)?(?:FRY\s*[- ]?\s*2|28\s*(?:SPEC(?:IAL)?\s*)?(?:IRON)?|MINI\s*PELLETS?|DUST\s*(?:\/|&|AND)?\s*FINES)\b(?:\s+(?:SPEC(?:IAL)?|IRON|PELLETS?))?/i);
+    if(m)scannedFeed=feedClean(m[0]);
+   }
+  }finally{await worker.terminate();pic.close();}
+ }catch(e){}
+}
 const number=(text.match(/(?:ticket|load|order)\s*(?:no\.?|number|#|:)?\s*([0-9]{5,8})/i)||text.match(/\b(10[0-9]{4})\b/))?.[1];const shipped=text.match(/\bshipped\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})\s*(?:tons?|ton\b)/i);const stated=text.match(/(?:net\s*tons?|tons?|tonnage)\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})/i);const netPounds=text.match(/\bnet\s*[:#-]?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:lbs?|pounds?)?/i);let tons=(shipped||stated)?.[1]?.replace(',','.');if(!tons&&netPounds){const pounds=Number(netPounds[1].replace(/,/g,''));if(pounds>=10000&&pounds<=100000)tons=(pounds/2000).toFixed(2)}const instructionIndex=lines.findIndex(x=>/delivery\s*instructions?/i.test(x));const nearby=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):lines;// Delta Western instructions may read "304, D Tank" (tank suffix after the number).
 // Prefer the full instruction over numeric-only OCR fallbacks; do not infer missing letters.
 const deliveryInstructionLines=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):[];
