@@ -148,7 +148,8 @@ if(dateSource||fallbackDate){
     scannedDate=String(yy).padStart(4,'0')+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
   }
 }
-let filled=[];function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New test photographs are independent drafts; scanned fields replace old preview values without dialogs.el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',number,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',dest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
+let filled=[];function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New photographs replace the unsaved preview without confirmation dialogs.
+el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',number,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',dest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
 scannedFeed=scannedFeed.replace(/\bFr[vy]\s*(?:11|ll|II)\b/gi,'Fry II');
 fill('draftFeedType',scannedFeed,'feed type');
