@@ -824,7 +824,7 @@ $("ticketDraft").addEventListener("submit", async e => {
     $("draftResult").textContent = "Ticket number available and photo validated. Review the confirmation below. Nothing has been saved.";
     verifiedTicket = Object.freeze({delivery_date:date,ticket_number:number,tons,destination,feed_type:feedType});
     $("confirmDetails").textContent = "Date: " + date + " | Ticket: " + number +
-       | Tons: " + tons.toFixed(2) + " | Feed: " + feedType + " | Destination: " + destination + " | Photo: " + photo.name;
+       " | Tons: " + tons.toFixed(2) + " | Feed: " + feedType + " | Destination: " + destination + " | Photo: " + photo.name;
     $("confirmPanel").hidden = false;
   } catch (error) {
     $("draftResult").textContent = "Could not check cloud history: " + error.message + ". Nothing was saved.";
