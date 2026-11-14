@@ -21,7 +21,7 @@ if(!scannedFeed){
   const pic=await createImageBitmap(input.files[0]);
   const crop=document.createElement('canvas');crop.width=1600;crop.height=750;
   const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);
-  cx.drawImage(pic,pic.width*.17,pic.height*.30,pic.width*.53,pic.height*.25,0,0,crop.width,crop.height);
+  cx.drawImage(pic,pic.width*.24,pic.height*.30,pic.width*.42,pic.height*.18,0,0,crop.width,crop.height);const pixels=cx.getImageData(0,0,crop.width,crop.height);for(let i=0;i<pixels.data.length;i+=4){const g=.299*pixels.data[i]+.587*pixels.data[i+1]+.114*pixels.data[i+2];const v=g>155?255:Math.max(0,(g-100)*2.2);pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=v;}cx.putImageData(pixels,0,0);
   const worker=await Tesseract.createWorker('eng');
   try{
    const raw=(await worker.recognize(crop)).data.text||'';
