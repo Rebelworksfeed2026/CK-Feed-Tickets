@@ -21,10 +21,10 @@ if(!scannedFeed){
  try{
   const pic=await createImageBitmap(input.files[0]);
   const detail=await Tesseract.createWorker('eng');
-  const bad=/^(?:product|description|delivery|instructions|shipped|dispatched|scale|gross|tare|net|ticket|tons|date|driver|truck|trailer|customer|order|destination|lbs|weight|total)\\b/i;
+  const bad=/^(?:product|description|delivery|instructions|shipped|dispatched|scale|gross|tare|net|ticket|tons|date|driver|truck|trailer|customer|order|destination|lbs|weight|total)\b/i;
   const candidate=line=>{
-   const x=String(line||'').replace(/[|_~]+/g,' ').replace(/\\s+/g,' ').trim();
-   if(x.length<4||x.length>85||bad.test(x)||/\\d{5,}/.test(x)||!/[a-z]{2,}/i.test(x))return '';
+   const x=String(line||'').replace(/[|_~]+/g,' ').replace(/\s+/g,' ').trim();
+   if(x.length<4||x.length>85||bad.test(x)||/\d{5,}/.test(x)||!/[a-z]{2,}/i.test(x))return '';
    if(!/[a-z]{2,}.*[a-z0-9]{2,}/i.test(x))return '';
    return x;
   };
@@ -36,10 +36,10 @@ if(!scannedFeed){
     const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);
     cx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,crop.width,crop.height);
     const raw=(await detail.recognize(crop)).data.text||'';
-    const rows=raw.split(/\\r?\\n/).map(v=>v.trim()).filter(Boolean);
-    const label=rows.findIndex(v=>/product\\s*(?:description|desc)|feed\\s*(?:type|description)/i.test(v));
+    const rows=raw.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
+    const label=rows.findIndex(v=>/product\s*(?:description|desc)|feed\s*(?:type|description)/i.test(v));
     if(label<0)continue;
-    const onLabel=rows[label].replace(/^.*?(?:product\\s*(?:description|desc)|feed\\s*(?:type|description))\\s*[:#-]?/i,'');
+    const onLabel=rows[label].replace(/^.*?(?:product\s*(?:description|desc)|feed\s*(?:type|description))\s*[:#-]?/i,'');
     const found=[onLabel,...rows.slice(label+1,label+3)].map(candidate).find(Boolean);
     if(found){scannedFeed=found;break;}
    }
