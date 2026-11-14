@@ -81,13 +81,4 @@ if(dateSource||fallbackDate){
 }
 let filled=[];function fill(id,value,label){if(!value)return;const el=document.getElementById(id);if(el.value.trim()&&!confirm('Replace '+label+' with scanned value: '+value+'?'))return;el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',number,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',dest,'destination');fill('draftFeedType',scannedFeed,'feed type');
 const feedField=document.getElementById('draftFeedType');
-let review=document.getElementById('feedTypeReviewNotice');
-if(!review){review=document.createElement('p');review.id='feedTypeReviewNotice';review.setAttribute('role','status');review.style.cssText='font-weight:700;color:#8a4500;padding:10px;border:1px solid #c28b43;border-radius:8px;background:#fff7e8';feedField.insertAdjacentElement('afterend',review)}
-review.textContent=scannedFeed
- ?'CHECK FULL FEED NAME: The scanner may misread letters (for example, II as 11) or omit the end. Compare every word with the original ticket and correct it before confirming.'
- :'FEED NAME NOT READ: Enter the exact printed Product Description manually. Do not guess.';
-const destField=document.getElementById('draftDestination');
-let destReview=document.getElementById('destinationReviewNotice');
-if(!destReview){destReview=document.createElement('p');destReview.id='destinationReviewNotice';destReview.style.cssText='font-weight:600;color:#8a4500';destField.insertAdjacentElement('afterend',destReview)}
-destReview.textContent='CHECK DESTINATION: Confirm the full tank name and suffix (for example, 304 D Tank), not just its number.';
 status.textContent=filled.length?'Scan complete: '+filled.join(', ')+'. Verify every field, especially the date printed on the ticket. Nothing was saved.':'Scan finished, but no reliable fields were found. Enter ticket details manually.';if(!filled.length)status.textContent='Scanner could not confidently identify ticket fields. Try a closer, well-lit picture with the ticket filling the frame.'}catch(e){status.textContent='Scanning unavailable: '+e.message+'. You can still enter the ticket manually.'}finally{busy=false;btn.disabled=false}}})();
