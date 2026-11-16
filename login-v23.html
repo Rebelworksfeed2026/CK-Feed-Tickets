@@ -842,6 +842,12 @@ async function showSignedIn(profile) {
     $("password").value = "";
     $("login").style.display = "none";
     $("profile").style.display = "block";
+    // Branding follows the authenticated driver's company, never a URL parameter.
+    const nextPage = String(profile.company || "").trim().toLowerCase() === "next page";
+    const brandName = nextPage ? "Next Page Feed Tickets" : "C&K Feed Tickets";
+    document.title = brandName + " — Signed In";
+    document.querySelector("main > h1").textContent = brandName;
+    document.querySelector('meta[name="apple-mobile-web-app-title"]').setAttribute("content", brandName);
     $("welcome").textContent = "Welcome, " + profile.name;
     $("role").textContent = "Access: " + (profile.is_admin ? "Administrator" : profile.is_office ? "Office" : "Driver") + " · " + profile.company;
     $("adminTile").hidden = !profile.is_admin;
