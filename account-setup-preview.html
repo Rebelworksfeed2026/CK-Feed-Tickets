@@ -14,7 +14,7 @@ const hash=new URLSearchParams(location.hash.replace(/^#/,""));
 const query=new URLSearchParams(location.search);
 // Remove sensitive callback tokens from browser history immediately.
 if(location.hash||query.has("error")||query.has("error_code")||query.has("error_description"))history.replaceState(null,"",location.pathname);
-if(hash.has("error")||hash.has("error_description")||query.has("error")||query.has("error_code")||query.has("error_description")){message("This sign-in link could not be used. Please request a fresh link when ready.");history.replaceState(null,"",location.pathname);}
+if(hash.has("error")||hash.has("error_description")||query.has("error")||query.has("error_code")||query.has("error_description")){const reason=hash.get("error_code")||query.get("error_code")||hash.get("error")||query.get("error")||"unknown";message("This sign-in link could not be used. Error code: "+String(reason).replace(/[^a-zA-Z0-9_-]/g,"").slice(0,60)+". Please request a fresh link when ready.");history.replaceState(null,"",location.pathname);}
 else if(hash.has("access_token")&&hash.has("refresh_token")){
   (async()=>{try{
     const session={access_token:hash.get("access_token"),refresh_token:hash.get("refresh_token"),token_type:hash.get("token_type")||"bearer",expires_in:Number(hash.get("expires_in")||3600),expires_at:Math.floor(Date.now()/1000)+Number(hash.get("expires_in")||3600)};
