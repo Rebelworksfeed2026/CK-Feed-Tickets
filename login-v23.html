@@ -592,17 +592,13 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   // Keep one prominent camera shortcut above the dashboard, not a duplicate.
   const otherTiles=[...dashboard.querySelectorAll(":scope > .tile")].filter(t=>
     t!==cameraTile && t!==ticketEntryTile && t!==weekTile && t.id!=="savedPhotoViewer" && t.id!=="adminTile");
-  const extras=document.createElement("details");
+  const extras=document.createElement("section");
   extras.id="dashboardExtras";
-  extras.style.cssText="margin-top:14px;border:1px solid #b8cbdc;border-radius:14px;overflow:hidden;background:#fff";
-  const summary=document.createElement("summary");
-  summary.textContent="More Options";
-  summary.style.cssText="font-weight:750;font-size:20px;cursor:pointer;padding:16px 18px;background:#174e96;color:white";
-  extras.appendChild(summary);
+  extras.style.cssText="margin-top:18px;background:transparent";
   const menu=document.createElement("div");
-  menu.style.cssText="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px";
+  menu.style.cssText="display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:4px 0";
   const panel=document.createElement("div");
-  panel.style.cssText="padding:12px;border-top:1px solid #c3d2df;background:white";
+  panel.style.cssText="padding:12px;border:1px solid #c3d2df;border-radius:12px;margin-top:10px;background:white";
   panel.hidden=true;
   const sections=[
     {name:"Drivers",icon:"🚚",hint:"View delivery sheets",match:/driver directory|delivery sheets/i},
@@ -615,8 +611,8 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   const panels=sections.map((section,index)=>{
     const button=document.createElement("button");
     button.type="button";
-    button.style.cssText="min-width:0;width:100%;min-height:112px;border:1px solid #c3d2df;border-radius:12px;background:#eef3f8;color:#143452;padding:12px 4px;font-weight:750;font-size:16px;cursor:pointer;white-space:normal";
-    button.innerHTML='<span style="display:block;font-size:25px;margin-bottom:5px">'+section.icon+'</span>'+section.name+'<span style="display:block;font-size:11px;font-weight:500;margin-top:5px">'+section.hint+'</span>';
+    button.style.cssText="display:flex;align-items:center;gap:14px;width:100%;min-height:78px;border:1px solid #c3d2df;border-radius:12px;background:#eef3f8;color:#143452;padding:14px;text-align:left;font-weight:750;font-size:19px;cursor:pointer;white-space:normal";
+    button.innerHTML='<span style="font-size:28px;flex:none">'+section.icon+'</span><span style="flex:1">'+section.name+'<span style="display:block;font-size:12px;font-weight:500;margin-top:3px">'+section.hint+'</span></span><span aria-hidden="true" style="font-size:25px">›</span>';
     const contents=document.createElement("div");
     contents.hidden=true;
     contents.style.cssText="overflow-wrap:anywhere";
