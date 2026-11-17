@@ -223,15 +223,15 @@ if(!verifiedDest){
     const cx=canvas.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,canvas.width,canvas.height);
     cx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,canvas.width,canvas.height);
     const raw=(await worker.recognize(canvas)).data.text||'';
-    diagnostic.textContent+='\\nDESTINATION CROP '+y+': '+(raw.trim()||'[no text detected]').slice(0,300);
-    const lines=raw.split(/\\r?\\n/).map(v=>v.trim()).filter(Boolean);
-    const instructionAt=lines.findIndex(v=>/delivery\\s*instructions?/i.test(v));
-    const relevant=instructionAt>=0?lines.slice(instructionAt,instructionAt+5).join('\\n'):raw;
-    const m=relevant.match(/\\b(?:tank|tnk)\\s*[:#-]?\\s*([1-9])\\b/i);
+    diagnostic.textContent+='\nDESTINATION CROP '+y+': '+(raw.trim()||'[no text detected]').slice(0,300);
+    const lines=raw.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
+    const instructionAt=lines.findIndex(v=>/delivery\s*instructions?/i.test(v));
+    const relevant=instructionAt>=0?lines.slice(instructionAt,instructionAt+5).join('\n'):raw;
+    const m=relevant.match(/\b(?:tank|tnk)\s*[:#-]?\s*([1-9])\b/i);
     if(m){verifiedDest='Tank '+m[1];break;}
    }
   }finally{await worker.terminate();pic.close();}
- }catch(e){diagnostic.textContent+='\\nDestination OCR error: '+String(e.message||e);}
+ }catch(e){diagnostic.textContent+='\nDestination OCR error: '+String(e.message||e);}
 }
 // Prefer a complete, label-adjacent printed product description; discard stray OCR prefixes.
 if(scannedFeed){
