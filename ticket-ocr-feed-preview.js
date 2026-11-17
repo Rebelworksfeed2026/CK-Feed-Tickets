@@ -200,6 +200,17 @@ if(!explicitTankPond && /delivery\s*instructions?|delta\s*western/i.test(instruc
 if(scannedFeed){
  scannedFeed=scannedFeed.replace(/^\s*(?:Ta|To)\s+(?=DW\s+\d)/i,'').trim();
 }
+// A nearby scale-weight heading is not a feed description. Prefer a legible
+// complete product code from any OCR pass; never populate a guessed feed name.
+const feedEvidence=[result.data.text||'',extra,instructionCrop,...feedCropReadings].join('\n');
+const completeProduct=/\b(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\s+[A-Za-z][A-Za-z0-9]*(?:\s+[A-Za-z][A-Za-z0-9]*){0,3}/ig;
+const products=[...feedEvidence.matchAll(completeProduct)].map(m=>m[0].replace(/\s+(?:Gross|Tare|Net|Scale|Weights?|Shipped|Dispatched|Lbs?|Pounds?)\b.*$/i,'').trim());
+if(products.length){
+ scannedFeed=products.sort((a,b)=>b.length-a.length)[0];
+}else if(/\b(?:scale?|scal|gross|tare|net|tonnage|weights?)\b/i.test(scannedFeed)||!/(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\b/i.test(scannedFeed)){
+ // If OCR cannot establish the printed product, leave it for confirmation.
+ scannedFeed='';
+}
 let filled=[];if(recognizedCustomer&&customerSelect?.value)filled.push('customer ('+recognizedCustomer+')');function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New photographs replace the unsaved preview without confirmation dialogs.
 el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',verifiedNumber,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',verifiedDest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
