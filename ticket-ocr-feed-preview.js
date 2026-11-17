@@ -138,7 +138,10 @@ for(const id of ['draftDate','draftNumber','draftTons','draftFeedType','draftDes
  if(field){field.value='';field.dispatchEvent(new Event('input',{bubbles:true}));}
 }
 let scannedDate='';
-const dateSource=text.match(/(?:dispatched|shipped\s*(?:on|date)?|delivery\s*date)\s*[:#-]?\s*(\d{1,2})\s*[\/.-]\s*(\d{1,2})\s*[\/.-]\s*(\d{2,4})/i);
+// OCR sometimes inserts a space within a two-digit day (11/1 7/2026).
+// Repair only dates next to a shipment/dispatch label, never unrelated numbers.
+const dateText=text.replace(/(\b(?:dispatched|shipped\s*(?:on|date)?|delivery\s*date)\s*[:#-]?\s*\d{1,2}\s*[\/.\-]\s*)(\d)\s+(\d)(\s*[\/.\-]\s*\d{4}\b)/gi,(_all,prefix,d1,d2,suffix)=>prefix+d1+d2+suffix);
+const dateSource=dateText.match(/(?:dispatched|shipped\s*(?:on|date)?|delivery\s*date)\s*[:#-]?\s*(\d{1,2})\s*[\/.-]\s*(\d{1,2})\s*[\/.-]\s*(\d{2,4})/i);
 // Some Delta Western tickets print the date after the shipped tonnage on one line.
 // OCR may lose the word "Dispatched" while retaining the numeric date.
 // Accept a fallback only when the date is on a line mentioning shipment/dispatch.
@@ -146,7 +149,8 @@ let fallbackDate=null;
 if(!dateSource){
   for(const line of lines){
     if(!/shipped|dispatch|delivery\s*date/i.test(line))continue;
-    const m=line.match(/\b(\d{1,2})\s*[\/.-]\s*(\d{1,2})\s*[\/.-]\s*(\d{2,4})\b/);
+    const normalized=line.replace(/(\d{1,2}\s*[\/.-]\s*)(\d)\s+(\d)(\s*[\/.-]\s*\d{4}\b)/g,(_all,p,a,b,z)=>p+a+b+z);
+    const m=normalized.match(/\b(\d{1,2})\s*[\/.-]\s*(\d{1,2})\s*[\/.-]\s*(\d{2,4})\b/);
     if(m){fallbackDate=m;break;}
   }
 }
