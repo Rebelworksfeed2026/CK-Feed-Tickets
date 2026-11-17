@@ -708,6 +708,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     });
   }
   // Render manager names directly, independently of hidden admin-only controls.
+  // Manager > assigned farms > tanks. Read-only, using existing directory records.
   const managerDirectory=document.createElement("div");
   managerDirectory.id="ckManagerDirectory";
   managerDirectory.style.cssText="padding:8px 0";
@@ -715,27 +716,67 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   if(managerButton){
     managerButton.addEventListener("click",async()=>{
       if(panels[2].hidden)return;
-      managerDirectory.textContent="Loading managers…";
+      managerDirectory.textContent="Loading managers and farms…";
       try{
-        const data=await CKCloud.listManagersAndAssignments();
+        const [data,farmData]=await Promise.all([
+          CKCloud.listManagersAndAssignments(),
+          CKCloud.listFarmsAndTanks()
+        ]);
+        if(panels[2].hidden)return;
         managerDirectory.replaceChildren();
         const managers=data.managers.filter(m=>m.active!==false);
         if(!managers.length){managerDirectory.textContent="No managers registered.";return;}
-        for(const manager of managers){
-          const row=document.createElement("button");
-          row.type="button";
-          row.textContent=manager.name;
-          row.style.cssText="display:block;width:100%;margin:6px 0;padding:14px;text-align:left;background:#eef3f8;color:#143452;border:1px solid #c3d2df;border-radius:9px;font-size:17px;font-weight:700";
-          row.addEventListener("click",()=>{
-            const select=$("mfrManager");
-            const option=[...select.options].find(o=>o.value===manager.id);
-            if(option)select.value=manager.id;
-            if(managerReport)managerReport.open=true;
-            managerReport?.scrollIntoView({behavior:"smooth",block:"nearest"});
-          });
-          managerDirectory.appendChild(row);
+        const today=new Date().toLocaleDateString("en-CA");
+        const activeAssignments=new Map();
+        for(const assignment of [...data.assignments].sort((a,b)=>String(b.effective_from||"").localeCompare(String(a.effective_from||"")))){
+          if(assignment.effective_from && assignment.effective_from>today)continue;
+          if(assignment.effective_to && assignment.effective_to<today)continue;
+          if(!activeAssignments.has(assignment.farm_id))activeAssignments.set(assignment.farm_id,assignment.manager_id);
         }
-      }catch(error){managerDirectory.textContent="Unable to load managers: "+(error.message||"Connection error");}
+        for(const manager of managers){
+          const group=document.createElement("details");
+          group.style.cssText="margin:6px 0;border:1px solid #c3d2df;border-radius:9px;background:#eef3f8;overflow:hidden";
+          const heading=document.createElement("summary");
+          heading.textContent=manager.name;
+          heading.style.cssText="padding:14px;color:#143452;font-size:17px;font-weight:700;cursor:pointer";
+          group.appendChild(heading);
+          const farmsBox=document.createElement("div");
+          farmsBox.style.cssText="padding:4px 12px 12px;background:white";
+          const farms=farmData.farms.filter(f=>activeAssignments.get(f.id)===manager.id);
+          if(!farms.length){
+            const note=document.createElement("p");
+            note.textContent="No farms currently assigned to this manager.";
+            farmsBox.appendChild(note);
+          }
+          for(const farm of farms){
+            const farmGroup=document.createElement("details");
+            farmGroup.style.cssText="margin:8px 0;border:1px solid #d4e0e9;border-radius:8px";
+            const farmHeading=document.createElement("summary");
+            farmHeading.textContent=farm.name;
+            farmHeading.style.cssText="padding:12px;font-weight:700;color:#183449;cursor:pointer";
+            farmGroup.appendChild(farmHeading);
+            const tanks=farmData.tanks.filter(t=>t.farm_id===farm.id);
+            const tankList=document.createElement("div");
+            tankList.style.cssText="padding:0 12px 12px";
+            if(!tanks.length){
+              const note=document.createElement("p");
+              note.textContent="No tanks or ponds registered for this farm.";
+              tankList.appendChild(note);
+            }else{
+              for(const tank of tanks){
+                const item=document.createElement("div");
+                item.textContent=tank.tank_label;
+                item.style.cssText="padding:10px 6px;border-bottom:1px solid #e3ebf0;color:#183449";
+                tankList.appendChild(item);
+              }
+            }
+            farmGroup.appendChild(tankList);
+            farmsBox.appendChild(farmGroup);
+          }
+          group.appendChild(farmsBox);
+          managerDirectory.appendChild(group);
+        }
+      }catch(error){managerDirectory.textContent="Unable to load manager farms and tanks: "+(error.message||"Connection error");}
     });
   }
   extras.appendChild(menu);
