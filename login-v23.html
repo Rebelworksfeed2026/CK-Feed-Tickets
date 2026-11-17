@@ -597,9 +597,6 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   extras.style.cssText="margin-top:18px;background:transparent";
   const menu=document.createElement("div");
   menu.style.cssText="display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:4px 0";
-  const panel=document.createElement("div");
-  panel.style.cssText="padding:12px;border:1px solid #c3d2df;border-radius:12px;margin-top:10px;background:white";
-  panel.hidden=true;
   const sections=[
     {name:"Drivers",icon:"🚚",hint:"View delivery sheets",match:/driver directory|delivery sheets/i},
     {name:"Farms",icon:"🏠",hint:"Farm directories",match:/farm.*directory|austin farms/i},
@@ -611,16 +608,16 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   const panels=sections.map((section,index)=>{
     const button=document.createElement("button");
     button.type="button";
+    button.className="ck-nav-button";
     button.style.cssText="display:flex;align-items:center;gap:14px;width:100%;min-height:78px;border:1px solid #c3d2df;border-radius:12px;background:#eef3f8;color:#143452;padding:14px;text-align:left;font-weight:750;font-size:19px;cursor:pointer;white-space:normal";
     button.innerHTML='<span style="font-size:28px;flex:none">'+section.icon+'</span><span style="flex:1">'+section.name+'<span style="display:block;font-size:12px;font-weight:500;margin-top:3px">'+section.hint+'</span></span><span aria-hidden="true" style="font-size:25px">›</span>';
     const contents=document.createElement("div");
     contents.hidden=true;
-    contents.style.cssText="overflow-wrap:anywhere";
+    contents.style.cssText="padding:12px;border:1px solid #c3d2df;border-radius:12px;margin:-3px 0 10px;background:white;overflow-wrap:anywhere";
     button.addEventListener("click",()=>{
       const opening=contents.hidden;
-      for(const child of panel.children)child.hidden=true;
-      for(const other of menu.children)other.style.background="#eef3f8";
-      panel.hidden=!opening;
+      for(const child of menu.querySelectorAll(".ck-nav-content"))child.hidden=true;
+      for(const other of menu.querySelectorAll("button.ck-nav-button"))other.style.background="#eef3f8";
       contents.hidden=!opening;
       if(opening){
         button.style.background="#d4e4f4";
@@ -648,8 +645,12 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         }
       }
     });
-    menu.appendChild(button);
-    panel.appendChild(contents);
+    contents.className="ck-nav-content";
+    const group=document.createElement("div");
+    group.style.cssText="min-width:0";
+    group.appendChild(button);
+    group.appendChild(contents);
+    menu.appendChild(group);
     return contents;
   });
   for(const tile of otherTiles) {
@@ -674,7 +675,6 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     panels[0].prepend(directory);
   }
   extras.appendChild(menu);
-  extras.appendChild(panel);
   dashboard.appendChild(extras);
 }
 document.body.appendChild($("correctionPanel"));
@@ -952,7 +952,7 @@ async function showSignedIn(profile) {
     document.querySelector('meta[name="apple-mobile-web-app-title"]').setAttribute("content", brandName);
     $("welcome").textContent = "Welcome, " + profile.name;
     $("role").textContent = "Access: " + (profile.is_admin ? "Administrator" : profile.is_office ? "Office" : "Driver") + " · " + profile.company;
-    $("adminTile").hidden = !profile.is_admin;
+    if($("adminTile")) $("adminTile").hidden = !profile.is_admin;
     $("farmAdmin").hidden = !profile.is_admin;
     $("managerAdmin").hidden = !profile.is_admin;
     if(profile.is_admin) refreshManagers();
@@ -1337,7 +1337,7 @@ $("logout").addEventListener("click", async () => {
     $("sheetHeading").textContent="";
     $("profile").style.display = "none";
     $("driverDirectory").textContent = "Sign in to load the driver directory.";
-    $("adminTile").hidden = true;
+    if($("adminTile")) $("adminTile").hidden = true;
     $("officeTile").hidden = true;
     $("farmAdmin").hidden = true;
     $("managerAdmin").hidden = true;
