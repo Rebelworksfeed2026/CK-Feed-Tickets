@@ -601,6 +601,9 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   extras.appendChild(summary);
   const menu=document.createElement("div");
   menu.style.cssText="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px";
+  const panel=document.createElement("div");
+  panel.style.cssText="padding:12px;border-top:1px solid #c3d2df;background:white";
+  panel.hidden=true;
   const sections=[
     {name:"Drivers",icon:"🚚",hint:"View delivery sheets",match:/driver directory|delivery sheets/i},
     {name:"Farms",icon:"🏠",hint:"Farm directories",match:/farm.*directory|austin farms/i},
@@ -609,17 +612,48 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     {name:"Reports",icon:"📊",hint:"Totals and history",match:/totals|report|expense/i},
     {name:"Settings",icon:"⚙️",hint:"Feed types and tools",match:/feed types|prices/i}
   ];
-  const panels=sections.map(section=>{
-    const details=document.createElement("details");
-    details.style.cssText="min-width:0;border:1px solid #c3d2df;border-radius:12px;background:#eef3f8;overflow:hidden";
-    const title=document.createElement("summary");
-    title.style.cssText="list-style:none;cursor:pointer;text-align:center;padding:14px 5px;color:#143452;font-weight:750;font-size:16px";
-    title.innerHTML='<span style="display:block;font-size:25px;margin-bottom:5px">'+section.icon+'</span>'+section.name+'<span style="display:block;font-size:11px;font-weight:500;margin-top:5px">'+section.hint+'</span>';
-    details.appendChild(title);
+  const panels=sections.map((section,index)=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.style.cssText="min-width:0;width:100%;min-height:112px;border:1px solid #c3d2df;border-radius:12px;background:#eef3f8;color:#143452;padding:12px 4px;font-weight:750;font-size:16px;cursor:pointer;white-space:normal";
+    button.innerHTML='<span style="display:block;font-size:25px;margin-bottom:5px">'+section.icon+'</span>'+section.name+'<span style="display:block;font-size:11px;font-weight:500;margin-top:5px">'+section.hint+'</span>';
     const contents=document.createElement("div");
-    contents.style.cssText="padding:8px;background:white;text-align:left;overflow-wrap:anywhere";
-    details.appendChild(contents);
-    menu.appendChild(details);
+    contents.hidden=true;
+    contents.style.cssText="overflow-wrap:anywhere";
+    button.addEventListener("click",()=>{
+      const opening=contents.hidden;
+      for(const child of panel.children)child.hidden=true;
+      for(const other of menu.children)other.style.background="#eef3f8";
+      panel.hidden=!opening;
+      contents.hidden=!opening;
+      if(opening){
+        button.style.background="#d4e4f4";
+        if(index===0) {
+          const selector=$("cloudDriver");
+          const list=$("driverDirectory");
+          if(selector?.options.length){
+            list.replaceChildren();
+            for(const option of selector.options){
+              if(!option.value)continue;
+              const link=document.createElement("button");
+              link.type="button";
+              link.textContent=option.textContent;
+              link.style.cssText="display:block;width:100%;margin:6px 0;padding:12px;text-align:left;background:#eef3f8;color:#143452;border:1px solid #c3d2df;border-radius:9px;font-size:16px";
+              link.addEventListener("click",()=>{
+                selector.value=option.value;
+                selector.dispatchEvent(new Event("change",{bubbles:true}));
+                $("loadWeek").click();
+                $("todayDeliveriesDisclosure").open=true;
+                $("todayDeliveriesDisclosure").scrollIntoView({behavior:"smooth",block:"start"});
+              });
+              list.appendChild(link);
+            }
+          }
+        }
+      }
+    });
+    menu.appendChild(button);
+    panel.appendChild(contents);
     return contents;
   });
   for(const tile of otherTiles) {
@@ -630,12 +664,21 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     inner.style.cssText="margin:6px 0;border-bottom:1px solid #d8e2e9";
     const title=document.createElement("summary");
     title.textContent=label || "Open";
-    title.style.cssText="font-weight:650;cursor:pointer;padding:9px 3px;font-size:13px";
+    title.style.cssText="font-weight:650;cursor:pointer;padding:10px 3px;font-size:15px";
     inner.appendChild(title);
     inner.appendChild(tile);
     panels[index].appendChild(inner);
   }
+  // Show driver directory directly in the Drivers panel, not inside a second disclosure.
+  const directory=$("driverDirectory");
+  if(directory){
+    const directoryTile=directory.closest(".tile");
+    const directoryDisclosure=directoryTile?.parentElement;
+    if(directoryDisclosure?.tagName==="DETAILS")directoryDisclosure.remove();
+    panels[0].prepend(directory);
+  }
   extras.appendChild(menu);
+  extras.appendChild(panel);
   dashboard.appendChild(extras);
 }
 document.body.appendChild($("correctionPanel"));
