@@ -200,6 +200,47 @@ if(!explicitTankPond && /delivery\s*instructions?|delta\s*western/i.test(instruc
 if(scannedFeed){
  scannedFeed=scannedFeed.replace(/^\s*(?:Ta|To)\s+(?=DW\s+\d)/i,'').trim();
 }
+// Independently read the upper product-description region, which is above
+// Delivery Instructions on Delta Western tickets. Keep the existing number,
+// weight, destination and date extraction untouched.
+try {
+ const image=await createImageBitmap(input.files[0]);
+ const worker=await Tesseract.createWorker('eng');
+ try {
+  await worker.setParameters({tessedit_pageseg_mode:'6'});
+  const productCandidates=[];
+  const regions=[
+   [.10,.17,.54,.32], // full printed ticket photographed directly
+   [.10,.29,.53,.19], // photo displayed inside a phone screenshot
+   [.18,.33,.45,.14],
+   [.04,.20,.65,.36]
+  ];
+  for(const [x,y,w,h] of regions){
+   const canvas=document.createElement('canvas');
+   canvas.width=2000;canvas.height=1100;
+   const ctx=canvas.getContext('2d');
+   ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);
+   ctx.drawImage(image,image.width*x,image.height*y,image.width*w,image.height*h,0,0,canvas.width,canvas.height);
+   const raw=(await worker.recognize(canvas)).data.text||'';
+   feedCropReadings.push('PRODUCT FOCUSED '+(feedCropReadings.length+1)+': '+(raw.trim()||'[no text detected]'));
+   const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+   for(let i=0;i<lines.length;i++){
+    const line=lines[i];
+    const m=line.match(/\b(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\s+[A-Za-z]{3,}(?:\s+[A-Za-z]{3,}){0,2}/i);
+    if(m)productCandidates.push(m[0].trim());
+    if(/product\s*description/i.test(line)){
+     const next=(lines[i+1]||'').match(/\b(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\s+[A-Za-z]{3,}(?:\s+[A-Za-z]{3,}){0,2}/i);
+     if(next)productCandidates.push(next[0].trim());
+    }
+   }
+  }
+  if(productCandidates.length){
+   const counts=new Map();
+   for(const candidate of productCandidates)counts.set(candidate,(counts.get(candidate)||0)+1);
+   scannedFeed=[...counts].sort((a,b)=>b[1]-a[1]||b[0].length-a[0].length)[0][0];
+  }
+ }finally{await worker.terminate();image.close();}
+}catch(e){/* Leave feed description blank if it cannot be read reliably. */}
 // A nearby scale-weight heading is not a feed description. Prefer a legible
 // complete product code from any OCR pass; never populate a guessed feed name.
 const feedEvidence=[result.data.text||'',extra,instructionCrop,...feedCropReadings].join('\n');
