@@ -707,6 +707,37 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       if(!panels[2].hidden && managerReport)managerReport.open=true;
     });
   }
+  // Render manager names directly, independently of hidden admin-only controls.
+  const managerDirectory=document.createElement("div");
+  managerDirectory.id="ckManagerDirectory";
+  managerDirectory.style.cssText="padding:8px 0";
+  panels[2].prepend(managerDirectory);
+  if(managerButton){
+    managerButton.addEventListener("click",async()=>{
+      if(panels[2].hidden)return;
+      managerDirectory.textContent="Loading managers…";
+      try{
+        const data=await CKCloud.listManagersAndAssignments();
+        managerDirectory.replaceChildren();
+        const managers=data.managers.filter(m=>m.active!==false);
+        if(!managers.length){managerDirectory.textContent="No managers registered.";return;}
+        for(const manager of managers){
+          const row=document.createElement("button");
+          row.type="button";
+          row.textContent=manager.name;
+          row.style.cssText="display:block;width:100%;margin:6px 0;padding:14px;text-align:left;background:#eef3f8;color:#143452;border:1px solid #c3d2df;border-radius:9px;font-size:17px;font-weight:700";
+          row.addEventListener("click",()=>{
+            const select=$("mfrManager");
+            const option=[...select.options].find(o=>o.value===manager.id);
+            if(option)select.value=manager.id;
+            if(managerReport)managerReport.open=true;
+            managerReport?.scrollIntoView({behavior:"smooth",block:"nearest"});
+          });
+          managerDirectory.appendChild(row);
+        }
+      }catch(error){managerDirectory.textContent="Unable to load managers: "+(error.message||"Connection error");}
+    });
+  }
   extras.appendChild(menu);
   dashboard.appendChild(extras);
 }
