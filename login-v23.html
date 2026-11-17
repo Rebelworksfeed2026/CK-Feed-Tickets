@@ -743,7 +743,22 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
           if(ticket.is_test===true||!Number.isFinite(Number(ticket.tons))||Number(ticket.tons)<=0)continue;
           const dest=normalized(ticket.destination);
           if(!dest)continue;
-          const matches=allTanks.filter(t=>normalized(t.tank_label)===dest ||
+          // Scale tickets often use "Tank", comma separators, or a farm
+          // abbreviation. Match only unambiguous known aliases, never a guess.
+          const canonical=value=>normalized(value).replace(/^TANK/,"");
+          const aliases=t=>{
+            const label=canonical(t.tank_label);
+            const values=new Set([label]);
+            // Known alternate printed labels for the same registered tank.
+            if(label==="EG309")values.add("EG1309");
+            if(label==="FF302")values.add("302");
+            if(label==="B701")values.add("701");
+            if(label==="LW314")values.add("314LW2");
+            if(label==="401")values.add("401P1");
+            if(label==="106")values.add("106A06");
+            return values;
+          };
+          const matches=allTanks.filter(t=>aliases(t).has(canonical(ticket.destination)) ||
             normalized((farmData.farms.find(f=>f.id===t.farm_id)?.name||"")+" "+t.tank_label)===dest);
           const amount=cents(ticket.tons);
           if(matches.length===1){
