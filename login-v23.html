@@ -662,7 +662,14 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     menu.appendChild(group);
     return contents;
   });
+  // Move the driver directory before removing its old wrapper.
+  // Never delete a parent while the live directory element is still inside it.
+  const directory=$("driverDirectory");
+  const originalDirectoryTile=directory?.closest(".tile");
+  if(directory)panels[0].appendChild(directory);
+  if(originalDirectoryTile)originalDirectoryTile.remove();
   for(const tile of otherTiles) {
+    if(tile===originalDirectoryTile)continue;
     const label=tile.querySelector("strong")?.textContent || "";
     let index=sections.findIndex(section=>section.match.test(label));
     if(index<0)index=5;
@@ -674,19 +681,6 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     inner.appendChild(title);
     inner.appendChild(tile);
     panels[index].appendChild(inner);
-  }
-  // Show the live driver list immediately when Drivers is selected.
-  // Remove the redundant "Driver directory" disclosure and its wrapper.
-  const directory=$("driverDirectory");
-  if(directory){
-    const directoryTile=directory.closest(".tile");
-    const directoryDisclosure=directoryTile?.parentElement;
-    if(directoryDisclosure?.tagName==="DETAILS")directoryDisclosure.remove();
-    panels[0].prepend(directory);
-  }
-  // Remove any redundant directory disclosure left by earlier layouts.
-  for(const details of panels[0].querySelectorAll("details")){
-    if(details.querySelector("summary")?.textContent.trim()==="Driver directory")details.remove();
   }
   extras.appendChild(menu);
   dashboard.appendChild(extras);
