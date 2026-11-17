@@ -148,10 +148,30 @@ if(dateSource||fallbackDate){
     scannedDate=String(yy).padStart(4,'0')+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
   }
 }
-let filled=[];function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New photographs replace the unsaved preview without confirmation dialogs.
+// Identify the delivery customer from printed Ship To / Sold To names, never the feed supplier's logo.
+const customerSelect=document.getElementById('draftCustomer');
+const customerText=[result.data.text||'',extra].join('\n');
+const customerLines=customerText.split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
+const namedCustomerLine=customerLines.some((line,i)=>{
+ if(!/^(?:ship\s*to|sold\s*to|customer|consignee)\s*:/i.test(line))return false;
+ return /delta\s*cat\s*fisheries|tackett\s*(?:fish\s*farm|farms?)/i.test([line,customerLines[i+1]||'',customerLines[i+2]||''].join(' '));
+});
+const directCustomerNames=customerLines.filter(v=>/delta\s*cat\s*fisheries|tackett\s*(?:fish\s*farm|farms?)/i.test(v));
+let recognizedCustomer='';
+if(namedCustomerLine || directCustomerNames.length){
+ const isDelta=directCustomerNames.some(v=>/delta\s*cat\s*fisheries/i.test(v));
+ const isTackett=directCustomerNames.some(v=>/tackett\s*(?:fish\s*farm|farms?)/i.test(v));
+ if(isDelta!==isTackett)recognizedCustomer=isDelta?'Delta Cat':'Tackett Fish Farm';
+}
+if(customerSelect){
+ const match=[...customerSelect.options].find(o=>o.textContent.trim().toLowerCase()===recognizedCustomer.toLowerCase());
+ if(recognizedCustomer && match){customerSelect.value=match.value;customerSelect.dispatchEvent(new Event('input',{bubbles:true}));}
+ else {customerSelect.value='';customerSelect.dispatchEvent(new Event('input',{bubbles:true}));}
+}
+let filled=[];if(recognizedCustomer&&customerSelect?.value)filled.push('customer ('+recognizedCustomer+')');function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New photographs replace the unsaved preview without confirmation dialogs.
 el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',number,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',dest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
 scannedFeed=scannedFeed.replace(/\bFr[vy]\s*(?:11|ll|II)\b/gi,'Fry II');
 fill('draftFeedType',scannedFeed,'feed type');
 const feedField=document.getElementById('draftFeedType');
-scanStatus.textContent=filled.length?'Scan complete: '+filled.join(', ')+'. Verify every field, especially the date printed on the ticket. Nothing was saved.':'Scan finished, but no reliable fields were found. Enter ticket details manually.';if(!filled.length)scanStatus.textContent='Scanner could not confidently identify ticket fields. Try a closer, well-lit picture with the ticket filling the frame.'}catch(e){scanStatus.textContent='Scanning unavailable: '+e.message+'. You can still enter the ticket manually.'}finally{busy=false;btn.disabled=false}}})();
+scanStatus.textContent=filled.length?'Scan complete: '+filled.join(', ')+'. Verify every field, especially the date printed on the ticket. '+(customerSelect?.value?'Customer detected automatically.':'Customer not identified — choose customer manually.')+' Nothing was saved.':'Scan finished, but no reliable fields were found. Enter ticket details manually.';if(!filled.length)scanStatus.textContent='Scanner could not confidently identify ticket fields. Try a closer, well-lit picture with the ticket filling the frame.'}catch(e){scanStatus.textContent='Scanning unavailable: '+e.message+'. You can still enter the ticket manually.'}finally{busy=false;btn.disabled=false}}})();
