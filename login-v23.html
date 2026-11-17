@@ -624,24 +624,33 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         if(index===0) {
           const selector=$("cloudDriver");
           const list=$("driverDirectory");
-          if(selector?.options.length){
-            list.replaceChildren();
-            for(const option of selector.options){
-              if(!option.value)continue;
-              const link=document.createElement("button");
-              link.type="button";
-              link.textContent=option.textContent;
-              link.style.cssText="display:block;width:100%;margin:6px 0;padding:12px;text-align:left;background:#eef3f8;color:#143452;border:1px solid #c3d2df;border-radius:9px;font-size:16px";
-              link.addEventListener("click",()=>{
-                selector.value=option.value;
-                selector.dispatchEvent(new Event("change",{bubbles:true}));
-                $("loadWeek").click();
-                $("todayDeliveriesDisclosure").open=true;
-                $("todayDeliveriesDisclosure").scrollIntoView({behavior:"smooth",block:"start"});
-              });
-              list.appendChild(link);
+          list.textContent="Loading drivers…";
+          (async()=>{
+            try {
+              const drivers=await CKCloud.listDrivers();
+              list.replaceChildren();
+              if(!drivers.length){list.textContent="No drivers found.";return;}
+              for(const driver of drivers.filter(d=>!d.is_office)){
+                const link=document.createElement("button");
+                link.type="button";
+                link.textContent=driver.name;
+                link.style.cssText="display:block;width:100%;margin:6px 0;padding:14px;text-align:left;background:#eef3f8;color:#143452;border:1px solid #c3d2df;border-radius:9px;font-size:17px;font-weight:700";
+                link.addEventListener("click",()=>{
+                  let option=[...selector.options].find(o=>o.value===driver.id);
+                  if(!option){option=document.createElement("option");option.value=driver.id;option.textContent=driver.name+" — "+driver.company;selector.appendChild(option);}
+                  selector.value=driver.id;
+                  selector.dispatchEvent(new Event("change",{bubbles:true}));
+                  $("todayDeliveriesDisclosure").open=true;
+                  $("loadWeek").click();
+                  $("todayDeliveriesDisclosure").scrollIntoView({behavior:"smooth",block:"start"});
+                });
+                list.appendChild(link);
+              }
+              if(!list.children.length)list.textContent="No driver accounts available.";
+            } catch(error){
+              list.textContent="Unable to load drivers: "+(error.message||"Connection error")+".";
             }
-          }
+          })();
         }
       }
     });
