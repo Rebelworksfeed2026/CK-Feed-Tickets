@@ -207,6 +207,32 @@ if(!explicitTankPond && /delivery\s*instructions?|delta\s*western/i.test(instruc
   }finally{await w.terminate();pic.close();}
  }catch(e){/* Require manual verification if OCR remains unclear. */}
 }
+// Final destination pass: OCR often loses the small single-digit "Tank 3" on
+// the full page. Existing destination crops only looked for multi-digit ponds.
+// Read the delivery-instructions region itself with overlapping crops and
+// use only an explicitly printed tank label, never an isolated numeral.
+if(!verifiedDest){
+ try{
+  const pic=await createImageBitmap(input.files[0]);
+  const worker=await Tesseract.createWorker('eng');
+  try{
+   await worker.setParameters({tessedit_pageseg_mode:'6'});
+   const regions=[[.05,.40,.56,.24],[.05,.46,.54,.25],[.07,.50,.45,.18],[.05,.54,.52,.18]];
+   for(const [x,y,w,h] of regions){
+    const canvas=document.createElement('canvas');canvas.width=1700;canvas.height=650;
+    const cx=canvas.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,canvas.width,canvas.height);
+    cx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,canvas.width,canvas.height);
+    const raw=(await worker.recognize(canvas)).data.text||'';
+    diagnostic.textContent+='\\nDESTINATION CROP '+y+': '+(raw.trim()||'[no text detected]').slice(0,300);
+    const lines=raw.split(/\\r?\\n/).map(v=>v.trim()).filter(Boolean);
+    const instructionAt=lines.findIndex(v=>/delivery\\s*instructions?/i.test(v));
+    const relevant=instructionAt>=0?lines.slice(instructionAt,instructionAt+5).join('\\n'):raw;
+    const m=relevant.match(/\\b(?:tank|tnk)\\s*[:#-]?\\s*([1-9])\\b/i);
+    if(m){verifiedDest='Tank '+m[1];break;}
+   }
+  }finally{await worker.terminate();pic.close();}
+ }catch(e){diagnostic.textContent+='\\nDestination OCR error: '+String(e.message||e);}
+}
 // Prefer a complete, label-adjacent printed product description; discard stray OCR prefixes.
 if(scannedFeed){
  scannedFeed=scannedFeed.replace(/^\s*(?:Ta|To)\s+(?=DW\s+\d)/i,'').trim();
