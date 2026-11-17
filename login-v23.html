@@ -793,6 +793,9 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   if(farmsNavGroup)farmsNavGroup.hidden=true;
   extras.appendChild(menu);
   dashboard.appendChild(extras);
+  // Office lookup must be visible without opening the Settings navigation.
+  const officeLookup=$("officeTile");
+  if(officeLookup)dashboard.insertBefore(officeLookup,extras);
 }
 document.body.appendChild($("correctionPanel"));
 // Keep the photo viewer outside collapsed dashboard sections so it can display.
