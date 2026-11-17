@@ -101,7 +101,7 @@ const number=(text.match(/(?:ticket|load|order)\s*(?:no\.?|number|#|:)?\s*([0-9]
 // Prefer the full instruction over numeric-only OCR fallbacks; do not infer missing letters.
 const deliveryInstructionLines=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):[];
 function fullNumberLetterTank(line){
-  const m=line.match(/(?:^|[:\\s])(?:destination\\s*[:#-]?\\s*)?(\\d{2,4})\\s*[,;.]?\\s*([A-Z]{1,3})\\s*(?:tank|tnk)\\b/i);
+  const m=line.match(/(?:^|[:\\s])(?:destination\\s*[:#-]?\\s*)?(\\d{1,4})\\s*[,;.]?\\s*([A-Z]{1,3})\\s*(?:tank|tnk)\\b/i);
   return m?m[1]+', '+m[2].toUpperCase()+' Tank':'';
 }
 const fullInstructionDestination=deliveryInstructionLines.map(fullNumberLetterTank).find(Boolean)
@@ -126,7 +126,13 @@ if(!fullInstructionDestination){
   }finally{await detail.terminate();pic.close()}
  }catch(e){/* Manual destination correction remains available. */}
 }
-if(!dest){const match=instructionCrop.match(/delivery\s*instructions?\s*[:#-]?\s*(?:\n|\s)+\s*(\d{2,4})\b/i);if(match)dest=match[1]}if(!dest&&instructionCrop){const cropLines=instructionCrop.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);const labelAt=cropLines.findIndex(s=>/delivery\s*instructions?/i.test(s));if(labelAt>=0){const candidate=cropLines.slice(labelAt+1,labelAt+4).map(s=>s.match(/^\D{0,3}(\d{2,4})\D{0,3}$/)?.[1]).find(Boolean);if(candidate)dest=candidate}}if(!dest){try{const pic=await createImageBitmap(input.files[0]);const crop=document.createElement('canvas');crop.width=1600;crop.height=600;const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);cx.drawImage(pic,0,pic.height*.51,pic.width*.36,pic.height*.115,0,0,crop.width,crop.height);const detail=await Tesseract.createWorker('eng');try{const raw=(await detail.recognize(crop)).data.text||'';const match=raw.match(/(?:^|\n)\s*(\d{2,4})\s*(?:\n|$)/m)||raw.match(/delivery\s*instructions?\s*[:#-]?\s*(\d{2,4})/i);if(match)dest=match[1]}finally{await detail.terminate()}pic.close()}catch(e){}}if(!dest&&/DELTA|WESTERN|delivery\s*instructions?/i.test(text)){try{const pic=await createImageBitmap(input.files[0]);const worker=await Tesseract.createWorker('eng');try{await worker.setParameters({tessedit_char_whitelist:'0123456789',tessedit_pageseg_mode:'7'});const regions=[[.035,.539,.19,.038],[.035,.535,.25,.075],[.025,.525,.30,.11]];for(const [x,y,w,h] of regions){const canvas=document.createElement('canvas');canvas.width=1400;canvas.height=300;const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=true;ctx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,canvas.width,canvas.height);const raw=(await worker.recognize(canvas)).data.text||'';const candidates=raw.match(/\b\d{2,4}\b/g)||[];if(candidates.length===1){dest=candidates[0];break}}}finally{await worker.terminate();pic.close()}}catch(e){}}let scannedDate='';
+if(!dest){const match=instructionCrop.match(/delivery\s*instructions?\s*[:#-]?\s*(?:\n|\s)+\s*(\d{2,4})\b/i);if(match)dest=match[1]}if(!dest&&instructionCrop){const cropLines=instructionCrop.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);const labelAt=cropLines.findIndex(s=>/delivery\s*instructions?/i.test(s));if(labelAt>=0){const candidate=cropLines.slice(labelAt+1,labelAt+4).map(s=>s.match(/^\D{0,3}(\d{2,4})\D{0,3}$/)?.[1]).find(Boolean);if(candidate)dest=candidate}}if(!dest){try{const pic=await createImageBitmap(input.files[0]);const crop=document.createElement('canvas');crop.width=1600;crop.height=600;const cx=crop.getContext('2d');cx.fillStyle='white';cx.fillRect(0,0,crop.width,crop.height);cx.drawImage(pic,0,pic.height*.51,pic.width*.36,pic.height*.115,0,0,crop.width,crop.height);const detail=await Tesseract.createWorker('eng');try{const raw=(await detail.recognize(crop)).data.text||'';const match=raw.match(/(?:^|\n)\s*(\d{2,4})\s*(?:\n|$)/m)||raw.match(/delivery\s*instructions?\s*[:#-]?\s*(\d{2,4})/i);if(match)dest=match[1]}finally{await detail.terminate()}pic.close()}catch(e){}}if(!dest&&/DELTA|WESTERN|delivery\s*instructions?/i.test(text)){try{const pic=await createImageBitmap(input.files[0]);const worker=await Tesseract.createWorker('eng');try{await worker.setParameters({tessedit_char_whitelist:'0123456789',tessedit_pageseg_mode:'7'});const regions=[[.035,.539,.19,.038],[.035,.535,.25,.075],[.025,.525,.30,.11]];for(const [x,y,w,h] of regions){const canvas=document.createElement('canvas');canvas.width=1400;canvas.height=300;const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=true;ctx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,canvas.width,canvas.height);const raw=(await worker.recognize(canvas)).data.text||'';const candidates=raw.match(/\b\d{2,4}\b/g)||[];if(candidates.length===1){dest=candidates[0];break}}}finally{await worker.terminate();pic.close()}}catch(e){}}
+// Single-digit tank numbers are common on Delta Cat tickets. Read a clearly
+// labeled "Tank 3" from any OCR pass, including the instructions crop.
+const labeledTankSources=[result.data.text||'',instructionCrop,extra].join('\n');
+const labeledSingleTank=labeledTankSources.match(/\b(?:tank|tnk)\s*[:#-]?\s*([1-9])\b/i);
+if(labeledSingleTank && !fullInstructionDestination && !/\b(?:tank|tnk)\s*[:#-]?\s*\d{2,4}\b/i.test(labeledTankSources))dest='Tank '+labeledSingleTank[1];
+let scannedDate='';
 const dateSource=text.match(/(?:dispatched|shipped\s*(?:on|date)?|delivery\s*date)\s*[:#-]?\s*(\d{1,2})\s*[\/.-]\s*(\d{1,2})\s*[\/.-]\s*(\d{2,4})/i);
 // Some Delta Western tickets print the date after the shipped tonnage on one line.
 // OCR may lose the word "Dispatched" while retaining the numeric date.
@@ -174,6 +180,11 @@ let verifiedNumber=number;
 const ticketLabelCandidates=[result.data.text||'',extra,instructionCrop].join('\n').match(/(?:delivery\s*)?ticket\s*(?:number|no\.?|#)\s*[:#]?\s*(\d{6,8})\b/i);
 if(ticketLabelCandidates)verifiedNumber=ticketLabelCandidates[1];
 let verifiedDest=dest;
+// Retain an explicitly labeled one-digit tank after all OCR refinements.
+if(!verifiedDest){
+ const explicitOneDigit=[result.data.text||'',instructionCrop,extra].join('\n').match(/\b(?:tank|tnk)\s*[:#-]?\s*([1-9])\b/i);
+ if(explicitOneDigit)verifiedDest='Tank '+explicitOneDigit[1];
+}
 const instructionSources=[result.data.text||'',instructionCrop,extra].join('\n');
 const tankPondPattern=/\b(?:tank|tnk)\s*[:#-]?\s*(\d{2,4})\s*[,;. ]+\s*([A-Z]{1,3}\s*[- ]?\d{1,3})\b/i;
 const explicitTankPond=instructionSources.match(tankPondPattern);
