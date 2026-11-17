@@ -682,6 +682,23 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     inner.appendChild(tile);
     panels[index].appendChild(inner);
   }
+  // Put manager controls in the Managers section rather than hiding them inside Farms.
+  const managerControls=$("managerAdmin");
+  if(managerControls){
+    const managerContainer=document.createElement("div");
+    managerContainer.style.cssText="padding:10px 0";
+    managerContainer.appendChild(managerControls);
+    panels[2].prepend(managerContainer);
+  }
+  // The manager report is already a disclosure; open it with the Managers row
+  // so there is no second tap just to reveal its contents.
+  const managerReport=$("managerFeedReport");
+  const managerButton=menu.querySelectorAll(".ck-nav-button")[2];
+  if(managerButton && managerReport){
+    managerButton.addEventListener("click",()=>{
+      if(!panels[2].hidden)managerReport.open=true;
+    });
+  }
   extras.appendChild(menu);
   dashboard.appendChild(extras);
 }
