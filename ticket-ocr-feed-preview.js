@@ -329,13 +329,11 @@ try {
 const feedEvidence=[result.data.text||'',extra,instructionCrop,...feedCropReadings].join('\n');
 const completeProduct=/\b(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\s+[A-Za-z][A-Za-z0-9]*(?:\s+[A-Za-z][A-Za-z0-9]*){0,3}/ig;
 function cleanProduct(v){
- let value=v.replace(/\s+/g,' ').trim();
- // "Bulk" is the last word in this printed Delta Western product.
- // Stop there even if OCR joins the adjacent PRODUCT DESCRIPTION heading.
- const bulk=value.match(/^((?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\s+Bulk)\b/i);
- if(bulk)return bulk[1];
- const beforeHeader=value.split(/\s+(?:PRODUCT|DESCRIPTION|SCALE|WEIGHTS?|GROSS|TARE|NET|SHIPPED|DISPATCHED|LBS)\b/i)[0].trim();
- return beforeHeader;
+ let value=String(v||'').replace(/\s+/g,' ').trim();
+ // OCR can merge a heading directly after "Bulk", e.g. "BulkPRODUCT".
+ const boundary=value.match(/^((?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\s+Bulk)(?=\b|PRODUCT|DESCRIPTION|SCALE|WEIGHTS|GROSS|TARE|NET|SHIPPED|DISPATCHED)/i);
+ if(boundary)return boundary[1];
+ return value.split(/\s+(?:PRODUCT|DESCRIPTION|SCALE|WEIGHTS?|GROSS|TARE|NET|SHIPPED|DISPATCHED|LBS)\b/i)[0].trim();
 }
 const products=[...feedEvidence.matchAll(completeProduct)].map(m=>cleanProduct(m[0])).filter(Boolean);
 if(products.length){
