@@ -168,8 +168,40 @@ if(customerSelect){
  if(recognizedCustomer && match){customerSelect.value=match.value;customerSelect.dispatchEvent(new Event('input',{bubbles:true}));}
  else {customerSelect.value='';customerSelect.dispatchEvent(new Event('input',{bubbles:true}));}
 }
+// Delta Western: prioritize the labeled ticket number and complete delivery-instruction line.
+// Do not guess missing pond suffixes from a numeric-only OCR pass.
+let verifiedNumber=number;
+const ticketLabelCandidates=[result.data.text||'',extra,instructionCrop].join('\n').match(/(?:delivery\s*)?ticket\s*(?:number|no\.?|#)\s*[:#]?\s*(\d{6,8})\b/i);
+if(ticketLabelCandidates)verifiedNumber=ticketLabelCandidates[1];
+let verifiedDest=dest;
+const instructionSources=[result.data.text||'',instructionCrop,extra].join('\n');
+const tankPondPattern=/\b(?:tank|tnk)\s*[:#-]?\s*(\d{2,4})\s*[,;. ]+\s*([A-Z]{1,3}\s*[- ]?\d{1,3})\b/i;
+const explicitTankPond=instructionSources.match(tankPondPattern);
+if(explicitTankPond)verifiedDest=explicitTankPond[1]+', '+explicitTankPond[2].replace(/\s+/g,'').toUpperCase();
+if(!explicitTankPond && /delivery\s*instructions?|delta\s*western/i.test(instructionSources)){
+ try{
+  const pic=await createImageBitmap(input.files[0]);
+  const w=await Tesseract.createWorker('eng');
+  try{
+   await w.setParameters({tessedit_pageseg_mode:'6'});
+   // Wide overlapping crops account for variable margins and phone-camera framing.
+   for(const [x,y,ww,hh] of [[.10,.37,.48,.22],[.08,.41,.52,.25],[.10,.47,.48,.20]]){
+    const canvas=document.createElement('canvas');canvas.width=2000;canvas.height=650;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(pic,pic.width*x,pic.height*y,pic.width*ww,pic.height*hh,0,0,canvas.width,canvas.height);
+    const raw=(await w.recognize(canvas)).data.text||'';
+    const m=raw.match(tankPondPattern);
+    if(m){verifiedDest=m[1]+', '+m[2].replace(/\s+/g,'').toUpperCase();break;}
+   }
+  }finally{await w.terminate();pic.close();}
+ }catch(e){/* Require manual verification if OCR remains unclear. */}
+}
+// Prefer a complete, label-adjacent printed product description; discard stray OCR prefixes.
+if(scannedFeed){
+ scannedFeed=scannedFeed.replace(/^\s*(?:Ta|To)\s+(?=DW\s+\d)/i,'').trim();
+}
 let filled=[];if(recognizedCustomer&&customerSelect?.value)filled.push('customer ('+recognizedCustomer+')');function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New photographs replace the unsaved preview without confirmation dialogs.
-el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',number,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',dest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
+el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',verifiedNumber,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',verifiedDest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
 scannedFeed=scannedFeed.replace(/\bFr[vy]\s*(?:11|ll|II)\b/gi,'Fry II');
 fill('draftFeedType',scannedFeed,'feed type');
