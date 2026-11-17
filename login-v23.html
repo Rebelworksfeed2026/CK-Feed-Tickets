@@ -694,9 +694,17 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   // so there is no second tap just to reveal its contents.
   const managerReport=$("managerFeedReport");
   const managerButton=menu.querySelectorAll(".ck-nav-button")[2];
-  if(managerButton && managerReport){
+  if(managerReport){
+    // This report is a <details> element without a <strong> label.
+    // The generic tile sorter previously put it under Settings by mistake.
+    const oldWrapper=managerReport.parentElement;
+    panels[2].appendChild(managerReport);
+    managerReport.open=true;
+    if(oldWrapper?.tagName==="DETAILS" && oldWrapper.querySelector("summary")?.textContent.trim()==="More options")oldWrapper.remove();
+  }
+  if(managerButton){
     managerButton.addEventListener("click",()=>{
-      if(!panels[2].hidden)managerReport.open=true;
+      if(!panels[2].hidden && managerReport)managerReport.open=true;
     });
   }
   extras.appendChild(menu);
