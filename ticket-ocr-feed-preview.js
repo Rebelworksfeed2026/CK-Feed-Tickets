@@ -336,8 +336,15 @@ function cleanProduct(v){
  return value.split(/\s+(?:PRODUCT|DESCRIPTION|SCALE|WEIGHTS?|GROSS|TARE|NET|SHIPPED|DISPATCHED|LBS)\b/i)[0].trim();
 }
 const products=[...feedEvidence.matchAll(completeProduct)].map(m=>cleanProduct(m[0])).filter(Boolean);
+// FRY II / FLY II is a valid printed feed type even without a DW product code.
+// Require a whole feed name in the OCR evidence, not an isolated numeral.
+const fryEvidence=feedEvidence.match(/\b(?:FRY|FLY)\s*(?:II|ll|11|2)\s*(?:BULK|FEED|PELLETS?)?\b/ig)||[];
+const normalizeFry=v=>v.replace(/\b(FRY|FLY)\s*(?:II|ll|11|2)\b/i,(_m,name)=>name.toUpperCase()+' II').replace(/\s+/g,' ').trim();
+const fryProducts=fryEvidence.map(normalizeFry).filter(v=>/^(?:FRY|FLY) II(?: (?:BULK|FEED|PELLETS?))?$/i.test(v));
 if(products.length){
  scannedFeed=products.sort((a,b)=>b.length-a.length)[0];
+}else if(fryProducts.length){
+ scannedFeed=fryProducts.sort((a,b)=>b.length-a.length)[0];
 }else if(/\b(?:scale?|scal|gross|tare|net|tonnage|weights?)\b/i.test(scannedFeed)||!/(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\b/i.test(scannedFeed)){
  scannedFeed='';
 }
@@ -345,7 +352,7 @@ scannedFeed=cleanProduct(scannedFeed);
 let filled=[];if(recognizedCustomer&&customerSelect?.value)filled.push('customer ('+recognizedCustomer+')');function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New photographs replace the unsaved preview without confirmation dialogs.
 el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',verifiedNumber,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',verifiedDest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
-scannedFeed=scannedFeed.replace(/\bFr[vy]\s*(?:11|ll|II)\b/gi,'Fry II');
+scannedFeed=scannedFeed.replace(/\b(Fry|Fly)\s*(?:11|ll|II)\b/gi,(_m,name)=>name+' II');
 fill('draftFeedType',scannedFeed,'feed type');
 const feedField=document.getElementById('draftFeedType');
 scanStatus.textContent=filled.length?'Scan complete: '+filled.join(', ')+'. Verify every field, especially the date printed on the ticket. '+(customerSelect?.value?'Customer detected automatically.':'Customer not identified — choose customer manually.')+' Nothing was saved.':'Scan finished, but no reliable fields were found. Enter ticket details manually.';if(!filled.length)scanStatus.textContent='Scanner could not confidently identify ticket fields. Try a closer, well-lit picture with the ticket filling the frame.'}catch(e){scanStatus.textContent='Scanning unavailable: '+e.message+'. You can still enter the ticket manually.'}finally{busy=false;btn.disabled=false}}})();
