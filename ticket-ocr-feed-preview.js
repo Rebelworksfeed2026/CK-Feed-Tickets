@@ -132,6 +132,11 @@ if(!dest){const match=instructionCrop.match(/delivery\s*instructions?\s*[:#-]?\s
 const labeledTankSources=[result.data.text||'',instructionCrop,extra].join('\n');
 const labeledSingleTank=labeledTankSources.match(/\b(?:tank|tnk)\s*[:#-]?\s*([1-9])\b/i);
 if(labeledSingleTank && !fullInstructionDestination && !/\b(?:tank|tnk)\s*[:#-]?\s*\d{2,4}\b/i.test(labeledTankSources))dest='Tank '+labeledSingleTank[1];
+// Reset the previous unsaved scan so a missing field cannot inherit an older ticket.
+for(const id of ['draftDate','draftNumber','draftTons','draftFeedType','draftDestination']){
+ const field=document.getElementById(id);
+ if(field){field.value='';field.dispatchEvent(new Event('input',{bubbles:true}));}
+}
 let scannedDate='';
 const dateSource=text.match(/(?:dispatched|shipped\s*(?:on|date)?|delivery\s*date)\s*[:#-]?\s*(\d{1,2})\s*[\/.-]\s*(\d{1,2})\s*[\/.-]\s*(\d{2,4})/i);
 // Some Delta Western tickets print the date after the shipped tonnage on one line.
@@ -153,6 +158,34 @@ if(dateSource||fallbackDate){
   if(mm>=1&&mm<=12&&dd>=1&&dd<=31&&yy>=2020&&yy<=2100&&parsed.getFullYear()===yy&&parsed.getMonth()===mm-1&&parsed.getDate()===dd&&parsed.getDay()!==0){
     scannedDate=String(yy).padStart(4,'0')+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
   }
+}
+// When the full-page OCR misses the dispatch date, scan the printed
+// Shipped / Dispatched line in several overlapping upper-middle crops.
+if(!scannedDate){
+ try{
+  const pic=await createImageBitmap(input.files[0]);
+  const worker=await Tesseract.createWorker('eng');
+  try{
+   await worker.setParameters({tessedit_pageseg_mode:'6'});
+   const regions=[[.12,.33,.65,.19],[.12,.38,.72,.16],[.16,.40,.65,.18],[.08,.27,.80,.30]];
+   for(const [x,y,w,h] of regions){
+    const canvas=document.createElement('canvas');
+    canvas.width=1900;canvas.height=500;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,canvas.width,canvas.height);
+    const raw=(await worker.recognize(canvas)).data.text||'';
+    const dateLine=raw.split(/\\r?\\n/).find(line=>/shipped|dispatch|delivery\\s*date/i.test(line))||'';
+    const m=dateLine.match(/\\b(\\d{1,2})\\s*[\\/.-]\\s*(\\d{1,2})\\s*[\\/.-]\\s*(\\d{2,4})\\b/);
+    if(!m)continue;
+    const mm=Number(m[1]),dd=Number(m[2]),year=Number(m[3]),yy=year<100?year+2000:year;
+    const dt=new Date(yy,mm-1,dd);
+    if(yy>=2020&&yy<=2100&&dt.getFullYear()===yy&&dt.getMonth()===mm-1&&dt.getDate()===dd&&dt.getDay()!==0){
+     scannedDate=String(yy).padStart(4,'0')+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
+     break;
+    }
+   }
+  }finally{await worker.terminate();pic.close();}
+ }catch(e){diagnostic.textContent+='\\nDate OCR unavailable: '+String(e.message||e);}
 }
 // Identify the delivery customer from printed Ship To / Sold To names, never the feed supplier's logo.
 const customerSelect=document.getElementById('draftCustomer');
