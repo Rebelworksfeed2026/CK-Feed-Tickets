@@ -666,13 +666,18 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     inner.appendChild(tile);
     panels[index].appendChild(inner);
   }
-  // Show driver directory directly in the Drivers panel, not inside a second disclosure.
+  // Show the live driver list immediately when Drivers is selected.
+  // Remove the redundant "Driver directory" disclosure and its wrapper.
   const directory=$("driverDirectory");
   if(directory){
     const directoryTile=directory.closest(".tile");
     const directoryDisclosure=directoryTile?.parentElement;
     if(directoryDisclosure?.tagName==="DETAILS")directoryDisclosure.remove();
     panels[0].prepend(directory);
+  }
+  // Remove any redundant directory disclosure left by earlier layouts.
+  for(const details of panels[0].querySelectorAll("details")){
+    if(details.querySelector("summary")?.textContent.trim()==="Driver directory")details.remove();
   }
   extras.appendChild(menu);
   dashboard.appendChild(extras);
