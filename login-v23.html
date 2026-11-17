@@ -779,6 +779,10 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       }catch(error){managerDirectory.textContent="Unable to load manager farms and tanks: "+(error.message||"Connection error");}
     });
   }
+  // Hide the redundant Farms navigation row. Preserve its panel and all
+  // existing farm directory DOM so other code can still access it.
+  const farmsNavGroup=panels[1]?.parentElement;
+  if(farmsNavGroup)farmsNavGroup.hidden=true;
   extras.appendChild(menu);
   dashboard.appendChild(extras);
 }
