@@ -568,7 +568,19 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   dashboard.insertBefore(cameraTile,firstTile);
   dashboard.insertBefore(ticketEntryTile,firstTile);
   dashboard.insertBefore(weekTile,firstTile);
-  weekTile.querySelector("strong").textContent="My feed delivery tickets — this week";
+  // Presentation only: keep the existing weekly report and driver selector intact.
+  // Collapsing this section never changes tickets, farms, managers or permissions.
+  const deliveryDisclosure=document.createElement("details");
+  deliveryDisclosure.id="todayDeliveriesDisclosure";
+  deliveryDisclosure.style.cssText="margin:10px 0;border:1px solid #cbd9e2;border-radius:10px;background:#eef3f6;overflow:hidden";
+  const deliverySummary=document.createElement("summary");
+  deliverySummary.textContent="Today's Feed Deliveries";
+  deliverySummary.style.cssText="cursor:pointer;font-size:19px;font-weight:750;color:#183449;padding:16px;list-style:inside";
+  deliveryDisclosure.appendChild(deliverySummary);
+  dashboard.insertBefore(deliveryDisclosure,weekTile);
+  deliveryDisclosure.appendChild(weekTile);
+  weekTile.style.margin="0";
+  weekTile.querySelector("strong").textContent="Choose a driver and week";
   const photoInput=$("ticketPhoto");
   cameraTile.querySelector("strong").textContent="Ticket photo and scan status";
   // The large top button is the sole camera entry point.
