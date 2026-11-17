@@ -35,6 +35,12 @@ button:disabled{opacity:.6;cursor:wait}.secondary{background:#e6eef3;color:#1834
   #weekTable tr {break-inside:avoid!important;page-break-inside:avoid!important;}
   #weekTotal,#weekHighlights {font-size:9pt!important;margin:5pt 0!important;break-inside:avoid!important;}
 }
+/* Keep weekly action buttons readable while preserving horizontal swipe. */
+@media screen {
+  #weekTable { min-width:900px!important; }
+  #weekTable th.no-print, #weekTable td.no-print { min-width:112px;white-space:nowrap; }
+  #weekTable td.no-print button { display:inline-block;width:auto!important;min-width:96px;max-width:none;white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;line-height:1.2; }
+}
 #groupedReportResults{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 #groupedReportResults table{min-width:0;width:100%;table-layout:fixed;font-size:12px!important}
 #groupedReportResults th,#groupedReportResults td{padding:5px 3px!important;overflow-wrap:anywhere;word-break:normal}
@@ -1196,7 +1202,7 @@ $("loadWeek").addEventListener("click", async () => {
       if(!activeProfile?.is_office && (activeProfile?.is_admin || activeProfile?.id===t.driver_id)) {
         const edit=document.createElement("button");
         edit.type="button";edit.textContent="Correct";
-        edit.style.cssText="padding:8px;min-height:40px;font-size:13px";
+        edit.style.cssText="padding:8px;min-height:40px;font-size:13px;min-width:96px;width:auto;white-space:nowrap;overflow-wrap:normal;word-break:normal";
         edit.addEventListener("click",()=>openTicketCorrection(t));
         editCell.appendChild(edit);
       }
