@@ -163,10 +163,9 @@ if(dateSource||fallbackDate){
     scannedDate=String(yy).padStart(4,'0')+'-'+String(mm).padStart(2,'0')+'-'+String(dd).padStart(2,'0');
   }
 }
-// Some OCR passes split the day across whitespace or a line break.
-// Match the date immediately after Dispatched even when a separate OCR line.
+// Match dispatch dates with OCR-spaced day digits, e.g. "11/1 7/2026".
 if(!scannedDate){
- const dispatch=text.match(/\\bdispatched\\b[\\s:–-]*([0-1]?\\d)\\s*[\\/.\\-]\\s*(\\d)(?:[ \\t\\r\\n]+(\\d))?\\s*[\\/.\\-]\\s*(20\\d{2})\\b/i);
+ const dispatch=text.match(/\bdispatched\b[\s:–-]*([0-1]?\d)\s*[\/.\-]\s*(\d)(?:[ \t\r\n]+(\d))?\s*[\/.\-]\s*(20\d{2})\b/i);
  if(dispatch){
   const mm=Number(dispatch[1]),dd=Number(dispatch[2]+(dispatch[3]||'')),yy=Number(dispatch[4]);
   const d=new Date(yy,mm-1,dd);
