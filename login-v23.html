@@ -724,14 +724,44 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   if(managerButton){
     managerButton.addEventListener("click",async()=>{
       if(panels[2].hidden)return;
-      managerDirectory.textContent="Loading managers and farms…";
+      managerDirectory.textContent="Loading managers and yearly ticket totals…";
       try{
-        const [data,farmData]=await Promise.all([
+        const reportYear=new Date().getFullYear();
+        const [data,farmData,drivers,yearTickets]=await Promise.all([
           CKCloud.listManagersAndAssignments(),
-          CKCloud.listFarmsAndTanks()
+          CKCloud.listFarmsAndTanks(),
+          CKCloud.listDrivers(),
+          CKCloud.listTicketsForPeriod(reportYear+"-01-01",(reportYear+1)+"-01-01")
         ]);
+        const normalized=value=>String(value||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+        // Credit an entire ticket to one tank only when its destination uniquely
+        // identifies that tank. Never split or estimate multi-tank deliveries.
+        const tankTotals=new Map(),farmUnassigned=new Map();
+        const allTanks=farmData.tanks;
+        const cents=value=>Math.round(Number(value)*100);
+        for(const ticket of yearTickets){
+          if(ticket.is_test===true||!Number.isFinite(Number(ticket.tons))||Number(ticket.tons)<=0)continue;
+          const dest=normalized(ticket.destination);
+          if(!dest)continue;
+          const matches=allTanks.filter(t=>normalized(t.tank_label)===dest ||
+            normalized((farmData.farms.find(f=>f.id===t.farm_id)?.name||"")+" "+t.tank_label)===dest);
+          const amount=cents(ticket.tons);
+          if(matches.length===1){
+            const tank=matches[0],byDriver=tankTotals.get(tank.id)||new Map();
+            byDriver.set(ticket.driver_id,(byDriver.get(ticket.driver_id)||0)+amount);
+            tankTotals.set(tank.id,byDriver);
+          }else{
+            const farms=farmData.farms.filter(f=>normalized(f.name)===dest);
+            if(farms.length===1)farmUnassigned.set(farms[0].id,(farmUnassigned.get(farms[0].id)||0)+amount);
+          }
+        }
+        const fmt=amount=>(amount/100).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
         if(panels[2].hidden)return;
         managerDirectory.replaceChildren();
+        const explanation=document.createElement("p");
+        explanation.textContent=reportYear+" totals from tickets with one uniquely identified tank only. Multi-tank deliveries are not estimated.";
+        explanation.style.cssText="font-size:12px;color:#526778;margin:0 0 10px";
+        managerDirectory.appendChild(explanation);
         const managers=data.managers.filter(m=>m.active!==false);
         if(!managers.length){managerDirectory.textContent="No managers registered.";return;}
         const today=new Date().toLocaleDateString("en-CA");
@@ -773,12 +803,40 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
             }else{
               for(const tank of tanks){
                 const item=document.createElement("div");
-                item.textContent=tank.tank_label;
                 item.style.cssText="padding:10px 6px;border-bottom:1px solid #e3ebf0;color:#183449";
+                const row=document.createElement("div");
+                row.style.cssText="display:flex;justify-content:space-between;align-items:center;gap:8px";
+                const name=document.createElement("span");name.textContent=tank.tank_label;
+                const byDriver=tankTotals.get(tank.id)||new Map();
+                const total=[...byDriver.values()].reduce((sum,v)=>sum+v,0);
+                const amount=document.createElement("span");
+                amount.textContent=fmt(total)+" tons";
+                amount.style.cssText="border:1px solid #c3d2df;border-radius:7px;padding:7px;background:#eef3f8;font-size:13px;font-weight:700;white-space:nowrap";
+                row.appendChild(name);row.appendChild(amount);item.appendChild(row);
+                const breakdown=document.createElement("details");
+                breakdown.style.cssText="margin-top:6px";
+                const summary=document.createElement("summary");
+                summary.textContent="Driver breakdown · "+reportYear;
+                summary.style.cssText="font-size:13px;color:#315f83;cursor:pointer";
+                breakdown.appendChild(summary);
+                for(const driver of drivers.filter(d=>!d.is_office)){
+                  const line=document.createElement("div");
+                  line.textContent=driver.name+": "+fmt(byDriver.get(driver.id)||0)+" tons";
+                  line.style.cssText="padding:4px 12px;font-size:13px";
+                  breakdown.appendChild(line);
+                }
+                item.appendChild(breakdown);
                 tankList.appendChild(item);
               }
             }
             farmGroup.appendChild(tankList);
+            const unassigned=farmUnassigned.get(farm.id)||0;
+            if(unassigned){
+              const note=document.createElement("p");
+              note.textContent="Farm-only tickets (not assigned to a tank): "+fmt(unassigned)+" tons";
+              note.style.cssText="padding:8px;color:#526778;font-size:13px";
+              farmGroup.appendChild(note);
+            }
             farmsBox.appendChild(farmGroup);
           }
           group.appendChild(farmsBox);
