@@ -345,7 +345,7 @@ if(products.length){
  scannedFeed=products.sort((a,b)=>b.length-a.length)[0];
 }else if(fryProducts.length){
  scannedFeed=fryProducts.sort((a,b)=>b.length-a.length)[0];
-}else if(/\b(?:scale?|scal|gross|tare|net|tonnage|weights?)\b/i.test(scannedFeed)||!/(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\b/i.test(scannedFeed)){
+}else if(/\b(?:scale?|scal|gross|tare|net|tonnage|weights?)\b/i.test(scannedFeed)||!(/(?:DW|DWV|DWVV)\s*\d{1,2}\s*(?:Spec|Special)\b/i.test(scannedFeed)||/\b(?:mini\s+pellets?|pellets?\s+(?:bulk|feed)|dust|fines)\b/i.test(scannedFeed))){
  scannedFeed='';
 }
 scannedFeed=cleanProduct(scannedFeed);
