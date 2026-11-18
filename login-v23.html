@@ -676,6 +676,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   const originalDirectoryTile=directory?.closest(".tile");
   if(directory)panels[0].appendChild(directory);
   if(originalDirectoryTile)originalDirectoryTile.remove();
+  let unlabeledSettingsCount=0;
   for(const tile of otherTiles) {
     if(tile===originalDirectoryTile)continue;
     const label=tile.querySelector("strong")?.textContent || "";
@@ -689,6 +690,8 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     inner.appendChild(title);
     inner.appendChild(tile);
     panels[index].appendChild(inner);
+    // Hide the first obsolete unlabeled Settings disclosure; keep its DOM intact.
+    if(!label && index===5 && ++unlabeledSettingsCount===1)inner.hidden=true;
   }
   // Put manager controls in the Managers section rather than hiding them inside Farms.
   const managerControls=$("managerAdmin");
