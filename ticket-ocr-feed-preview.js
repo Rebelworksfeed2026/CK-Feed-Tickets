@@ -257,6 +257,10 @@ if(!explicitTankPond && /delivery\s*instructions?|delta\s*western/i.test(instruc
   }finally{await w.terminate();pic.close();}
  }catch(e){/* Require manual verification if OCR remains unclear. */}
 }
+// Preserve a single printed suffix in "Tank 708, F", not just suffixes with digits.
+const singleSuffix=/\b(?:tank|tnk)\s*[:#-]?\s*(\d{2,4})\s*[,;.]\s*([A-Z])\b/i;
+const suffixEvidence=[result.data.text||'',instructionCrop,extra].join('\n').match(singleSuffix);
+if(suffixEvidence)verifiedDest='Tank '+suffixEvidence[1]+', '+suffixEvidence[2].toUpperCase();
 // Final destination pass: OCR often loses the small single-digit "Tank 3" on
 // the full page. Existing destination crops only looked for multi-digit ponds.
 // Read the delivery-instructions region itself with overlapping crops and
@@ -355,6 +359,8 @@ if(products.length){
  scannedFeed='';
 }
 scannedFeed=cleanProduct(scannedFeed);
+// The scale column can contribute "Gro" from "Gross" after the Iron product.
+scannedFeed=scannedFeed.replace(/^(DW\s*28\s*Spec\s*Iron)\s+Gro(?:ss)?\b/i,'$1').trim();
 let filled=[];if(recognizedCustomer&&customerSelect?.value)filled.push('customer ('+recognizedCustomer+')');function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New photographs replace the unsaved preview without confirmation dialogs.
 el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',verifiedNumber,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',verifiedDest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
