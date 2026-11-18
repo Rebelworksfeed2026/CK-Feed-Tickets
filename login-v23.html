@@ -919,6 +919,92 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   if(farmsNavGroup)farmsNavGroup.hidden=true;
   extras.appendChild(menu);
   dashboard.appendChild(extras);
+
+  // Ask C&K: on-device speech-to-text with read-only, verified ticket calculations.
+  const askBox=document.createElement("section");
+  askBox.style.cssText="margin:12px 0;padding:14px;border:1px solid #c3d2df;border-radius:12px;background:#eef3f8";
+  const askTitle=document.createElement("strong");askTitle.textContent="Ask C&K";askTitle.style.cssText="display:block;font-size:19px;margin-bottom:7px";
+  const askHelp=document.createElement("p");askHelp.textContent="Ask: How much has Ricky hauled today? Or: How much feed did tank 403 receive this week?";askHelp.style.cssText="font-size:13px;margin:0 0 10px";
+  const askInput=document.createElement("input");askInput.type="text";askInput.placeholder="Ask about drivers or tanks";askInput.setAttribute("aria-label","Ask C&K question");askInput.style.cssText="width:100%;margin-bottom:8px";
+  const askActions=document.createElement("div");askActions.style.cssText="display:flex;gap:8px";
+  const askMic=document.createElement("button");askMic.type="button";askMic.textContent="🎤 Microphone";askMic.style.cssText="flex:1;min-width:0";
+  const askSubmit=document.createElement("button");askSubmit.type="button";askSubmit.textContent="Ask";askSubmit.style.cssText="flex:1;min-width:0";
+  const askAnswer=document.createElement("div");askAnswer.setAttribute("role","status");askAnswer.setAttribute("aria-live","polite");askAnswer.style.cssText="margin-top:10px;font-size:15px;font-weight:650;white-space:pre-wrap";
+  askActions.append(askMic,askSubmit);askBox.append(askTitle,askHelp,askInput,askActions,askAnswer);
+  dashboard.insertBefore(askBox,extras);
+  const askNormalize=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+  const askISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+  const askFmt=n=>Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  async function answerCKQuestion(){
+    const question=askInput.value.trim(),q=question.toLowerCase();
+    if(!question){askAnswer.textContent="Ask a question first.";return;}
+    const period=/\\b(year|yearly|this year)\\b/.test(q)?"year":/\\b(month|monthly|this month)\\b/.test(q)?"month":/\\b(week|weekly|this week)\\b/.test(q)?"week":/\\b(today|daily|this day)\\b/.test(q)?"today":null;
+    if(!period){askAnswer.textContent="Please include today, this week, this month, or this year.";return;}
+    const now=new Date(),from=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    if(period==="week")from.setDate(from.getDate()-(from.getDay()+6)%7);
+    if(period==="month")from.setDate(1);
+    if(period==="year")from.setMonth(0,1);
+    const end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+    askSubmit.disabled=true;askAnswer.textContent="Checking saved tickets…";
+    try{
+      const [tickets,drivers,directory]=await Promise.all([CKCloud.listTicketsForPeriod(askISO(from),askISO(end)),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks()]);
+      const active=tickets.filter(t=>t.is_test!==true && Number(t.tons)>0);
+      const driver=drivers.filter(d=>!d.is_office).find(d=>q.includes(String(d.name||"").toLowerCase()));
+      const isTank=/\\b(tank|pond|ponds|feed|received|got|delivered|destination)\\b/.test(q);
+      const isDriver=/\\b(hauled|driver|loads|trips)\\b/.test(q);
+      const periodLabel=period==="today"?"today":"this "+period;
+      if(driver && (isDriver||!isTank)){
+        const selected=active.filter(t=>t.driver_id===driver.id);
+        const total=selected.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0)/100;
+        askAnswer.textContent=driver.name+" hauled "+askFmt(total)+" tons in "+selected.length+" loads "+periodLabel+".";
+        return;
+      }
+      if(!isTank && !driver && isDriver){
+        const total=active.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0)/100;
+        askAnswer.textContent="All drivers hauled "+askFmt(total)+" tons in "+active.length+" loads "+periodLabel+".";
+        return;
+      }
+      if(isTank){
+        const matching=directory.tanks.filter(t=>{
+          const label=askNormalize(t.tank_label);
+          const words=q.match(/[a-z]+\\s*\\d+[a-z0-9]*/g)||[];
+          return words.some(w=>askNormalize(w)===label) || (label.length>=3 && new RegExp("(^|[^a-z0-9])"+label+"([^a-z0-9]|$)","i").test(askNormalize(q)));
+        });
+        // Numeric tank names must match a complete number, never a substring.
+        const exact=directory.tanks.filter(t=>{
+          const label=String(t.tank_label||"").trim();
+          return new RegExp("(^|[^a-z0-9])"+label.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\  extras.appendChild(menu);
+  dashboard.appendChild(extras);")+"(?=$|[^a-z0-9])","i").test(q);
+        });
+        const tanks=[...new Map([...matching,...exact].map(t=>[t.id,t])).values()];
+        if(tanks.length!==1){askAnswer.textContent=tanks.length?"More than one tank matches. Please include its full tank name.":"I couldn't identify the tank. Please use its full name, such as 403 or LW 313.";return;}
+        const tank=tanks[0],allocations=await CKCloud.listReportTankAllocations(active.map(t=>t.id));
+        const ids=new Set(active.map(t=>t.id));
+        const matched=allocations.filter(a=>a.tank_id===tank.id && ids.has(a.ticket_id));
+        const total=matched.reduce((sum,a)=>sum+Math.round(Number(a.tons)*100),0)/100;
+        askAnswer.textContent=tank.tank_label+" received "+askFmt(total)+" verified assigned tons "+periodLabel+". "+new Set(matched.map(a=>a.ticket_id)).size+" assigned tickets. Unassigned tickets are excluded.";
+        return;
+      }
+      askAnswer.textContent="Try: How much has Ricky hauled today? Or: How much feed has tank 403 received this week?";
+    }catch(e){askAnswer.textContent="Unable to check tickets: "+(e.message||e);}
+    finally{askSubmit.disabled=false;}
+  }
+  askSubmit.addEventListener("click",answerCKQuestion);
+  askInput.addEventListener("keydown",e=>{if(e.key==="Enter")answerCKQuestion();});
+  const CKSpeech=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(CKSpeech){
+    askMic.addEventListener("click",()=>{
+      const recognition=new CKSpeech();recognition.lang="en-US";recognition.interimResults=false;recognition.maxAlternatives=1;
+      askAnswer.textContent="Listening…";
+      recognition.onresult=e=>{askInput.value=e.results[0][0].transcript;answerCKQuestion();};
+      recognition.onerror=e=>{askAnswer.textContent="Microphone unavailable: "+e.error+". You can type your question.";};
+      recognition.onend=()=>{askMic.disabled=false;};askMic.disabled=true;
+      try{recognition.start();}catch(e){askMic.disabled=false;askAnswer.textContent="Microphone could not start. Type your question instead.";}
+    });
+  }else{
+    askMic.disabled=true;askMic.title="Voice recognition is not supported in this browser. You can type a question or use the iPhone keyboard microphone.";
+  }
+
   // Keep office lookup in Settings, clearly labeled and available to admin/office.
   const officeLookup=$("officeTile");
   if(officeLookup){
