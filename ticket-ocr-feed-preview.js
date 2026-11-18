@@ -96,6 +96,7 @@ if(!scannedFeed){
   if(m){scannedFeed=m[0].replace(/\s+(?:Gross|Tare|Net|Shipped|Scale|Lbs)\b.*$/i,'').trim();break;}
  }
 }
+if(/^DW\s*28\s*Spec\s*Iron\s+Gro(?:ss)?$/i.test(String(scannedFeed||"").trim()))scannedFeed="DW 28 Spec Iron";
 if(feedCropReadings.length){diagnostic.textContent+='\n\n'+feedCropReadings.join('\n\n').slice(0,2800)}
 const number=(text.match(/(?:ticket|load|order)\s*(?:no\.?|number|#|:)?\s*([0-9]{5,8})/i)||text.match(/\b(10[0-9]{4})\b/))?.[1];const shipped=text.match(/\bshipped\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})\s*(?:tons?|ton\b)/i);const stated=text.match(/(?:net\s*tons?|tons?|tonnage)\s*[:#-]?\s*(\d{1,3}[.,]\d{1,2})/i);const netPounds=text.match(/\bnet\s*[:#-]?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:lbs?|pounds?)?/i);let tons=(shipped||stated)?.[1]?.replace(',','.');if(!tons&&netPounds){const pounds=Number(netPounds[1].replace(/,/g,''));if(pounds>=10000&&pounds<=100000)tons=(pounds/2000).toFixed(2)}const instructionIndex=lines.findIndex(x=>/delivery\s*instructions?/i.test(x));const nearby=instructionIndex>=0?lines.slice(instructionIndex,instructionIndex+5):lines;// Delta Western instructions may read "304, D Tank" (tank suffix after the number).
 // Prefer the full instruction over numeric-only OCR fallbacks; do not infer missing letters.
@@ -107,7 +108,10 @@ function fullNumberLetterTank(line){
 const fullInstructionDestination=deliveryInstructionLines.map(fullNumberLetterTank).find(Boolean)
   ||(instructionIndex>=0?fullNumberLetterTank(lines[instructionIndex]):'')
   ||(instructionIndex>=0?fullNumberLetterTank(instructionCrop):'');
-const tankLines=nearby.filter(x=>/\b(?:tank|tnk)\s*[:#-]?\s*\d{2,4}\b/i.test(x));const tankLine=tankLines[0]||lines.find(x=>/\b(?:tank|tnk)\s*[:#-]?\s*\d{2,4}\b/i.test(x))||'';const tankMatch=tankLine.match(/\b(?:tank|tnk)\s*[:#-]?\s*(\d{2,4})\s*[,;.]?\s*([A-Z]{1,3}\s*[- ]?\d{1,2})?/i);let dest=tankMatch?'Tank '+tankMatch[1]+(tankMatch[2]?', '+tankMatch[2].replace(/\s+/g,''):''):'';if(!dest&&instructionIndex>=0){const sameLine=lines[instructionIndex].match(/delivery\s*instructions?\s*[:#-]?\s*(\d{2,4})\s*$/i);if(sameLine)dest=sameLine[1]}if(!dest&&instructionIndex>=0){const following=lines.slice(instructionIndex+1,instructionIndex+4);for(const line of following){const match=line.match(/^(?:destination\s*[:#-]?\s*)?(\d{2,4}(?:\s*[A-Z]{1,3}\s*[- ]?\d{1,2})?(?:\s*(?:&|\/|,|and)\s*(?:\d{2,4}\s*)?[A-Z]{0,3}\s*[- ]?\d{1,3})?)\s*$/i);if(match){dest=match[1].replace(/\s+/g,' ').trim();break}}}if(tankMatch){const bin=tankMatch[2]?.replace(/\s+/g,'')||'';const after=tankLine.slice(tankMatch.index+tankMatch[0].length);const second=after.match(/(?:&|and|\+|,|;)\s*([A-Z]{1,3})\s*[- ]?(\d{1,2})\b/i);if(second){dest+=' & '+second[1].toUpperCase()+second[2]}else if(bin&&/[&+]\s*$/.test(tankLine)){status.textContent='Second bin was not legible; check delivery instructions.'}}if(fullInstructionDestination)dest=fullInstructionDestination;// Independently read the delivery-instructions area to recover tank letters.
+// Delta Western prints some destinations as "Tank 708, F" (letter after Tank number).
+// Preserve that explicit suffix; never guess a letter from a number alone.
+const numberedSuffix=deliveryInstructionLines.concat(instructionCrop.split(/\r?\n/)).map(line=>line.match(/\b(?:tank|tnk)\s*[:#-]?\s*(\d{2,4})\s*[,;.]\s*([A-Z])\b/i)).find(Boolean);
+const tankLines=nearby.filter(x=>/\b(?:tank|tnk)\s*[:#-]?\s*\d{2,4}\b/i.test(x));const tankLine=tankLines[0]||lines.find(x=>/\b(?:tank|tnk)\s*[:#-]?\s*\d{2,4}\b/i.test(x))||'';const tankMatch=tankLine.match(/\b(?:tank|tnk)\s*[:#-]?\s*(\d{2,4})\s*[,;.]?\s*([A-Z]{1,3}\s*[- ]?\d{1,2})?/i);let dest=tankMatch?'Tank '+tankMatch[1]+(tankMatch[2]?', '+tankMatch[2].replace(/\s+/g,''):''):'';if(!dest&&instructionIndex>=0){const sameLine=lines[instructionIndex].match(/delivery\s*instructions?\s*[:#-]?\s*(\d{2,4})\s*$/i);if(sameLine)dest=sameLine[1]}if(!dest&&instructionIndex>=0){const following=lines.slice(instructionIndex+1,instructionIndex+4);for(const line of following){const match=line.match(/^(?:destination\s*[:#-]?\s*)?(\d{2,4}(?:\s*[A-Z]{1,3}\s*[- ]?\d{1,2})?(?:\s*(?:&|\/|,|and)\s*(?:\d{2,4}\s*)?[A-Z]{0,3}\s*[- ]?\d{1,3})?)\s*$/i);if(match){dest=match[1].replace(/\s+/g,' ').trim();break}}}if(tankMatch){const bin=tankMatch[2]?.replace(/\s+/g,'')||'';const after=tankLine.slice(tankMatch.index+tankMatch[0].length);const second=after.match(/(?:&|and|\+|,|;)\s*([A-Z]{1,3})\s*[- ]?(\d{1,2})\b/i);if(second){dest+=' & '+second[1].toUpperCase()+second[2]}else if(bin&&/[&+]\s*$/.test(tankLine)){status.textContent='Second bin was not legible; check delivery instructions.'}}if(fullInstructionDestination)dest=fullInstructionDestination;if(numberedSuffix)dest="Tank "+numberedSuffix[1]+", "+numberedSuffix[2].toUpperCase();// Independently read the delivery-instructions area to recover tank letters.
 // Use only an explicit number + letter + Tank match; never infer a suffix.
 if(!fullInstructionDestination){
  try{
@@ -324,6 +328,8 @@ try {
   }
  }finally{await worker.terminate();image.close();}
 }catch(e){/* Leave feed description blank if it cannot be read reliably. */}
+// Strip OCR fragments of the adjacent Gross heading from the printed Iron feed name.
+if(/^DW\s*28\s*Spec\s*Iron\s+Gro(?:ss)?$/i.test(String(scannedFeed||"").trim()))scannedFeed="DW 28 Spec Iron";
 // A nearby scale-weight heading is not a feed description. Prefer a legible
 // complete product code from any OCR pass; never populate a guessed feed name.
 const feedEvidence=[result.data.text||'',extra,instructionCrop,...feedCropReadings].join('\n');
