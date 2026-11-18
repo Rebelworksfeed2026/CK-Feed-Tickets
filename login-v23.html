@@ -737,6 +737,12 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
           CKCloud.listTicketsForPeriod(reportYear+"-01-01",(reportYear+1)+"-01-01")
         ]);
         const normalized=value=>String(value||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+        const yearAllocations=await CKCloud.listReportTankAllocations(yearTickets.filter(t=>t.is_test!==true).map(t=>t.id));
+        const allocationsByTicket=new Map();
+        for(const allocation of yearAllocations){
+          if(!allocationsByTicket.has(allocation.ticket_id))allocationsByTicket.set(allocation.ticket_id,[]);
+          allocationsByTicket.get(allocation.ticket_id).push(allocation);
+        }
         // Credit an entire ticket to one tank only when its destination uniquely
         // identifies that tank. Never split or estimate multi-tank deliveries.
         const tankTotals=new Map(),farmUnassigned=new Map();
@@ -744,6 +750,18 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         const cents=value=>Math.round(Number(value)*100);
         for(const ticket of yearTickets){
           if(ticket.is_test===true||!Number.isFinite(Number(ticket.tons))||Number(ticket.tons)<=0)continue;
+          const savedAllocations=allocationsByTicket.get(ticket.id)||[];
+          if(savedAllocations.length){
+            for(const allocation of savedAllocations){
+              if(!farmData.tanks.some(t=>t.id===allocation.tank_id))continue;
+              const allocatedCents=Math.round(Number(allocation.tons)*100);
+              if(!Number.isFinite(allocatedCents)||allocatedCents<=0)continue;
+              const byDriver=tankTotals.get(allocation.tank_id)||new Map();
+              byDriver.set(ticket.driver_id,(byDriver.get(ticket.driver_id)||0)+allocatedCents);
+              tankTotals.set(allocation.tank_id,byDriver);
+            }
+            continue;
+          }
           const dest=normalized(ticket.destination);
           if(!dest)continue;
           // Scale tickets often use "Tank", comma separators, or a farm
@@ -777,7 +795,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         if(panels[2].hidden)return;
         managerDirectory.replaceChildren();
         const explanation=document.createElement("p");
-        explanation.textContent=reportYear+" totals from tickets with one uniquely identified tank only. Multi-tank deliveries are not estimated.";
+        explanation.textContent=reportYear+" totals from saved tank assignments and uniquely identified single-tank tickets. Multi-tank deliveries are counted only when allocated.";
         explanation.style.cssText="font-size:12px;color:#526778;margin:0 0 10px";
         managerDirectory.appendChild(explanation);
         const managers=data.managers.filter(m=>m.active!==false);
