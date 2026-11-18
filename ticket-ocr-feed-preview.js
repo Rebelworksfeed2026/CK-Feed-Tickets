@@ -366,5 +366,24 @@ el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(l
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
 scannedFeed=scannedFeed.replace(/\b(Fry|Fly)\s*(?:11|ll|II)\b/gi,(_m,name)=>name+' II');
 fill('draftFeedType',scannedFeed,'feed type');
+// Warn immediately when a recognized ticket number is already in cloud history.
+// The normal preview and save checks remain in place as independent safeguards.
+if(verifiedNumber){
+ try{
+  const existing=await window.CKCloud.findTicketNumber(String(verifiedNumber));
+  if(existing){
+   scanStatus.textContent='⚠️ DUPLICATE TICKET '+verifiedNumber+' — already saved'+(existing.delivery_date?' on '+existing.delivery_date:'')+'. This scan is for review only. Do not save again.';
+   scanStatus.style.background='#fff0d5';
+   scanStatus.style.color='#8a4200';
+  }else{
+   scanStatus.style.background='#e4eff8';
+   scanStatus.style.color='';
+  }
+ }catch(error){
+  scanStatus.textContent='Could not check whether ticket '+verifiedNumber+' is already saved. Do not save until the duplicate check succeeds.';
+  scanStatus.style.background='#fff0d5';
+  scanStatus.style.color='#8a4200';
+ }
+}
 const feedField=document.getElementById('draftFeedType');
-scanStatus.textContent=filled.length?'Scan complete: '+filled.join(', ')+'. Verify every field, especially the date printed on the ticket. '+(customerSelect?.value?'Customer detected automatically.':'Customer not identified — choose customer manually.')+' Nothing was saved.':'Scan finished, but no reliable fields were found. Enter ticket details manually.';if(!filled.length)scanStatus.textContent='Scanner could not confidently identify ticket fields. Try a closer, well-lit picture with the ticket filling the frame.'}catch(e){scanStatus.textContent='Scanning unavailable: '+e.message+'. You can still enter the ticket manually.'}finally{busy=false;btn.disabled=false}}})();
+if(!scanStatus.textContent.includes('DUPLICATE TICKET')&&!scanStatus.textContent.includes('Could not check whether ticket'))scanStatus.textContent=filled.length?'Scan complete: '+filled.join(', ')+'. Verify every field, especially the date printed on the ticket. '+(customerSelect?.value?'Customer detected automatically.':'Customer not identified — choose customer manually.')+' Nothing was saved.':'Scan finished, but no reliable fields were found. Enter ticket details manually.';if(!filled.length)scanStatus.textContent='Scanner could not confidently identify ticket fields. Try a closer, well-lit picture with the ticket filling the frame.'}catch(e){scanStatus.textContent='Scanning unavailable: '+e.message+'. You can still enter the ticket manually.'}finally{busy=false;btn.disabled=false}}})();
