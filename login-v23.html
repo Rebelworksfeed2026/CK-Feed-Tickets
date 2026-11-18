@@ -837,14 +837,27 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
             note.textContent="No farms currently assigned to this manager.";
             farmsBox.appendChild(note);
           }
-          for(const farm of farms){
+          // Display Mark's individual one-tank farm records under logical headings.
+          // This changes only the directory presentation, never the underlying farm/tank IDs.
+          const displayFarms=manager.name.trim().toLowerCase()==="mark" ? (()=>{
+            const grouped=new Map();
+            for(const farm of farms){
+              const name=String(farm.name||"").trim();
+              const heading=/^B\s*70[123]\b/i.test(name)?"B Tanks":
+                /^(?:CTR\s*70[56]|[FGO]\s*(?:Tank\s*)?70[478])\b/i.test(name)?"Other Tanks":name;
+              if(!grouped.has(heading))grouped.set(heading,[]);
+              grouped.get(heading).push(farm);
+            }
+            return [...grouped].map(([name,members])=>({name,members}));
+          })() : farms.map(farm=>({name:farm.name,members:[farm]}));
+          for(const displayFarm of displayFarms){
             const farmGroup=document.createElement("details");
             farmGroup.style.cssText="margin:8px 0;border:1px solid #d4e0e9;border-radius:8px";
             const farmHeading=document.createElement("summary");
-            farmHeading.textContent=farm.name;
+            farmHeading.textContent=displayFarm.name;
             farmHeading.style.cssText="padding:12px;font-weight:700;color:#183449;cursor:pointer";
             farmGroup.appendChild(farmHeading);
-            const tanks=farmData.tanks.filter(t=>t.farm_id===farm.id);
+            const tanks=farmData.tanks.filter(t=>displayFarm.members.some(f=>t.farm_id===f.id));
             const tankList=document.createElement("div");
             tankList.style.cssText="padding:0 12px 12px";
             if(!tanks.length){
@@ -881,7 +894,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
               }
             }
             farmGroup.appendChild(tankList);
-            const unassigned=farmUnassigned.get(farm.id)||0;
+            const unassigned=displayFarm.members.reduce((sum,f)=>sum+(farmUnassigned.get(f.id)||0),0);
             if(unassigned){
               const note=document.createElement("p");
               note.textContent="Farm-only tickets (not assigned to a tank): "+fmt(unassigned)+" tons";
