@@ -971,7 +971,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
           return label==='tank '+num || label===num;
         }).map(t=>t.id));
         const allocatedIds=new Set(allocations.filter(a=>matchingTankIds.has(a.tank_id)).map(a=>a.ticket_id));
-        const destPattern=new RegExp('(?:^|\\\\b)(?:tank\\\\s*)?'+num+'(?:\\\\b|$)','i');
+        const destPattern=new RegExp('(?:^|\\b)(?:tank\\s*)?'+num+'(?:\\b|$)','i');
         const found=relevant.filter(t=>allocatedIds.has(t.id)||destPattern.test(String(t.destination||'')))
           .sort((a,b)=>String(b.delivery_date).localeCompare(String(a.delivery_date))||Number(b.ticket_number)-Number(a.ticket_number))[0];
         if(!found){askAnswer.textContent="No saved delivery found for "+customer.name+" Tank "+num+" in the available history.";return;}
