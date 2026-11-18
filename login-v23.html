@@ -870,9 +870,18 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   if(farmsNavGroup)farmsNavGroup.hidden=true;
   extras.appendChild(menu);
   dashboard.appendChild(extras);
-  // Office lookup must be visible without opening the Settings navigation.
+  // Keep office lookup in Settings, clearly labeled and available to admin/office.
   const officeLookup=$("officeTile");
-  if(officeLookup)dashboard.insertBefore(officeLookup,extras);
+  if(officeLookup){
+    const officeGroup=document.createElement("details");
+    officeGroup.style.cssText="margin:8px 0;border-bottom:1px solid #d8e2e9";
+    const officeHeading=document.createElement("summary");
+    officeHeading.textContent="Office ticket lookup";
+    officeHeading.style.cssText="font-weight:700;cursor:pointer;padding:14px 3px;font-size:17px;color:#183449";
+    officeGroup.appendChild(officeHeading);
+    officeGroup.appendChild(officeLookup);
+    panels[5].prepend(officeGroup);
+  }
 }
 document.body.appendChild($("correctionPanel"));
 // Keep the photo viewer outside collapsed dashboard sections so it can display.
