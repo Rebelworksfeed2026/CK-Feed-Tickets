@@ -366,6 +366,14 @@ el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(l
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
 scannedFeed=scannedFeed.replace(/\b(Fry|Fly)\s*(?:11|ll|II)\b/gi,(_m,name)=>name+' II');
 fill('draftFeedType',scannedFeed,'feed type');
+const nearSave=document.getElementById('duplicateNearSave');
+const atConfirm=document.getElementById('duplicateAtConfirm');
+function showDuplicateNearSave(message){
+ for(const el of [nearSave,atConfirm])if(el){el.textContent=message||'';el.hidden=!message;}
+ const saveButton=document.getElementById('confirmSave');
+ if(saveButton)saveButton.disabled=Boolean(message);
+}
+showDuplicateNearSave('');
 // Warn immediately when a recognized ticket number is already in cloud history.
 // The normal preview and save checks remain in place as independent safeguards.
 if(verifiedNumber){
@@ -373,6 +381,7 @@ if(verifiedNumber){
   const existing=await CKCloud.findTicketNumber(String(verifiedNumber));
   if(existing){
    scanStatus.textContent='⚠️ DUPLICATE TICKET '+verifiedNumber+' — already saved'+(existing.delivery_date?' on '+existing.delivery_date:'')+'. This scan is for review only. Do not save again.';
+   showDuplicateNearSave(scanStatus.textContent);
    scanStatus.style.background='#fff0d5';
    scanStatus.style.color='#8a4200';
   }else{
@@ -381,6 +390,7 @@ if(verifiedNumber){
   }
  }catch(error){
   scanStatus.textContent='Could not check whether ticket '+verifiedNumber+' is already saved. Do not save until the duplicate check succeeds.';
+  showDuplicateNearSave(scanStatus.textContent);
   scanStatus.style.background='#fff0d5';
   scanStatus.style.color='#8a4200';
  }
