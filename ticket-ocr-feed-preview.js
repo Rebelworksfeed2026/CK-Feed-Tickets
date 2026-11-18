@@ -370,7 +370,7 @@ fill('draftFeedType',scannedFeed,'feed type');
 // The normal preview and save checks remain in place as independent safeguards.
 if(verifiedNumber){
  try{
-  const existing=await window.CKCloud.findTicketNumber(String(verifiedNumber));
+  const existing=await CKCloud.findTicketNumber(String(verifiedNumber));
   if(existing){
    scanStatus.textContent='⚠️ DUPLICATE TICKET '+verifiedNumber+' — already saved'+(existing.delivery_date?' on '+existing.delivery_date:'')+'. This scan is for review only. Do not save again.';
    scanStatus.style.background='#fff0d5';
