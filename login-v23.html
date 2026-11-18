@@ -955,7 +955,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       const isDriver=/\b(hauled|haul|hall|driver|loads|trips)\b/.test(q);
       const periodLabel=period==="today"?"today":"this "+period;
       // Compare named driver with the signed-in driver when the question says "me".
-      const asksComparison=/\b(how much more|more than|less than|difference|compare|compared|ahead of|behind)\b/.test(q);
+      const asksComparison=/\b(?:how\s+(?:much|many)\s+more|more\s+(?:tons?\s+)?than|less\s+(?:tons?\s+)?than|difference|compare|compared|ahead\s+of|behind)\b/.test(q) || (/\bmore\b/.test(q)&&/\bthan\b/.test(q));
       const asksMe=/\b(me|my|mine|i)\b/.test(q);
       if(driver && asksComparison && asksMe){
         const mine=drivers.find(d=>d.id===activeProfile?.id);
