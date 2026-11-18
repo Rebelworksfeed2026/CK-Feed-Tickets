@@ -921,17 +921,18 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   dashboard.appendChild(extras);
 
   // Ask C&K: on-device speech-to-text with read-only, verified ticket calculations.
-  const askBox=document.createElement("section");
-  askBox.style.cssText="margin:12px 0;padding:14px;border:1px solid #c3d2df;border-radius:12px;background:#eef3f8";
-  const askTitle=document.createElement("strong");askTitle.textContent="Ask C&K";askTitle.style.cssText="display:block;font-size:19px;margin-bottom:7px";
-  const askHelp=document.createElement("p");askHelp.textContent="Ask: How much has Ricky hauled today? Or: How much feed did tank 403 receive this week?";askHelp.style.cssText="font-size:13px;margin:0 0 10px";
-  const askInput=document.createElement("input");askInput.type="text";askInput.placeholder="Ask about drivers or tanks";askInput.setAttribute("aria-label","Ask C&K question");askInput.style.cssText="width:100%;margin-bottom:8px";
+  const askBox=document.createElement("details");
+  askBox.style.cssText="margin:8px 0 12px;border:1px solid #c3d2df;border-radius:10px;background:#eef3f8;overflow:hidden";
+  const askTitle=document.createElement("summary");askTitle.textContent="🎤 Ask C&K";askTitle.style.cssText="cursor:pointer;padding:11px 14px;font-size:16px;font-weight:750;color:#183449";
+  const askContent=document.createElement("div");askContent.style.cssText="padding:0 12px 12px";
+  const askInput=document.createElement("input");askInput.type="text";askInput.placeholder="Ask about drivers or tanks";askInput.setAttribute("aria-label","Ask C&K question");askInput.style.cssText="width:100%;margin:4px 0 8px;padding:9px;font-size:14px";
   const askActions=document.createElement("div");askActions.style.cssText="display:flex;gap:8px";
-  const askMic=document.createElement("button");askMic.type="button";askMic.textContent="🎤 Microphone";askMic.style.cssText="flex:1;min-width:0";
-  const askSubmit=document.createElement("button");askSubmit.type="button";askSubmit.textContent="Ask";askSubmit.style.cssText="flex:1;min-width:0";
-  const askAnswer=document.createElement("div");askAnswer.setAttribute("role","status");askAnswer.setAttribute("aria-live","polite");askAnswer.style.cssText="margin-top:10px;font-size:15px;font-weight:650;white-space:pre-wrap";
-  askActions.append(askMic,askSubmit);askBox.append(askTitle,askHelp,askInput,askActions,askAnswer);
-  dashboard.insertBefore(askBox,extras);
+  const askMic=document.createElement("button");askMic.type="button";askMic.textContent="🎤 Speak";askMic.style.cssText="flex:1;min-width:0;padding:9px;font-size:14px";
+  const askSubmit=document.createElement("button");askSubmit.type="button";askSubmit.textContent="Ask";askSubmit.style.cssText="flex:1;min-width:0;padding:9px;font-size:14px";
+  const askAnswer=document.createElement("div");askAnswer.setAttribute("role","status");askAnswer.setAttribute("aria-live","polite");askAnswer.style.cssText="margin-top:8px;font-size:14px;font-weight:650;white-space:pre-wrap";
+  askActions.append(askMic,askSubmit);askContent.append(askInput,askActions,askAnswer);askBox.append(askTitle,askContent);
+  // Place immediately below the ticket photo area, ahead of today's deliveries.
+  dashboard.insertBefore(askBox,deliveryDisclosure);
   const askNormalize=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
   const askISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
   const askFmt=n=>Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
