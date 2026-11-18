@@ -360,7 +360,7 @@ if(products.length){
 }
 scannedFeed=cleanProduct(scannedFeed);
 // The scale column can contribute "Gro" from "Gross" after the Iron product.
-scannedFeed=scannedFeed.replace(/^(DW\s*28\s*Spec\s*Iron)\s+Gro(?:ss)?\b/i,'$1').trim();
+scannedFeed=scannedFeed.replace(/^(DW\s*28\s*Spec\s*Iron)\s+Gro(?:ss)?(?:\s|$)/i,'$1 ').trim();
 let filled=[];if(recognizedCustomer&&customerSelect?.value)filled.push('customer ('+recognizedCustomer+')');function fill(id,value,label){if(!value)return;const el=document.getElementById(id);// New photographs replace the unsaved preview without confirmation dialogs.
 el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));filled.push(label)}fill('draftDate',scannedDate,'delivery date');fill('draftNumber',verifiedNumber,'ticket number');fill('draftTons',tons,'tons');fill('draftDestination',verifiedDest,'destination');// OCR often reads the Roman numeral II as 11 or ll in the specific phrase Fry II.
 // Only normalize the ambiguous characters in that context, never arbitrary 11 values.
