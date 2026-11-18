@@ -939,8 +939,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   async function answerCKQuestion(){
     const question=askInput.value.trim(),q=question.toLowerCase();
     if(!question){askAnswer.textContent="Ask a question first.";return;}
-    const period=/\b(year|yearly|this year)\b/.test(q)?"year":/\b(month|monthly|this month)\b/.test(q)?"month":/\b(week|weekly|this week)\b/.test(q)?"week":/\b(today|daily|this day)\b/.test(q)?"today":null;
-    if(!period){askAnswer.textContent="Please include today, this week, this month, or this year.";return;}
+    const period=/\b(year|yearly|this year)\b/.test(q)?"year":/\b(month|monthly|this month)\b/.test(q)?"month":/\b(week|weekly|this week)\b/.test(q)?"week":/\b(today|daily|this day)\b/.test(q)?"today":"today";
     const now=new Date(),from=new Date(now.getFullYear(),now.getMonth(),now.getDate());
     if(period==="week")from.setDate(from.getDate()-(from.getDay()+6)%7);
     if(period==="month")from.setDate(1);
@@ -964,6 +963,22 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         const theirs=sumFor(driver.id),myTotal=sumFor(mine.id),difference=theirs-myTotal;
         askAnswer.textContent=driver.name+" hauled "+askFmt(theirs/100)+" tons; "+mine.name+" hauled "+askFmt(myTotal/100)+" tons "+periodLabel+". "+
           (difference>0?driver.name+" hauled "+askFmt(difference/100)+" tons more than "+mine.name+".":difference<0?mine.name+" hauled "+askFmt(-difference/100)+" tons more than "+driver.name+".":"Both hauled the same amount.");
+        return;
+      }
+      // Destination questions are distinct from questions about a driver's total.
+      const asksWhere=/\b(where|which|what)\b/.test(q)&&/\b(tanks?|ponds?|destinations?|where|took|take|delivered|went)\b/.test(q);
+      if(driver && asksWhere){
+        const selected=active.filter(t=>t.driver_id===driver.id);
+        if(!selected.length){askAnswer.textContent=driver.name+" has no saved loads "+periodLabel+".";return;}
+        const grouped=new Map();
+        for(const t of selected){
+          const destination=String(t.destination||"").trim()||"Destination not recorded";
+          const key=destination.toLowerCase().replace(/\s+/g," ");
+          const item=grouped.get(key)||{destination,tons:0,loads:0};
+          item.tons+=Math.round(Number(t.tons)*100);item.loads++;
+          grouped.set(key,item);
+        }
+        askAnswer.textContent=driver.name+"'s destinations "+periodLabel+":\n"+[...grouped.values()].map(x=>x.destination+" — "+askFmt(x.tons/100)+" tons ("+x.loads+" "+(x.loads===1?"load":"loads")+")").join("\n")+".";
         return;
       }
       if(driver && (isDriver||!isTank)){
