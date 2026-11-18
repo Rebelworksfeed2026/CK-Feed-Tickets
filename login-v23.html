@@ -973,8 +973,9 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         // Numeric tank names must match a complete number, never a substring.
         const exact=directory.tanks.filter(t=>{
           const label=String(t.tank_label||"").trim();
-          return new RegExp("(^|[^a-z0-9])"+label.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\  extras.appendChild(menu);
-  dashboard.appendChild(extras);")+"(?=$|[^a-z0-9])","i").test(q);
+          const escaped=label.replace(/[^a-zA-Z0-9]/g,"");
+          const tokens=q.match(/[a-z0-9]+/g)||[];
+          return tokens.some(token=>askNormalize(token)===askNormalize(escaped));
         });
         const tanks=[...new Map([...matching,...exact].map(t=>[t.id,t])).values()];
         if(tanks.length!==1){askAnswer.textContent=tanks.length?"More than one tank matches. Please include its full tank name.":"I couldn't identify the tank. Please use its full name, such as 403 or LW 313.";return;}
