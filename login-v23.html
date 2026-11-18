@@ -599,7 +599,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   ticketEntryTile.hidden=true;
   // Keep one prominent camera shortcut above the dashboard, not a duplicate.
   const otherTiles=[...dashboard.querySelectorAll(":scope > .tile")].filter(t=>
-    t!==cameraTile && t!==ticketEntryTile && t!==weekTile && t.id!=="savedPhotoViewer" && t.id!=="adminTile");
+    t!==cameraTile && t!==ticketEntryTile && t!==weekTile && t.id!=="savedPhotoViewer" && t.id!=="adminTile" && t.id!=="officeTile");
   const extras=document.createElement("section");
   extras.id="dashboardExtras";
   extras.style.cssText="margin-top:18px;background:transparent";
@@ -1154,7 +1154,7 @@ async function showSignedIn(profile) {
     $("managerAdmin").hidden = !profile.is_admin;
     if(profile.is_admin) refreshManagers();
     loadTotalsOptions();
-    $("officeTile").hidden = !profile.is_office;
+    $("officeTile").hidden = !(profile.is_office || profile.is_admin);
     $("cameraTile").hidden = true;
     $("quickCamera").hidden = Boolean(profile.is_office);
     $("ticketEntryTile").hidden = true;
