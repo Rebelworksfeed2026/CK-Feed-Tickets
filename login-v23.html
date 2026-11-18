@@ -954,6 +954,18 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       const isTank=/\b(tank|pond|ponds|received|got|delivered|destination)\b/.test(q);
       const isDriver=/\b(hauled|haul|hall|driver|loads|trips)\b/.test(q);
       const periodLabel=period==="today"?"today":"this "+period;
+      // Compare named driver with the signed-in driver when the question says "me".
+      const asksComparison=/\b(how much more|more than|less than|difference|compare|compared|ahead of|behind)\b/.test(q);
+      const asksMe=/\b(me|my|mine|i)\b/.test(q);
+      if(driver && asksComparison && asksMe){
+        const mine=drivers.find(d=>d.id===activeProfile?.id);
+        if(!mine){askAnswer.textContent="I couldn't identify your driver account for comparison.";return;}
+        const sumFor=id=>active.filter(t=>t.driver_id===id).reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
+        const theirs=sumFor(driver.id),myTotal=sumFor(mine.id),difference=theirs-myTotal;
+        askAnswer.textContent=driver.name+" hauled "+askFmt(theirs/100)+" tons; "+mine.name+" hauled "+askFmt(myTotal/100)+" tons "+periodLabel+". "+
+          (difference>0?driver.name+" hauled "+askFmt(difference/100)+" tons more than "+mine.name+".":difference<0?mine.name+" hauled "+askFmt(-difference/100)+" tons more than "+driver.name+".":"Both hauled the same amount.");
+        return;
+      }
       if(driver && (isDriver||!isTank)){
         const selected=active.filter(t=>t.driver_id===driver.id);
         const total=selected.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0)/100;
