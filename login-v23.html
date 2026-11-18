@@ -939,7 +939,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   async function answerCKQuestion(){
     const question=askInput.value.trim(),q=question.toLowerCase();
     if(!question){askAnswer.textContent="Ask a question first.";return;}
-    const period=/\\b(year|yearly|this year)\\b/.test(q)?"year":/\\b(month|monthly|this month)\\b/.test(q)?"month":/\\b(week|weekly|this week)\\b/.test(q)?"week":/\\b(today|daily|this day)\\b/.test(q)?"today":null;
+    const period=/\b(year|yearly|this year)\b/.test(q)?"year":/\b(month|monthly|this month)\b/.test(q)?"month":/\b(week|weekly|this week)\b/.test(q)?"week":/\b(today|daily|this day)\b/.test(q)?"today":null;
     if(!period){askAnswer.textContent="Please include today, this week, this month, or this year.";return;}
     const now=new Date(),from=new Date(now.getFullYear(),now.getMonth(),now.getDate());
     if(period==="week")from.setDate(from.getDate()-(from.getDay()+6)%7);
@@ -951,8 +951,8 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       const [tickets,drivers,directory]=await Promise.all([CKCloud.listTicketsForPeriod(askISO(from),askISO(end)),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks()]);
       const active=tickets.filter(t=>t.is_test!==true && Number(t.tons)>0);
       const driver=drivers.filter(d=>!d.is_office).find(d=>q.includes(String(d.name||"").toLowerCase()));
-      const isTank=/\\b(tank|pond|ponds|feed|received|got|delivered|destination)\\b/.test(q);
-      const isDriver=/\\b(hauled|driver|loads|trips)\\b/.test(q);
+      const isTank=/\b(tank|pond|ponds|received|got|delivered|destination)\b/.test(q);
+      const isDriver=/\b(hauled|haul|hall|driver|loads|trips)\b/.test(q);
       const periodLabel=period==="today"?"today":"this "+period;
       if(driver && (isDriver||!isTank)){
         const selected=active.filter(t=>t.driver_id===driver.id);
@@ -968,7 +968,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       if(isTank){
         const matching=directory.tanks.filter(t=>{
           const label=askNormalize(t.tank_label);
-          const words=q.match(/[a-z]+\\s*\\d+[a-z0-9]*/g)||[];
+          const words=q.match(/[a-z]+\s*\\d+[a-z0-9]*/g)||[];
           return words.some(w=>askNormalize(w)===label) || (label.length>=3 && new RegExp("(^|[^a-z0-9])"+label+"([^a-z0-9]|$)","i").test(askNormalize(q)));
         });
         // Numeric tank names must match a complete number, never a substring.
