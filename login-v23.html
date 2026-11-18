@@ -968,7 +968,18 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         const allocations=await CKCloud.listReportTankAllocations(relevant.map(t=>t.id));
         const matchingTankIds=new Set(directory.tanks.filter(t=>{
           const label=String(t.tank_label||'').toLowerCase().trim();
-          return new RegExp('^(?:tank\\s*)?'+num+'
+          return label==='tank '+num || label===num;
+        }).map(t=>t.id));
+        const allocatedIds=new Set(allocations.filter(a=>matchingTankIds.has(a.tank_id)).map(a=>a.ticket_id));
+        const destPattern=new RegExp('(?:^|\\\\b)(?:tank\\\\s*)?'+num+'(?:\\\\b|$)','i');
+        const found=relevant.filter(t=>allocatedIds.has(t.id)||destPattern.test(String(t.destination||'')))
+          .sort((a,b)=>String(b.delivery_date).localeCompare(String(a.delivery_date))||Number(b.ticket_number)-Number(a.ticket_number))[0];
+        if(!found){askAnswer.textContent="No saved delivery found for "+customer.name+" Tank "+num+" in the available history.";return;}
+        const who=drivers.find(d=>d.id===found.driver_id);
+        askAnswer.textContent="Last delivery to "+customer.name+" Tank "+num+": "+found.delivery_date+". Driver: "+(who?.name||"Not recorded")+". Ticket #"+found.ticket_number+". "+askFmt(Number(found.tons))+" tons.";
+        return;
+      }
+      // Compare named driver with the signed-in driver when the question says "me".
       const asksComparison=/\b(?:how\s+(?:much|many)\s+more|more\s+(?:tons?\s+)?than|less\s+(?:tons?\s+)?than|difference|compare|compared|ahead\s+of|behind)\b/.test(q) || (/\bmore\b/.test(q)&&/\bthan\b/.test(q));
       const asksMe=/\b(me|my|mine|i)\b/.test(q);
       if(driver && asksComparison && asksMe){
