@@ -1032,7 +1032,8 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         const matches=scoped.filter(t=>(allocated.has(t.id)||destPattern.test(String(t.destination||"")))&&(amount===null||Math.round(Number(t.tons)*100)===amount));
         if(!matches.length){askAnswer.textContent="No matching saved delivery found for "+customer.name+" Tank "+num+(amount!==null?" at "+askFmt(amount/100)+" tons":"")+" "+(period==="today"?"in the available history":periodLabel)+".";return;}
         matches.sort((a,b)=>String(b.delivery_date).localeCompare(String(a.delivery_date))||Number(b.ticket_number)-Number(a.ticket_number));
-        askAnswer.textContent=matches.map(t=>{const who=drivers.find(d=>d.id===t.driver_id);return (who?.name||"Driver not recorded")+" delivered "+askFmt(Number(t.tons))+" tons to "+customer.name+" Tank "+num+" on "+t.delivery_date+", ticket #"+t.ticket_number+".";}).join("\n");
+        const driverResults=/\b(?:last|latest|most recent)\b/.test(q)?matches.slice(0,1):matches;
+        askAnswer.textContent=driverResults.map(t=>{const who=drivers.find(d=>d.id===t.driver_id);return (who?.name||"Driver not recorded")+" delivered "+askFmt(Number(t.tons))+" tons to "+customer.name+" Tank "+num+" on "+t.delivery_date+", ticket #"+t.ticket_number+".";}).join("\n");
         return;
       }
       // Historical destination lookup: identify customer and tank together, never mix customers.
