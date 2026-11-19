@@ -1043,7 +1043,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
           return (n.includes('delta')&&/\bdelta\s*(?:cat|catfish)?\b/.test(q)) ||
             (n.includes('tackett')&&/\btackett\b/.test(q));
         });
-        const numberMatch=q.match(/\b(?:tank|pond)\s*(?:number\s*)?(\d{1,4})\b/)||q.match(/\b(\d{1,4})\s*(?:tank|pond)\b/)||(customer?q.match(/\b(?:number|no\.?|#)\s*(\d{1,4})\b/):null);
+        const numberMatch=q.match(/\b(?:tank|pond)\s*(?:number\s*)?(\d{1,4})\b/)||q.match(/\b(\d{1,4})\s*(?:tank|pond)\b/)||(customer?q.match(/\b(?:number|no\.?|#)\s*(\d{1,4})\b/):null)||q.match(/\b(?:delta\s*(?:cat|catfish)?|tackett)\s+(\d{1,4})\b/);
         if(!customer||!numberMatch){askAnswer.textContent="For the last delivery, include the customer and tank number, such as Delta Cat Tank 3.";return;}
         const num=numberMatch[1];
         const relevant=active.filter(t=>t.customer_id===customer.id);
@@ -1054,7 +1054,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
           return customerFarmIds.has(t.farm_id) && (label==='tank '+num || label===num || label==='pond '+num);
         }).map(t=>t.id));
         const allocatedIds=new Set(allocations.filter(a=>matchingTankIds.has(a.tank_id)).map(a=>a.ticket_id));
-        const destPattern=new RegExp('(?:^|\\b)(?:tank\\s*)?'+num+'(?:\\b|$)','i');
+        const destPattern=new RegExp('(?:^|[^0-9])(?:tank\\s*|pond\\s*)?'+num+'(?=$|[^0-9])','i');
         const found=relevant.filter(t=>allocatedIds.has(t.id)||destPattern.test(String(t.destination||'')))
           .sort((a,b)=>String(b.delivery_date).localeCompare(String(a.delivery_date))||Number(b.ticket_number)-Number(a.ticket_number))[0];
         if(!found){askAnswer.textContent="No saved delivery found for "+customer.name+" Tank "+num+" in the available history.";return;}
@@ -1144,7 +1144,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       if(isTank){
         const matching=directory.tanks.filter(t=>{
           const label=askNormalize(t.tank_label);
-          const words=q.match(/[a-z]+\s*\\d+[a-z0-9]*/g)||[];
+          const words=q.match(/[a-z]+\s*\d+[a-z0-9]*/g)||[];
           return words.some(w=>askNormalize(w)===label) || (label.length>=3 && new RegExp("(^|[^a-z0-9])"+label+"([^a-z0-9]|$)","i").test(askNormalize(q)));
         });
         // Numeric tank names must match a complete number, never a substring.
