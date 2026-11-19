@@ -1003,7 +1003,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       const asksMe=/\b(me|my|mine|i|myself)\b/.test(q);
       const namedDrivers=drivers.filter(d=>!d.is_office).filter(d=>new RegExp("\\b"+String(d.name||"").toLowerCase().replace(/[^a-z]/g,"")+"\\b").test(q));
       const driver=namedDrivers[0]||(asksMe?self:null);
-      const customer=customers.find(c=>q.includes(String(c.name||"").toLowerCase())||(String(c.name||"").toLowerCase().includes("delta")&&/\bdelta\b/.test(q))||(String(c.name||"").toLowerCase().includes("tackett")&&/\btackett\b/.test(q)));
+      const customer=customers.find(c=>{const name=String(c.name||"").trim().toLowerCase();return !!name&&(q.includes(name)||(name.includes("delta")&&/\bdelta\b/.test(q))||(name.includes("tackett")&&/\btackett\b/.test(q)));});
       const scoped=customer?active.filter(t=>t.customer_id===customer.id):active;
       const isTank=/\b(tank|pond|ponds|received|got|delivered|destination)\b/.test(q);
       const isDriver=/\b(hauled|haul|hall|driver|loads|trips)\b/.test(q);
