@@ -1009,7 +1009,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       const isDriver=/\b(hauled|haul|hall|driver|loads|trips)\b/.test(q);
       const periodLabel=period==="today"?"today":period==="yesterday"?"yesterday":period.startsWith("last ")?period:"this "+period;
       // Customer-only latest delivery: do not require a tank number.
-      if(asksLatest && customer && !/\b(?:tank|pond)\s*(?:number\s*)?\d{1,4}\b/.test(q) && !/\b\d{1,4}\s*(?:tank|pond)\b/.test(q)){
+      if(asksLatest && customer && !/\b(?:tank|pond)\s*(?:number\s*)?\d{1,4}\b/.test(q) && !/\b\d{1,4}\s*(?:tank|pond)\b/.test(q) && !/\b(?:delta\s*(?:cat|catfish)?|tackett)\s+\d{1,4}\b/.test(q)){
         const latest=scoped.slice().sort((a,b)=>String(b.delivery_date).localeCompare(String(a.delivery_date))||Number(b.ticket_number)-Number(a.ticket_number))[0];
         if(!latest){askAnswer.textContent="No saved delivery found for "+customer.name+" in the available history.";return;}
         const who=drivers.find(d=>d.id===latest.driver_id);
