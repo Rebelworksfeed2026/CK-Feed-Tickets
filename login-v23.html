@@ -973,7 +973,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         askAnswer.textContent="Ticket #"+ticket.ticket_number+" went to "+(ticket.destination||"destination not recorded")+". Date: "+ticket.delivery_date+". Driver: "+(driver?.name||"Not recorded")+". Customer: "+(customer?.name||"Not recorded")+". Tons: "+askFmt(Number(ticket.tons))+".";
         return;
       }
-      const asksLatest=/\b(last|latest|most recent|previous|when did|when was)\b/.test(q);
+      const asksLatest=/\b(last delivery|latest delivery|most recent|when did|when was|last time|previous delivery)\b/.test(q);
       const [tickets,drivers,directory,customers]=await Promise.all([CKCloud.listTicketsForPeriod(askISO(asksLatest?new Date(2020,0,1):from),askISO(end)),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks(),CKCloud.listCustomers()]);
       const active=tickets.filter(t=>t.is_test!==true && Number(t.tons)>0);
       const self=drivers.find(d=>d.id===activeProfile?.id);
