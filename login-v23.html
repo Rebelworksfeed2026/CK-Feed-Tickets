@@ -593,9 +593,6 @@ totalsEl("calculateTotals").addEventListener("click",async()=>{
    const byId=new Map(active.map(t=>[t.id,t]));
    const allocations=await CKCloud.listReportTankAllocations(active.map(t=>t.id));
    const farmById=new Map(directory.farms.map(f=>[f.id,f]));
-   const table=document.createElement('table');table.style.cssText='width:100%;min-width:610px;border-collapse:collapse';
-   const header=document.createElement('tr');
-   for(const h of ['Customer / farm / tank','Daily','Weekly','Monthly','Yearly']){const th=document.createElement('th');th.textContent=h;th.style.cssText='padding:7px;text-align:left;border-bottom:1px solid #b5c5d1';header.appendChild(th);}table.appendChild(header);
    const monday=new Date(now);monday.setDate(now.getDate()-(now.getDay()+6)%7);
    const month=new Date(now.getFullYear(),now.getMonth(),1);
    let counted=0;
@@ -603,11 +600,18 @@ totalsEl("calculateTotals").addEventListener("click",async()=>{
     const farm=farmById.get(tank.farm_id);if(!farm)continue;
     const rows=allocations.filter(a=>a.tank_id===tank.id).map(a=>({a,t:byId.get(a.ticket_id)})).filter(x=>x.t&&farm.customer_id&&x.t.customer_id===farm.customer_id);
     const sum=from=>rows.filter(x=>x.t.delivery_date>=localDate(from)&&x.t.delivery_date<=localDate(now)).reduce((n,x)=>n+Number(x.a.tons||0),0);
-    const tr=document.createElement('tr');
-    for(const v of [farm.name+' — '+tank.tank_label,sum(now).toFixed(2),sum(monday).toFixed(2),sum(month).toFixed(2),sum(yearStart).toFixed(2)]){const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:7px;border-bottom:1px solid #dce5eb';tr.appendChild(td);}
-    table.appendChild(tr);counted++;
+    const card=document.createElement('div');card.style.cssText='border:1px solid #c4d5e2;border-radius:10px;padding:12px;margin:10px 0;background:white;max-width:100%;box-sizing:border-box';
+    const title=document.createElement('strong');title.textContent=farm.name+' — '+tank.tank_label;title.style.cssText='display:block;font-size:17px;margin-bottom:10px;overflow-wrap:anywhere';card.appendChild(title);
+    const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px';
+    for(const [label,from] of [['Daily',now],['Weekly',monday],['Monthly',month],['Yearly',yearStart]]){
+      const cell=document.createElement('div');cell.style.cssText='padding:10px 6px;border-radius:8px;background:#edf3f8;min-width:0;text-align:center';
+      const heading=document.createElement('div');heading.textContent=label;heading.style.cssText='font-size:13px;color:#516b80;font-weight:650';
+      const value=document.createElement('div');value.textContent=sum(from).toFixed(2);value.style.cssText='font-size:21px;font-weight:750;color:#16354d;white-space:nowrap';
+      const unit=document.createElement('div');unit.textContent='tons';unit.style.cssText='font-size:12px;color:#516b80';
+      cell.append(heading,value,unit);grid.appendChild(cell);
+    }
+    card.appendChild(grid);out.appendChild(card);counted++;
    }
-   out.appendChild(table);
    status.textContent=counted+' tank(s) · tons · all drivers · 2026 calendar-year data. Unassigned tickets are not included; missing customer links are excluded.';
   }catch(e){status.textContent='Lookup unavailable: '+e.message;}
   finally{button.disabled=false;}
