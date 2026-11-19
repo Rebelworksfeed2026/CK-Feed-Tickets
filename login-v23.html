@@ -595,11 +595,14 @@ totalsEl("calculateTotals").addEventListener("click",async()=>{
   button.disabled=true;status.textContent='Checking saved deliveries and tank assignments…';
   try{
    const now=dateStart(new Date()),yearStart=new Date(now.getFullYear(),0,1),tomorrow=new Date(now);tomorrow.setDate(tomorrow.getDate()+1);
-   const [directory,tickets,drivers]=await Promise.all([CKCloud.listFarmsAndTanks(),CKCloud.listTicketsForPeriod(localDate(yearStart),localDate(tomorrow)),CKCloud.listDrivers()]);
-   const farms=directory.farms.filter(f=>normalize(f.name).includes(q));
+   const [directory,tickets,drivers,management]=await Promise.all([CKCloud.listFarmsAndTanks(),CKCloud.listTicketsForPeriod(localDate(yearStart),localDate(tomorrow)),CKCloud.listDrivers(),CKCloud.listManagersAndAssignments()]);
+   const matchingManagers=management.managers.filter(m=>normalize(m.name).includes(q));
+   const managerIds=new Set(matchingManagers.map(m=>m.id));
+   const managerFarmIds=new Set(management.assignments.filter(a=>managerIds.has(a.manager_id)&&a.effective_from<=localDate(now)&&(!a.effective_to||a.effective_to>=localDate(now))).map(a=>a.farm_id));
+   const farms=directory.farms.filter(f=>normalize(f.name).includes(q)||managerFarmIds.has(f.id));
    const tankMatches=directory.tanks.filter(t=>{const label=normalize(t.tank_label);if(/^\d+$/.test(q))return (String(t.tank_label).match(/\d+/g)||[]).some(n=>String(Number(n))===String(Number(q)));return label.includes(q);});
    const matched=directory.tanks.filter(t=>farms.some(f=>f.id===t.farm_id)||tankMatches.some(m=>m.id===t.id));
-   if(q&&!matched.length){status.textContent='No matching farm or tank. Check the spelling.';return;}
+   if(q&&!matched.length){status.textContent='No matching manager, farm or tank. Check the spelling.';return;}
    const active=tickets.filter(t=>t.is_test!==true&&Number(t.tons)>0&&(!selectedDriver||t.driver_id===selectedDriver));
    const byId=new Map(active.map(t=>[t.id,t]));
    const allocations=await CKCloud.listReportTankAllocations(active.map(t=>t.id));
