@@ -995,7 +995,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         askAnswer.textContent="Ticket #"+ticket.ticket_number+" went to "+(ticket.destination||"destination not recorded")+". Date: "+ticket.delivery_date+". Driver: "+(driver?.name||"Not recorded")+". Customer: "+(customer?.name||"Not recorded")+". Tons: "+askFmt(Number(ticket.tons))+".";
         return;
       }
-      const asksDriverAtTank=/\b(?:who|which driver|what driver)\b/.test(q)&&/\b(?:delivered|deliver|hauled|haul|took|take|went|brought|put)\b/.test(q)&&/\b(?:tank|pond|delta|tackett)\b/.test(q);
+      const asksDriverAtTank=/\b(?:who|which driver|what driver)\b/.test(q)&&/\b(?:delivered|deliver|ha[u]?led|haul|took|take|went|brought|put)\b/.test(q)&&/\b(?:tank|pond|delta|tackett)\b/.test(q);
       const asksLatest=/\b(last delivery|latest delivery|most recent|when did|when was|last time|previous delivery)\b/.test(q);
       const [tickets,drivers,directory,customers]=await Promise.all([CKCloud.listTicketsForPeriod(askISO((asksLatest||asksDriverAtTank)&&period==="today"?new Date(2020,0,1):from),askISO(end)),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks(),CKCloud.listCustomers()]);
       const active=tickets.filter(t=>t.is_test!==true && Number(t.tons)>0);
@@ -1027,7 +1027,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         const allocations=await CKCloud.listReportTankAllocations(scoped.map(t=>t.id));
         const allocated=new Set(allocations.filter(a=>tankIds.has(a.tank_id)).map(a=>a.ticket_id));
         const destPattern=new RegExp("(?:^|[^0-9])(?:tank\\s*|pond\\s*)?"+num+"(?=$|[^0-9])","i");
-        const amountMatch=q.match(/\b(\d{1,4}\.\d{1,2})\s*(?:tons?|tonnes?)\b/);
+        const amountMatch=q.match(/\b(\d{1,4}\.\d{1,2})\s*(?:tons?|tonnes?)\b/)||q.match(/\b(\d{1,4}\.\d{1,2})\b/);
         const amount=amountMatch?Math.round(Number(amountMatch[1])*100):null;
         const matches=scoped.filter(t=>(allocated.has(t.id)||destPattern.test(String(t.destination||"")))&&(amount===null||Math.round(Number(t.tons)*100)===amount));
         if(!matches.length){askAnswer.textContent="No matching saved delivery found for "+customer.name+" Tank "+num+(amount!==null?" at "+askFmt(amount/100)+" tons":"")+" "+(period==="today"?"in the available history":periodLabel)+".";return;}
