@@ -765,8 +765,14 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   const quickLookup=$("quickTankLookup");
   if(quickLookup){
     const wrapper=quickLookup.parentElement;
+    quickLookup.hidden=false;
+    quickLookup.style.display="block";
+    quickLookup.style.margin="0 0 12px";
     panels[4].prepend(quickLookup);
     if(wrapper?.tagName==="DETAILS" && !wrapper.querySelector(".tile"))wrapper.remove();
+    // Expose the lookup immediately on opening Reports; no second disclosure tap.
+    const reportNav=menu.querySelectorAll("button.ck-nav-button")[4];
+    if(reportNav)reportNav.querySelector("span[style*='flex:1']").lastElementChild.textContent="Search tanks and farm totals";
   }
   // Put manager controls in the Managers section rather than hiding them inside Farms.
   const managerControls=$("managerAdmin");
