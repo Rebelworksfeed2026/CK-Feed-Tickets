@@ -1102,6 +1102,16 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         askAnswer.textContent=(driver?driver.name:"All drivers")+" completed "+rows.length+" saved loads "+periodLabel+".";
         return;
       }
+      // Compare two explicitly named drivers, regardless of the signed-in account.
+      const asksNamedComparison=/\b(?:how\s+(?:much|many)\s+more|more\s+(?:tons?\s+)?than|less\s+(?:tons?\s+)?than|difference|compare|compared|ahead\s+of|behind)\b/.test(q)||(/\bmore\b/.test(q)&&/\bthan\b/.test(q));
+      if(asksNamedComparison && namedDrivers.length>=2){
+        const first=namedDrivers[0],second=namedDrivers[1];
+        const sumFor=id=>scoped.filter(t=>t.driver_id===id).reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
+        const a=sumFor(first.id),b=sumFor(second.id),difference=a-b;
+        askAnswer.textContent=first.name+" hauled "+askFmt(a/100)+" tons; "+second.name+" hauled "+askFmt(b/100)+" tons "+periodLabel+". "+
+          (difference>0?first.name+" hauled "+askFmt(difference/100)+" tons more than "+second.name+".":difference<0?second.name+" hauled "+askFmt(-difference/100)+" tons more than "+first.name+".":"Both hauled the same amount.");
+        return;
+      }
       // Compare named driver with the signed-in driver when the question says "me".
       const asksComparison=/\b(?:how\s+(?:much|many)\s+more|more\s+(?:tons?\s+)?than|less\s+(?:tons?\s+)?than|difference|compare|compared|ahead\s+of|behind)\b/.test(q) || (/\bmore\b/.test(q)&&/\bthan\b/.test(q));
       
