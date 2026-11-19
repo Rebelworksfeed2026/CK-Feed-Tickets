@@ -933,7 +933,29 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   askBox.style.cssText="margin:8px 0 12px;border:1px solid #c3d2df;border-radius:10px;background:#eef3f8;overflow:hidden";
   const askTitle=document.createElement("summary");askTitle.textContent="🎤 Ask C&K";askTitle.style.cssText="cursor:pointer;padding:11px 14px;font-size:16px;font-weight:750;color:#183449";
   const askContent=document.createElement("div");askContent.style.cssText="padding:0 12px 12px";
-  const askInput=document.createElement("input");askInput.type="text";askInput.placeholder="Ask about drivers or tanks";askInput.setAttribute("aria-label","Ask C&K question");askInput.style.cssText="width:100%;margin:4px 0 8px;padding:9px;font-size:14px";
+  const askInput=document.createElement("input");askInput.type="text";askInput.placeholder="Ask about drivers or tanks";askInput.setAttribute("aria-label","Ask C&K question");askInput.style.cssText="box-sizing:border-box;width:100%;margin:4px 0 8px;padding:9px;font-size:16px";
+  // Keep the focused question field in view as the iPhone keyboard changes the viewport.
+  let askKeyboardAdjustment=0;
+  const keepAskInputVisible=()=>{
+    if(document.activeElement!==askInput)return;
+    const viewportHeight=window.visualViewport?.height||window.innerHeight;
+    const top=askInput.getBoundingClientRect().top;
+    const bottom=askInput.getBoundingClientRect().bottom;
+    const safeTop=24;
+    const safeBottom=viewportHeight-28;
+    if(bottom>safeBottom||top<safeTop){
+      window.scrollBy({top:bottom>safeBottom?bottom-safeBottom:top-safeTop,behavior:"instant"});
+    }
+  };
+  askInput.addEventListener("focus",()=>{
+    requestAnimationFrame(keepAskInputVisible);
+    setTimeout(keepAskInputVisible,180);
+    setTimeout(keepAskInputVisible,420);
+  });
+  askInput.addEventListener("blur",()=>{askKeyboardAdjustment=0;});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("resize",keepAskInputVisible);
+  }
   const askActions=document.createElement("div");askActions.style.cssText="display:flex;gap:8px";
   const askMic=document.createElement("button");askMic.type="button";askMic.textContent="🎤 Speak";askMic.style.cssText="flex:1;min-width:0;padding:9px;font-size:14px";
   const askSubmit=document.createElement("button");askSubmit.type="button";askSubmit.textContent="Ask";askSubmit.style.cssText="flex:1;min-width:0;padding:9px;font-size:14px";
