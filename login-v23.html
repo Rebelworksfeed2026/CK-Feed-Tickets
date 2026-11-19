@@ -589,7 +589,7 @@ totalsEl("calculateTotals").addEventListener("click",async()=>{
    const now=dateStart(new Date()),yearStart=new Date(now.getFullYear(),0,1),tomorrow=new Date(now);tomorrow.setDate(tomorrow.getDate()+1);
    const [directory,tickets]=await Promise.all([CKCloud.listFarmsAndTanks(),CKCloud.listTicketsForPeriod(localDate(yearStart),localDate(tomorrow))]);
    const farms=directory.farms.filter(f=>normalize(f.name).includes(q));
-   const tankMatches=directory.tanks.filter(t=>normalize(t.tank_label).includes(q));
+   const tankMatches=directory.tanks.filter(t=>{const label=normalize(t.tank_label);if(/^\d+$/.test(q))return (String(t.tank_label).match(/\d+/g)||[]).some(n=>String(Number(n))===String(Number(q)));return label.includes(q);});
    const matched=directory.tanks.filter(t=>farms.some(f=>f.id===t.farm_id)||tankMatches.some(m=>m.id===t.id));
    if(!matched.length){status.textContent='No matching farm or tank. Check the spelling.';return;}
    const active=tickets.filter(t=>t.is_test!==true&&Number(t.tons)>0);
