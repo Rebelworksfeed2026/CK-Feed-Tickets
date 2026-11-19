@@ -572,6 +572,51 @@ totalsEl("calculateTotals").addEventListener("click",async()=>{
  }catch(e){status.textContent="Unable to calculate totals: "+e.message;}
  finally{button.disabled=false;}
 });
+
+// Search-first farm and tank lookup: all drivers, four periods, customer-isolated.
+(function(){
+ const tile=document.createElement('div');tile.className='tile';tile.id='quickTankLookup';
+ tile.innerHTML='<strong>Farm &amp; Tank Feed Lookup</strong><p class="muted">Type a tank (FF302) or farm (Fisackerly). All drivers combined; only verified tank assignments count.</p><label for="quickTankQuery">Farm or tank</label><input id="quickTankQuery" type="search" placeholder="FF302 or Fisackerly" value="FF302" autocomplete="off"><button id="quickTankRun" type="button">Search feed totals</button><p id="quickTankStatus" role="status" class="muted"></p><div id="quickTankResults" style="overflow-x:auto"></div>';
+ const report=document.getElementById('annualTotalsTile');report.parentNode.insertBefore(tile,report);
+ const normalize=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ const localDate=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+ const dateStart=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+ document.getElementById('quickTankRun').addEventListener('click',async()=>{
+  const q=normalize(document.getElementById('quickTankQuery').value),status=document.getElementById('quickTankStatus'),out=document.getElementById('quickTankResults'),button=document.getElementById('quickTankRun');
+  out.replaceChildren();if(!q){status.textContent='Enter a farm or tank name.';return;}
+  button.disabled=true;status.textContent='Checking saved deliveries and tank assignments…';
+  try{
+   const now=dateStart(new Date()),yearStart=new Date(now.getFullYear(),0,1),tomorrow=new Date(now);tomorrow.setDate(tomorrow.getDate()+1);
+   const [directory,tickets]=await Promise.all([CKCloud.listFarmsAndTanks(),CKCloud.listTicketsForPeriod(localDate(yearStart),localDate(tomorrow))]);
+   const farms=directory.farms.filter(f=>normalize(f.name).includes(q));
+   const tankMatches=directory.tanks.filter(t=>normalize(t.tank_label).includes(q));
+   const matched=directory.tanks.filter(t=>farms.some(f=>f.id===t.farm_id)||tankMatches.some(m=>m.id===t.id));
+   if(!matched.length){status.textContent='No matching farm or tank. Check the spelling.';return;}
+   const active=tickets.filter(t=>t.is_test!==true&&Number(t.tons)>0);
+   const byId=new Map(active.map(t=>[t.id,t]));
+   const allocations=await CKCloud.listReportTankAllocations(active.map(t=>t.id));
+   const farmById=new Map(directory.farms.map(f=>[f.id,f]));
+   const table=document.createElement('table');table.style.cssText='width:100%;min-width:610px;border-collapse:collapse';
+   const header=document.createElement('tr');
+   for(const h of ['Customer / farm / tank','Daily','Weekly','Monthly','Yearly']){const th=document.createElement('th');th.textContent=h;th.style.cssText='padding:7px;text-align:left;border-bottom:1px solid #b5c5d1';header.appendChild(th);}table.appendChild(header);
+   const monday=new Date(now);monday.setDate(now.getDate()-(now.getDay()+6)%7);
+   const month=new Date(now.getFullYear(),now.getMonth(),1);
+   let counted=0;
+   for(const tank of matched){
+    const farm=farmById.get(tank.farm_id);if(!farm)continue;
+    const rows=allocations.filter(a=>a.tank_id===tank.id).map(a=>({a,t:byId.get(a.ticket_id)})).filter(x=>x.t&&farm.customer_id&&x.t.customer_id===farm.customer_id);
+    const sum=from=>rows.filter(x=>x.t.delivery_date>=localDate(from)&&x.t.delivery_date<=localDate(now)).reduce((n,x)=>n+Number(x.a.tons||0),0);
+    const tr=document.createElement('tr');
+    for(const v of [farm.name+' — '+tank.tank_label,sum(now).toFixed(2),sum(monday).toFixed(2),sum(month).toFixed(2),sum(yearStart).toFixed(2)]){const td=document.createElement('td');td.textContent=v;td.style.cssText='padding:7px;border-bottom:1px solid #dce5eb';tr.appendChild(td);}
+    table.appendChild(tr);counted++;
+   }
+   out.appendChild(table);
+   status.textContent=counted+' tank(s) · tons · all drivers · 2026 calendar-year data. Unassigned tickets are not included; missing customer links are excluded.';
+  }catch(e){status.textContent='Lookup unavailable: '+e.message;}
+  finally{button.disabled=false;}
+ });
+})();
+
 // Daily driver work stays visible; secondary tools start collapsed.
 const dashboard=document.querySelector("#profile .dashboard");
 const cameraTile=$("cameraTile");
