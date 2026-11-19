@@ -220,7 +220,7 @@ if(namedCustomerLine || directCustomerNames.length){
  if(isDelta!==isTackett)recognizedCustomer=isDelta?'Delta Cat':'Tackett Fish Farm';
 }
 if(customerSelect){
- const match=[...customerSelect.options].find(o=>o.textContent.trim().toLowerCase()===recognizedCustomer.toLowerCase());
+ const match=[...customerSelect.options].find(o=>{const label=o.textContent.trim().toLowerCase();return recognizedCustomer==='Tackett Fish Farm'?/tackett/i.test(label):recognizedCustomer==='Delta Cat'?/delta\s*cat/i.test(label):false;});
  if(recognizedCustomer && match){customerSelect.value=match.value;customerSelect.dispatchEvent(new Event('input',{bubbles:true}));}
  else {customerSelect.value='';customerSelect.dispatchEvent(new Event('input',{bubbles:true}));}
 }
@@ -229,6 +229,27 @@ if(customerSelect){
 let verifiedNumber=number;
 const ticketLabelCandidates=[result.data.text||'',extra,instructionCrop].join('\n').match(/(?:delivery\s*)?ticket\s*(?:number|no\.?|#)\s*[:#]?\s*(\d{6,8})\b/i);
 if(ticketLabelCandidates)verifiedNumber=ticketLabelCandidates[1];
+if(!verifiedNumber){
+ // Ticket number is small at the upper-right of Delta Western paperwork.
+ // Read this area separately rather than guessing from unrelated numbers.
+ try{
+  const pic=await createImageBitmap(input.files[0]);
+  const worker=await Tesseract.createWorker('eng');
+  try{
+   await worker.setParameters({tessedit_pageseg_mode:'6'});
+   for(const [x,y,w,h] of [[.47,.08,.49,.25],[.48,.15,.48,.25],[.50,.22,.47,.20]]){
+    const canvas=document.createElement('canvas');canvas.width=1900;canvas.height=700;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(pic,pic.width*x,pic.height*y,pic.width*w,pic.height*h,0,0,canvas.width,canvas.height);
+    const raw=(await worker.recognize(canvas)).data.text||'';
+    diagnostic.textContent+='\nTICKET NUMBER CROP '+y+': '+(raw.trim()||'[no text detected]').slice(0,220);
+    const match=raw.match(/(?:delivery\s*)?ticket\s*(?:number|no\.?|#)?\s*[:#]?\s*(\d{6,8})\b/i);
+    if(match){verifiedNumber=match[1];break;}
+   }
+  }finally{await worker.terminate();pic.close();}
+ }catch(e){diagnostic.textContent+='\nTicket number crop unavailable: '+String(e.message||e);}
+}
+
 let verifiedDest=dest;
 // Retain an explicitly labeled one-digit tank after all OCR refinements.
 if(!verifiedDest){
