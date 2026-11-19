@@ -190,6 +190,14 @@ window.CKCloud = (() => {
     return body;
   }
 
+  async function askAI(question) {
+    const result=await request("/functions/v1/ask-ck-ai",{
+      method:"POST",body:JSON.stringify({question})
+    });
+    if(!result?.answer)throw Error(result?.error||"AI returned no answer.");
+    return result.answer;
+  }
+
   async function health() {
     if (!configured) return { ok: false, message: "Cloud settings missing" };
     try {
@@ -511,7 +519,7 @@ window.CKCloud = (() => {
     const rows=await request("/rest/v1/feed_prices?on_conflict=feed_type",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=representation"},body:JSON.stringify({feed_type,price_per_ton})});
     return rows;
   }
-  return { listFeedPrices, saveFeedPrice, listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, restoreSession, myProfile, listDrivers, listCustomers, listWeeklyTickets, listTicketsForPeriod, listTankAllocations, listReportTankAllocations, createTankAllocations, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, lookupTicketDetails, saveOwnTicket, saveTicketWithPhoto, readTicketPhoto, correctTicket, isSignedIn };
+  return { askAI, listFeedPrices, saveFeedPrice, listManagersAndAssignments, addManager, transferFarm, configured, health, signIn, signOut, restoreSession, myProfile, listDrivers, listCustomers, listWeeklyTickets, listTicketsForPeriod, listTankAllocations, listReportTankAllocations, createTankAllocations, listFarmsAndTanks, registerFarm, registerTank, findTicketNumber, lookupTicketDetails, saveOwnTicket, saveTicketWithPhoto, readTicketPhoto, correctTicket, isSignedIn };
 })();
 
 </script>
@@ -947,6 +955,9 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     const end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
     askSubmit.disabled=true;askAnswer.textContent="Checking saved tickets…";
     try{
+      askAnswer.textContent=await CKCloud.askAI(question);
+      return;
+      // Previous rule-based handler retained below for rollback only.
       // Direct ticket-number questions search all saved dates, not just today.
       const ticketQuery=q.match(/\b(?:ticket(?:\s*(?:number|no|#))?\s*(?:did|was|is|#|number|no)?\s*#?\s*)(\d{5,9})\b/) || (/(?:where|who|when|what|find|lookup|look up)/.test(q)?q.match(/\b(\d{6,9})\b/):null);
       if(ticketQuery){
