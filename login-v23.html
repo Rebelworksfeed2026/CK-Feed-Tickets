@@ -392,6 +392,28 @@ window.CKCloud = (() => {
     if(!response.ok) throw Error("This ticket photo could not be opened ("+response.status+").");
     return await response.blob();
   }
+  // Only auto-assign when a single tank can be identified unambiguously for this customer.
+  async function autoAssignSavedTicket(saved,original) {
+    const directory=await listFarmsAndTanks();
+    const normalize=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+    const destination=normalize(original.destination);
+    const candidates=directory.tanks.filter(t=>{
+      const farm=directory.farms.find(f=>f.id===t.farm_id);
+      if(!farm||farm.customer_id!==original.customer_id)return false;
+      const label=normalize(t.tank_label),farmName=normalize(farm.name);
+      if(!label)return false;
+      if(destination===label||destination===farmName)return true;
+      const numbers=String(t.tank_label).match(/\\d{3}/g)||[];
+      return numbers.length===1 && new RegExp("(^|\\\\D)"+numbers[0]+"(\\\\D|$)").test(String(original.destination)) &&
+        (String(original.destination).match(/\\d{3}/g)||[]).length===1;
+    });
+    if(candidates.length!==1)return {status:"review",reason:candidates.length?"Multiple possible tanks":"No uniquely matching tank"};
+    const existing=await listTankAllocations(saved.id);
+    if(existing.length)return {status:"existing"};
+    const assigned=await createTankAllocations(saved.id,[{tank_id:candidates[0].id,tons:Number(original.tons)}]);
+    if(!Array.isArray(assigned)||assigned.length!==1)throw Error("Tank assignment was not confirmed");
+    return {status:"assigned",tank:candidates[0].tank_label};
+  }
   async function saveTicketWithPhoto(ticket,file) {
     if (!session?.access_token) throw Error("Sign in before saving.");
     const profile=await myProfile();
@@ -418,7 +440,10 @@ window.CKCloud = (() => {
     });
     try {
       const saved=await saveOwnTicket({...ticket,photo_path:path});
-      return {...saved,photo_path:path};
+      let tankAssignment;
+      try { tankAssignment=await autoAssignSavedTicket(saved,ticket); }
+      catch(e) { tankAssignment={status:"review",reason:"Tank assignment could not be verified: "+e.message}; }
+      return {...saved,photo_path:path,tankAssignment};
     } catch(error) {
       // Photo may be orphaned if the insert fails; retain it privately for recovery.
       throw Error("Photo uploaded privately, but ticket was NOT saved: "+error.message+
@@ -1470,7 +1495,9 @@ $("confirmSave").addEventListener("click", async () => {
   $("draftResult").textContent="Saving ticket and private photo to the cloud…";
   try {
     const result=await CKCloud.saveTicketWithPhoto(verifiedTicket,file);
-    $("draftResult").textContent="Saved to cloud: ticket "+result.ticket_number+". Photo attached.";
+    const tankInfo=result.tankAssignment;
+    $("draftResult").textContent="Saved to cloud: ticket "+result.ticket_number+". Photo attached. "+
+      (tankInfo?.status==="assigned"?"Tank automatically credited: "+tankInfo.tank+".":tankInfo?.status==="existing"?"Tank assignment already recorded.":"Tank not automatically assigned — review in Assign delivery to tanks. "+(tankInfo?.reason||""));
     verifiedTicket=null;
     $("confirmPanel").hidden=true;
     $("ticketDraft").reset();
