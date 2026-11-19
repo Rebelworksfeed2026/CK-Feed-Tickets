@@ -1014,7 +1014,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
           return (n.includes('delta')&&/\bdelta\s*(?:cat|catfish)?\b/.test(q)) ||
             (n.includes('tackett')&&/\btackett\b/.test(q));
         });
-        const numberMatch=q.match(/\b(?:tank|pond)\s*(?:number\s*)?(\d{1,4})\b/)||q.match(/\b(\d{1,4})\s*(?:tank|pond)\b/);
+        const numberMatch=q.match(/\b(?:tank|pond)\s*(?:number\s*)?(\d{1,4})\b/)||q.match(/\b(\d{1,4})\s*(?:tank|pond)\b/)||(customer?q.match(/\b(?:number|no\.?|#)\s*(\d{1,4})\b/):null);
         if(!customer||!numberMatch){askAnswer.textContent="For the last delivery, include the customer and tank number, such as Delta Cat Tank 3.";return;}
         const num=numberMatch[1];
         const relevant=tickets.filter(t=>t.customer_id===customer.id);
