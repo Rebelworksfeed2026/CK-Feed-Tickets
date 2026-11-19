@@ -1032,6 +1032,32 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         askAnswer.textContent="Last delivery to "+customer.name+" Tank "+num+": "+found.delivery_date+". Driver: "+(who?.name||"Not recorded")+". Ticket #"+found.ticket_number+". "+askFmt(Number(found.tons))+" tons.";
         return;
       }
+      // Customer-specific tank totals take priority over general driver totals.
+      if(customer && /\b(?:tank|pond|feed|tons?|put|received|delivered)\b/.test(q)){
+        const numberMatch=q.match(/\b(?:tank|pond)\s*(?:number\s*)?(\d{1,4})\b/)||q.match(/\b(?:number|no\.?|#)\s*(\d{1,4})\b/)||q.match(/\b(?:delta\s*(?:cat|catfish)?|tackett)\s+(\d{1,4})\b/);
+        if(numberMatch){
+          const num=numberMatch[1];
+          const candidates=directory.tanks.filter(t=>{
+            const label=String(t.tank_label||"").toLowerCase().trim();
+            return label===num||label==="tank "+num||label==="pond "+num;
+          });
+          const farmIds=new Set(directory.farms.filter(f=>f.customer_id===customer.id).map(f=>f.id));
+          const tankIds=new Set(candidates.filter(t=>farmIds.has(t.farm_id)).map(t=>t.id));
+          const allocations=await CKCloud.listReportTankAllocations(scoped.map(t=>t.id));
+          const byTicket=new Map();
+          for(const a of allocations){
+            if(tankIds.has(a.tank_id))byTicket.set(a.ticket_id,(byTicket.get(a.ticket_id)||0)+Math.round(Number(a.tons)*100));
+          }
+          const destPattern=new RegExp("(?:^|[^0-9])(?:tank\\s*|pond\\s*)?"+num+"(?=$|[^0-9])","i");
+          let cents=0,loads=0;
+          for(const t of scoped){
+            if(byTicket.has(t.id)){cents+=byTicket.get(t.id);loads++;}
+            else if(destPattern.test(String(t.destination||""))){cents+=Math.round(Number(t.tons)*100);loads++;}
+          }
+          askAnswer.textContent=customer.name+" Tank "+num+" received "+askFmt(cents/100)+" tons in "+loads+" "+(loads===1?"load":"loads")+" "+periodLabel+".";
+          return;
+        }
+      }
       // Free natural-language reporting: rankings, load counts and common summaries.
       if(/\b(most|highest|biggest|top|leader|least|lowest|fewest)\b/.test(q)&&/\b(driver|haul|ton|load|who)\b/.test(q)){
         const ranking=drivers.filter(d=>!d.is_office).map(d=>{
