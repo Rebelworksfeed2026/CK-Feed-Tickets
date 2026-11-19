@@ -559,7 +559,7 @@ totalsEl("calculateTotals").addEventListener("click",async()=>{
   if(view==="driver"||view==="combined"){for(const t of active)add(view==="combined"?"all":t.driver_id,view==="combined"?"All drivers":(driverMap.get(t.driver_id)||"Unknown driver"),t.tons,t.id);}
   else{
    const allocations=await CKCloud.listReportTankAllocations(active.map(t=>t.id));const byTicket=new Map(active.map(t=>[t.id,t]));let assigned=0;
-   for(const row of allocations){const ticket=byTicket.get(row.ticket_id),tank=tankMap.get(row.tank_id);if(!ticket||!tank)continue;if(farmId&&tank.farm_id!==farmId)continue;if(tankId&&tank.id!==tankId)continue;assigned+=Number(row.tons)||0;const farmName=farmMap.get(tank.farm_id)||"Unknown farm";const key=view==="farm"?tank.farm_id:tank.id;add(key,view==="farm"?farmName:farmName+" — "+tank.tank_label,row.tons,ticket.id);}
+   for(const row of allocations){const ticket=byTicket.get(row.ticket_id),tank=tankMap.get(row.tank_id);if(!ticket||!tank)continue;const tankFarm=directory.farms.find(f=>f.id===tank.farm_id);if(!tankFarm||!ticket.customer_id||!tankFarm.customer_id||ticket.customer_id!==tankFarm.customer_id)continue;if(farmId&&tank.farm_id!==farmId)continue;if(tankId&&tank.id!==tankId)continue;assigned+=Number(row.tons)||0;const farmName=farmMap.get(tank.farm_id)||"Unknown farm";const key=view==="farm"?tank.farm_id:tank.id;add(key,view==="farm"?farmName:farmName+" — "+tank.tank_label,row.tons,ticket.id);}
    status.textContent=iso(from)+" to "+iso(new Date(to.getTime()-86400000))+" · verified assigned tons only · unassigned deliveries excluded.";
   }
   const table=document.createElement("table");table.style.cssText="width:100%;border-collapse:collapse;min-width:300px";
