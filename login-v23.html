@@ -761,6 +761,13 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     // Hide the first obsolete unlabeled Settings disclosure; keep its DOM intact.
     if(!label && index===5 && ++unlabeledSettingsCount===1)inner.hidden=true;
   }
+  // Keep the search-first lookup at the top of Reports, not under Tanks / Ponds.
+  const quickLookup=$("quickTankLookup");
+  if(quickLookup){
+    const wrapper=quickLookup.parentElement;
+    panels[4].prepend(quickLookup);
+    if(wrapper?.tagName==="DETAILS" && !wrapper.querySelector(".tile"))wrapper.remove();
+  }
   // Put manager controls in the Managers section rather than hiding them inside Farms.
   const managerControls=$("managerAdmin");
   if(managerControls){
