@@ -1047,9 +1047,10 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         const num=numberMatch[1];
         const relevant=tickets.filter(t=>t.customer_id===customer.id);
         const allocations=await CKCloud.listReportTankAllocations(relevant.map(t=>t.id));
+        const customerFarmIds=new Set(directory.farms.filter(f=>f.customer_id===customer.id).map(f=>f.id));
         const matchingTankIds=new Set(directory.tanks.filter(t=>{
           const label=String(t.tank_label||'').toLowerCase().trim();
-          return label==='tank '+num || label===num;
+          return customerFarmIds.has(t.farm_id) && (label==='tank '+num || label===num || label==='pond '+num);
         }).map(t=>t.id));
         const allocatedIds=new Set(allocations.filter(a=>matchingTankIds.has(a.tank_id)).map(a=>a.ticket_id));
         const destPattern=new RegExp('(?:^|\\b)(?:tank\\s*)?'+num+'(?:\\b|$)','i');
