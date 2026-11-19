@@ -300,7 +300,7 @@ window.CKCloud = (() => {
   async function listFarmsAndTanks() {
     if (!session?.access_token) throw Error("Sign in to view farms.");
     const [farms,tanks] = await Promise.all([
-      request("/rest/v1/farms?select=id,name&order=name.asc&limit=1000"),
+      request("/rest/v1/farms?select=id,name,customer_id&order=name.asc&limit=1000"),
       request("/rest/v1/farm_tanks?select=id,farm_id,tank_label&order=tank_label.asc&limit=2000")
     ]);
     if (!Array.isArray(farms) || !Array.isArray(tanks)) throw Error("Invalid farm directory response.");
