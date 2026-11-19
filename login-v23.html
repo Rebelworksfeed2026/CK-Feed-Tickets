@@ -955,9 +955,6 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
     const end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
     askSubmit.disabled=true;askAnswer.textContent="Checking saved tickets…";
     try{
-      askAnswer.textContent=await CKCloud.askAI(question);
-      return;
-      // Previous rule-based handler retained below for rollback only.
       // Direct ticket-number questions search all saved dates, not just today.
       const ticketQuery=q.match(/\b(?:ticket(?:\s*(?:number|no|#))?\s*(?:did|was|is|#|number|no)?\s*#?\s*)(\d{5,9})\b/) || (/(?:where|who|when|what|find|lookup|look up)/.test(q)?q.match(/\b(\d{6,9})\b/):null);
       if(ticketQuery){
