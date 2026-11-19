@@ -996,7 +996,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         return;
       }
       const asksDriverAtTank=/\b(?:who|which driver|what driver)\b/.test(q)&&/\b(?:delivered|deliver|ha[u]?led|haul|took|take|went|brought|put)\b/.test(q)&&/\b(?:tank|pond|delta|tackett)\b/.test(q);
-      const asksLatest=/\b(last delivery|latest delivery|most recent|when did|when was|last time|previous delivery)\b/.test(q);
+      const asksLatest=/\b(last delivery|latest delivery|last driver|latest driver|last load|latest load|most recent|when did|when was|last time|previous delivery)\b/.test(q);
       const [tickets,drivers,directory,customers]=await Promise.all([CKCloud.listTicketsForPeriod(askISO((asksLatest||asksDriverAtTank)&&period==="today"?new Date(2020,0,1):from),askISO(end)),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks(),CKCloud.listCustomers()]);
       const active=tickets.filter(t=>t.is_test!==true && Number(t.tons)>0);
       const self=drivers.find(d=>d.id===activeProfile?.id);
