@@ -403,9 +403,9 @@ window.CKCloud = (() => {
       const label=normalize(t.tank_label),farmName=normalize(farm.name);
       if(!label)return false;
       if(destination===label||destination===farmName)return true;
-      const numbers=String(t.tank_label).match(/\\d{3}/g)||[];
-      return numbers.length===1 && new RegExp("(^|\\\\D)"+numbers[0]+"(\\\\D|$)").test(String(original.destination)) &&
-        (String(original.destination).match(/\\d{3}/g)||[]).length===1;
+      const numbers=String(t.tank_label).match(/[0-9]{3}/g)||[];
+      const destinationNumbers=String(original.destination).match(/[0-9]{3}/g)||[];
+      return numbers.length===1 && destinationNumbers.length===1 && numbers[0]===destinationNumbers[0];
     });
     if(candidates.length!==1)return {status:"review",reason:candidates.length?"Multiple possible tanks":"No uniquely matching tank"};
     const existing=await listTankAllocations(saved.id);
