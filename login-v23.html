@@ -945,14 +945,21 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
   const askISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
   const askFmt=n=>Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   async function answerCKQuestion(){
-    const question=askInput.value.trim(),q=question.toLowerCase();
+    const question=askInput.value.trim();
+    const q=question.toLowerCase().replace(/\b(hall|hold)\b/g,"haul").replace(/\b(ponds)\b/g,"pond").replace(/\b(tanks)\b/g,"tank").replace(/\b(tickets)\b/g,"ticket");
     if(!question){askAnswer.textContent="Ask a question first.";return;}
-    const period=/\b(year|yearly|this year)\b/.test(q)?"year":/\b(month|monthly|this month)\b/.test(q)?"month":/\b(week|weekly|this week)\b/.test(q)?"week":/\b(today|daily|this day)\b/.test(q)?"today":"today";
+    const period=/\b(yesterday)\b/.test(q)?"yesterday":/\b(last week|previous week)\b/.test(q)?"last week":/\b(last month|previous month)\b/.test(q)?"last month":/\b(year|yearly|this year)\b/.test(q)?"year":/\b(month|monthly|this month)\b/.test(q)?"month":/\b(week|weekly|this week)\b/.test(q)?"week":"today";
     const now=new Date(),from=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    if(period==="week")from.setDate(from.getDate()-(from.getDay()+6)%7);
+    if(period==="yesterday")from.setDate(from.getDate()-1);
+    if(period==="week"||period==="last week")from.setDate(from.getDate()-(from.getDay()+6)%7);
+    if(period==="last week")from.setDate(from.getDate()-7);
+    if(period==="last month")from.setMonth(from.getMonth()-1,1);
     if(period==="month")from.setDate(1);
     if(period==="year")from.setMonth(0,1);
     const end=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+    if(period==="yesterday")end.setDate(end.getDate()-1);
+    if(period==="last week"){end.setTime(from.getTime());end.setDate(end.getDate()+7);}
+    if(period==="last month"){end.setTime(from.getTime());end.setMonth(end.getMonth()+1);}
     askSubmit.disabled=true;askAnswer.textContent="Checking saved tickets…";
     try{
       // Direct ticket-number questions search all saved dates, not just today.
@@ -969,10 +976,15 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
       const asksLatest=/\b(last|latest|most recent|previous|when did|when was)\b/.test(q);
       const [tickets,drivers,directory,customers]=await Promise.all([CKCloud.listTicketsForPeriod(askISO(asksLatest?new Date(2020,0,1):from),askISO(end)),CKCloud.listDrivers(),CKCloud.listFarmsAndTanks(),CKCloud.listCustomers()]);
       const active=tickets.filter(t=>t.is_test!==true && Number(t.tons)>0);
-      const driver=drivers.filter(d=>!d.is_office).find(d=>q.includes(String(d.name||"").toLowerCase()));
+      const self=drivers.find(d=>d.id===activeProfile?.id);
+      const asksMe=/\b(me|my|mine|i|myself)\b/.test(q);
+      const namedDrivers=drivers.filter(d=>!d.is_office).filter(d=>new RegExp("\\b"+String(d.name||"").toLowerCase().replace(/[^a-z]/g,"")+"\\b").test(q));
+      const driver=namedDrivers[0]||(asksMe?self:null);
+      const customer=customers.find(c=>q.includes(String(c.name||"").toLowerCase())||(String(c.name||"").toLowerCase().includes("delta")&&/\bdelta\b/.test(q))||(String(c.name||"").toLowerCase().includes("tackett")&&/\btackett\b/.test(q)));
+      const scoped=customer?active.filter(t=>t.customer_id===customer.id):active;
       const isTank=/\b(tank|pond|ponds|received|got|delivered|destination)\b/.test(q);
       const isDriver=/\b(hauled|haul|hall|driver|loads|trips)\b/.test(q);
-      const periodLabel=period==="today"?"today":"this "+period;
+      const periodLabel=period==="today"?"today":period==="yesterday"?"yesterday":period.startsWith("last ")?period:"this "+period;
       // Historical destination lookup: identify customer and tank together, never mix customers.
       if(asksLatest && /\b(tank|pond|delivery|deliver|went|go|been|visit|load)\b/.test(q)){
         const customer=customers.find(c=>{
@@ -998,22 +1010,36 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         askAnswer.textContent="Last delivery to "+customer.name+" Tank "+num+": "+found.delivery_date+". Driver: "+(who?.name||"Not recorded")+". Ticket #"+found.ticket_number+". "+askFmt(Number(found.tons))+" tons.";
         return;
       }
+      // Free natural-language reporting: rankings, load counts and common summaries.
+      if(/\b(most|highest|biggest|top|leader|least|lowest|fewest)\b/.test(q)&&/\b(driver|haul|ton|load|who)\b/.test(q)){
+        const ranking=drivers.filter(d=>!d.is_office).map(d=>{
+          const rows=scoped.filter(t=>t.driver_id===d.id);
+          return {name:d.name,loads:rows.length,tons:rows.reduce((a,t)=>a+Math.round(Number(t.tons)*100),0)/100};
+        }).sort((a,b)=>/\b(least|lowest|fewest)\b/.test(q)?a.tons-b.tons:b.tons-a.tons);
+        askAnswer.textContent="Driver totals "+periodLabel+":\n"+ranking.map((d,i)=>(i+1)+". "+d.name+": "+askFmt(d.tons)+" tons, "+d.loads+" loads").join("\n");
+        return;
+      }
+      if(/\b(how many|number of|count)\b/.test(q)&&/\b(load|trip|ticket)\b/.test(q)&&!isTank){
+        const rows=driver?scoped.filter(t=>t.driver_id===driver.id):scoped;
+        askAnswer.textContent=(driver?driver.name:"All drivers")+" completed "+rows.length+" saved loads "+periodLabel+".";
+        return;
+      }
       // Compare named driver with the signed-in driver when the question says "me".
       const asksComparison=/\b(?:how\s+(?:much|many)\s+more|more\s+(?:tons?\s+)?than|less\s+(?:tons?\s+)?than|difference|compare|compared|ahead\s+of|behind)\b/.test(q) || (/\bmore\b/.test(q)&&/\bthan\b/.test(q));
-      const asksMe=/\b(me|my|mine|i)\b/.test(q);
+      
       if(driver && asksComparison && asksMe){
         const mine=drivers.find(d=>d.id===activeProfile?.id);
         if(!mine){askAnswer.textContent="I couldn't identify your driver account for comparison.";return;}
-        const sumFor=id=>active.filter(t=>t.driver_id===id).reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
+        const sumFor=id=>scoped.filter(t=>t.driver_id===id).reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0);
         const theirs=sumFor(driver.id),myTotal=sumFor(mine.id),difference=theirs-myTotal;
         askAnswer.textContent=driver.name+" hauled "+askFmt(theirs/100)+" tons; "+mine.name+" hauled "+askFmt(myTotal/100)+" tons "+periodLabel+". "+
           (difference>0?driver.name+" hauled "+askFmt(difference/100)+" tons more than "+mine.name+".":difference<0?mine.name+" hauled "+askFmt(-difference/100)+" tons more than "+driver.name+".":"Both hauled the same amount.");
         return;
       }
       // Destination questions are distinct from questions about a driver's total.
-      const asksWhere=/\b(where|which|what)\b/.test(q)&&/\b(tanks?|ponds?|destinations?|where|took|take|deliver|delivers|delivered|delivering|went)\b/.test(q);
+      const asksWhere=/\b(where|which|what|list|show)\b/.test(q)&&/\b(tank|pond|destination|where|took|take|deliver|delivers|delivered|delivering|went)\b/.test(q);
       if(driver && asksWhere){
-        const selected=active.filter(t=>t.driver_id===driver.id);
+        const selected=scoped.filter(t=>t.driver_id===driver.id);
         if(!selected.length){askAnswer.textContent=driver.name+" has no saved loads "+periodLabel+".";return;}
         const grouped=new Map();
         for(const t of selected){
@@ -1026,15 +1052,15 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         askAnswer.textContent=driver.name+"'s destinations "+periodLabel+":\n"+[...grouped.values()].map(x=>x.destination+" — "+askFmt(x.tons/100)+" tons ("+x.loads+" "+(x.loads===1?"load":"loads")+")").join("\n")+".";
         return;
       }
-      if(driver && (isDriver||!isTank)){
-        const selected=active.filter(t=>t.driver_id===driver.id);
+      if(driver && (isDriver||!isTank||/\b(tons?|feed|how much)\b/.test(q))){
+        const selected=scoped.filter(t=>t.driver_id===driver.id);
         const total=selected.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0)/100;
         askAnswer.textContent=driver.name+" hauled "+askFmt(total)+" tons in "+selected.length+" loads "+periodLabel+".";
         return;
       }
-      if(!isTank && !driver && isDriver){
-        const total=active.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0)/100;
-        askAnswer.textContent="All drivers hauled "+askFmt(total)+" tons in "+active.length+" loads "+periodLabel+".";
+      if(!isTank && !driver && (isDriver||/\b(tons?|feed|how much)\b/.test(q))){
+        const total=scoped.reduce((sum,t)=>sum+Math.round(Number(t.tons)*100),0)/100;
+        askAnswer.textContent="All drivers hauled "+askFmt(total)+" tons in "+scoped.length+" loads "+periodLabel+".";
         return;
       }
       if(isTank){
