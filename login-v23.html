@@ -1046,7 +1046,7 @@ if(dashboard && cameraTile && ticketEntryTile && weekTile) {
         const numberMatch=q.match(/\b(?:tank|pond)\s*(?:number\s*)?(\d{1,4})\b/)||q.match(/\b(\d{1,4})\s*(?:tank|pond)\b/)||(customer?q.match(/\b(?:number|no\.?|#)\s*(\d{1,4})\b/):null);
         if(!customer||!numberMatch){askAnswer.textContent="For the last delivery, include the customer and tank number, such as Delta Cat Tank 3.";return;}
         const num=numberMatch[1];
-        const relevant=tickets.filter(t=>t.customer_id===customer.id);
+        const relevant=active.filter(t=>t.customer_id===customer.id);
         const allocations=await CKCloud.listReportTankAllocations(relevant.map(t=>t.id));
         const customerFarmIds=new Set(directory.farms.filter(f=>f.customer_id===customer.id).map(f=>f.id));
         const matchingTankIds=new Set(directory.tanks.filter(t=>{
