@@ -186,7 +186,7 @@ window.CKCloud = (() => {
       }
     });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) throw Error(body.msg || body.message || body.error_description || "Cloud request failed.");
+    if (!response.ok) throw Error(body.detail || body.error || body.msg || body.message || body.error_description || "Cloud request failed.");
     return body;
   }
 
